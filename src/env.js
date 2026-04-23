@@ -7,15 +7,19 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    AUTH_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
+    /** Prefer a strong random value; auth falls back if unset so local/bootstrap never hard-fails. */
+    AUTH_SECRET: z.string().optional(),
     DIRECT_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    /** Send confirmation via Resend; if unset, the verification URL is logged server-side in dev. */
+    RESEND_API_KEY: z.string().optional(),
+    /** Required when RESEND_API_KEY is set (e.g. `Strumf <onboarding@resend.dev>`). */
+    EMAIL_FROM: z.string().optional(),
+    /** Set to "true" to skip email verification (local testing only). */
+    SKIP_EMAIL_VERIFICATION: z.enum(["true", "false"]).optional(),
   },
 
   /**
@@ -36,6 +40,9 @@ export const env = createEnv({
     DIRECT_URL: process.env.DIRECT_URL,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    SKIP_EMAIL_VERIFICATION: process.env.SKIP_EMAIL_VERIFICATION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

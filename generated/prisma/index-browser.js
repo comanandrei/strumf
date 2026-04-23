@@ -121,12 +121,98 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.PostScalarFieldEnum = {
+exports.Prisma.HouseholdScalarFieldEnum = {
   id: 'id',
   name: 'name',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdById: 'createdById'
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.HouseholdMembershipScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  householdId: 'householdId',
+  role: 'role',
+  displayLabel: 'displayLabel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CaregiverInviteScalarFieldEnum = {
+  id: 'id',
+  householdId: 'householdId',
+  emailNormalized: 'emailNormalized',
+  token: 'token',
+  invitedByUserId: 'invitedByUserId',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  acceptedAt: 'acceptedAt',
+  acceptedByUserId: 'acceptedByUserId'
+};
+
+exports.Prisma.BabyScalarFieldEnum = {
+  id: 'id',
+  householdId: 'householdId',
+  displayName: 'displayName',
+  birthDateTime: 'birthDateTime',
+  birthWeightGrams: 'birthWeightGrams',
+  birthLengthCm: 'birthLengthCm',
+  headCircumferenceCm: 'headCircumferenceCm',
+  sex: 'sex',
+  notes: 'notes',
+  timezone: 'timezone',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FeedingEventScalarFieldEnum = {
+  id: 'id',
+  babyId: 'babyId',
+  loggedByUserId: 'loggedByUserId',
+  startedAt: 'startedAt',
+  endedAt: 'endedAt',
+  amountMl: 'amountMl',
+  milkType: 'milkType',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ConsultationScalarFieldEnum = {
+  id: 'id',
+  babyId: 'babyId',
+  recordedById: 'recordedById',
+  occurredAt: 'occurredAt',
+  location: 'location',
+  reason: 'reason',
+  outcomeNotes: 'outcomeNotes',
+  providerName: 'providerName',
+  followUpAt: 'followUpAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AppointmentScalarFieldEnum = {
+  id: 'id',
+  babyId: 'babyId',
+  title: 'title',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  location: 'location',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PredictionCacheScalarFieldEnum = {
+  id: 'id',
+  babyId: 'babyId',
+  kind: 'kind',
+  inputFingerprint: 'inputFingerprint',
+  payload: 'payload',
+  modelVersion: 'modelVersion',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -173,6 +259,10 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -183,9 +273,39 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+exports.HouseholdRole = exports.$Enums.HouseholdRole = {
+  OWNER: 'OWNER',
+  MEMBER: 'MEMBER'
+};
+
+exports.BabySex = exports.$Enums.BabySex = {
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  OTHER: 'OTHER',
+  UNKNOWN: 'UNKNOWN'
+};
+
+exports.MilkType = exports.$Enums.MilkType = {
+  BREAST_MILK: 'BREAST_MILK',
+  FORMULA: 'FORMULA',
+  MIXED: 'MIXED',
+  UNKNOWN: 'UNKNOWN'
+};
 
 exports.Prisma.ModelName = {
-  Post: 'Post',
+  Household: 'Household',
+  HouseholdMembership: 'HouseholdMembership',
+  CaregiverInvite: 'CaregiverInvite',
+  Baby: 'Baby',
+  FeedingEvent: 'FeedingEvent',
+  Consultation: 'Consultation',
+  Appointment: 'Appointment',
+  PredictionCache: 'PredictionCache',
   Account: 'Account',
   Session: 'Session',
   User: 'User',

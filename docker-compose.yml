@@ -1,0 +1,20 @@
+# Local PostgreSQL for development. Start with: docker compose up -d
+# Then set in .env (adjust user/password if you change them here):
+#   DATABASE_URL="postgresql://strumf:strumf@localhost:5432/strumf?schema=public"
+#   DIRECT_URL="postgresql://strumf:strumf@localhost:5432/strumf?schema=public"
+# Then: npx prisma migrate dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: strumf
+      POSTGRES_PASSWORD: strumf
+      POSTGRES_DB: strumf
+    ports:
+      - "5432:5432"
+    volumes:
+      - strumf_pgdata:/var/lib/postgresql/data
+
+volumes:
+  strumf_pgdata:

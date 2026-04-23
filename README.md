@@ -20,13 +20,17 @@ This project is scaffolded with [Create T3 App](https://create.t3.gg/) and confi
      - `DIRECT_URL`: direct Neon connection string for Prisma migrations.
    - Set `AUTH_SECRET` (generate with `npx auth secret`).
 
-3. Apply schema to Neon:
+3. Apply schema to Neon (migrations include domain tables + `migration_lock.toml`):
 
    ```bash
-   npm run db:push
+   npm run db:migrate
    ```
 
-4. Start development server:
+   For a quick local experiment without migration history you can use `npm run db:push` instead.
+
+4. Open the app (after sign-in): `/app` — create a household, then use tRPC (`baby`, `feeding`, `invite`, etc.) from the client or API.
+
+5. Start development server:
 
    ```bash
    npm run dev

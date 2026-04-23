@@ -8,24 +8,165 @@ generator client {
 
 datasource db {
     provider  = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
     url       = env("DATABASE_URL")
     directUrl = env("DIRECT_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
+enum HouseholdRole {
+    OWNER
+    MEMBER
+}
+
+enum MilkType {
+    BREAST_MILK
+    FORMULA
+    MIXED
+    UNKNOWN
+}
+
+enum BabySex {
+    MALE
+    FEMALE
+    OTHER
+    UNKNOWN
+}
+
+model Household {
+    id        String   @id @default(cuid())
+    name      String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
+    memberships HouseholdMembership[]
+    babies      Baby[]
+    invites     CaregiverInvite[]
+}
 
-    @@index([name])
+model HouseholdMembership {
+    id           String          @id @default(cuid())
+    userId       String
+    householdId  String
+    role         HouseholdRole
+    displayLabel String?
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @updatedAt
+
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, householdId])
+    @@index([householdId])
+}
+
+model CaregiverInvite {
+    id               String    @id @default(cuid())
+    householdId      String
+    emailNormalized  String
+    token            String    @unique
+    invitedByUserId  String
+    expiresAt        DateTime
+    revokedAt        DateTime?
+    acceptedAt       DateTime?
+    acceptedByUserId String?
+
+    household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+    invitedBy User      @relation("InvitesSent", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+    acceptedBy User?    @relation("InvitesAccepted", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+
+    @@index([householdId, emailNormalized])
+}
+
+model Baby {
+    id                  String    @id @default(cuid())
+    householdId         String
+    displayName         String
+    birthDateTime       DateTime
+    birthWeightGrams    Int?
+    birthLengthCm       Int?
+    headCircumferenceCm Int?
+    sex                 BabySex   @default(UNKNOWN)
+    notes               String?   @db.Text
+    timezone            String    @default("UTC")
+    createdAt           DateTime  @default(now())
+    updatedAt           DateTime  @updatedAt
+
+    household         Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+    feedingEvents     FeedingEvent[]
+    consultations     Consultation[]
+    appointments      Appointment[]
+    predictionCaches  PredictionCache[]
+
+    @@index([householdId])
+}
+
+model FeedingEvent {
+    id              String    @id @default(cuid())
+    babyId          String
+    loggedByUserId  String
+    startedAt       DateTime
+    endedAt         DateTime?
+    amountMl        Int
+    milkType        MilkType  @default(UNKNOWN)
+    notes           String?
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    baby     Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+    loggedBy User @relation(fields: [loggedByUserId], references: [id], onDelete: Cascade)
+
+    @@index([babyId, startedAt])
+    @@index([loggedByUserId])
+}
+
+model Consultation {
+    id             String    @id @default(cuid())
+    babyId         String
+    recordedById   String?
+    occurredAt     DateTime
+    location       String
+    reason         String    @db.Text
+    outcomeNotes   String?   @db.Text
+    providerName   String?
+    followUpAt     DateTime?
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+
+    baby       Baby  @relation(fields: [babyId], references: [id], onDelete: Cascade)
+    recordedBy User? @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+
+    @@index([babyId, occurredAt])
+}
+
+model Appointment {
+    id        String    @id @default(cuid())
+    babyId    String
+    title     String
+    startsAt  DateTime
+    endsAt    DateTime?
+    location  String?
+    notes     String?   @db.Text
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+    @@index([babyId, startsAt])
+}
+
+model PredictionCache {
+    id               String   @id @default(cuid())
+    babyId           String
+    kind             String
+    inputFingerprint String
+    payload          Json
+    modelVersion     String?
+    expiresAt        DateTime
+    createdAt        DateTime @default(now())
+
+    baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+    @@index([babyId, kind])
+    @@index([expiresAt])
 }
 
 // Necessary for Next auth
@@ -35,12 +176,12 @@ model Account {
     type                     String
     provider                 String
     providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
+    refresh_token            String?
+    access_token             String?
     expires_at               Int?
     token_type               String?
     scope                    String?
-    id_token                 String? // @db.Text
+    id_token                 String?
     session_state            String?
     user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
     refresh_token_expires_in Int?
@@ -64,9 +205,14 @@ model User {
     image         String?
     passwordHash  String?
     isActive      Boolean   @default(false)
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+
+    accounts            Account[]
+    sessions            Session[]
+    householdMemberships HouseholdMembership[]
+    invitesSent         CaregiverInvite[]      @relation("InvitesSent")
+    invitesAccepted     CaregiverInvite[]      @relation("InvitesAccepted")
+    feedingEventsLogged FeedingEvent[]
+    consultationsRecorded Consultation[]
 }
 
 model VerificationToken {

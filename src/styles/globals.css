@@ -3,4 +3,27 @@
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Calm baby-app palette: deep violet base, soft accent */
+  --color-strumf-bg-top: #2e026d;
+  --color-strumf-bg-bottom: #15162c;
+  --color-strumf-surface: rgb(255 255 255 / 0.08);
+  --color-strumf-surface-strong: rgb(255 255 255 / 0.12);
+  --color-strumf-border: rgb(255 255 255 / 0.12);
+  --color-strumf-accent: hsl(280 100% 72%);
+  --color-strumf-accent-muted: hsl(280 60% 55%);
+  --color-strumf-success: hsl(145 55% 45%);
+  --color-strumf-danger: hsl(0 70% 55%);
+  --radius-strumf-card: 1rem;
+  --radius-strumf-pill: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

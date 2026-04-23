@@ -1,10 +1,24 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import "./sanitize-auth-url-env";
+
+import {
+  CredentialsSignin,
+  type DefaultSession,
+  type NextAuthConfig,
+  type Session,
+  type User,
+} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
+import { env } from "~/env";
 import { db } from "~/server/db";
+import { normalizeEmail } from "~/server/lib/household-access";
+import {
+  isSudoAdminEmail,
+  SUDO_ADMIN_EMAIL,
+  SUDO_ADMIN_PASSWORD,
+} from "~/server/lib/sudo-admin";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -12,12 +26,48 @@ import { db } from "~/server/db";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+/** Maps to `error=CredentialsSignin&code=service_unavailable` so the UI can explain instead of `Configuration`. */
+class ServiceUnavailableSignin extends CredentialsSignin {
+  constructor() {
+    super();
+    this.code = "service_unavailable";
+  }
+}
+
+/** `instanceof` is unreliable with bundled Prisma in Next.js; use `name` + `code` instead. */
+function isPrismaConnectivityError(error: unknown): boolean {
+  if (typeof error !== "object" || !error) return false;
+  const c = (error as { constructor?: { name?: string } }).constructor?.name;
+  if (c === "PrismaClientInitializationError" || c === "PrismaClientUnknownRequestError")
+    return true;
+  if (c === "PrismaClientKnownRequestError" && "code" in error) {
+    return ["P1000", "P1001", "P1002", "P1003", "P1008", "P1010", "P1011", "P1017"].includes(
+      (error as { code: string }).code,
+    );
+  }
+  return false;
+}
+
+/** Strip Prisma fields (e.g. passwordHash) so JWT encoding never sees non-public data. */
+function toAuthUser(record: {
+  id: string;
+  email: string | null;
+  name: string | null;
+  image: string | null;
+}): User {
+  return {
+    id: record.id,
+    email: record.email,
+    name: record.name,
+    image: record.image,
+  };
+}
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      isSudoAdmin: boolean;
     } & DefaultSession["user"];
   }
 
@@ -33,6 +83,23 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authConfig = {
+  // Must match `src/app/api/auth/[...nextauth]`. If AUTH_URL uses pathname `/auth`,
+  // Auth.js would otherwise point the browser at the wrong callback and sign-in breaks.
+  basePath: "/api/auth",
+  pages: {
+    signIn: "/auth",
+    error: "/auth",
+  },
+  // JWT cookies require a non-empty secret. Always provide a fallback so sign-in never 500s
+  // when AUTH_SECRET is unset (override with a strong secret in production).
+  secret:
+    env.AUTH_SECRET ??
+    "strumf-auth-secret-fallback-min-32-chars-set-AUTH_SECRET!",
+  // Credentials + JWT: no PrismaAdapter/DB session rows. (Adapter would also mix DB session
+  // defaults with credentials in subtle ways; we only need JWT for this app today.)
+  session: { strategy: "jwt" },
+  trustHost: true,
+  debug: process.env.NODE_ENV !== "production",
   providers: [
     CredentialsProvider({
       name: "Email and Password",
@@ -50,30 +117,126 @@ export const authConfig = {
 
         if (!parsed.success) return null;
 
-        const user = await db.user.findUnique({
-          where: { email: parsed.data.email },
-        });
+        const email = normalizeEmail(parsed.data.email);
 
-        if (!user?.passwordHash || !user.isActive) return null;
+        try {
+          if (
+            email === SUDO_ADMIN_EMAIL &&
+            parsed.data.password === SUDO_ADMIN_PASSWORD
+          ) {
+            let user = await db.user.findUnique({
+              where: { email: SUDO_ADMIN_EMAIL },
+            });
+            const passwordHash = await bcrypt.hash(SUDO_ADMIN_PASSWORD, 12);
+            if (!user) {
+              user = await db.user.create({
+                data: {
+                  email: SUDO_ADMIN_EMAIL,
+                  name: "Sudo Admin",
+                  passwordHash,
+                  emailVerified: new Date(),
+                  isActive: true,
+                },
+              });
+            } else {
+              const hashOk =
+                !!user.passwordHash &&
+                (await bcrypt.compare(SUDO_ADMIN_PASSWORD, user.passwordHash));
+              const ready = !!user.emailVerified && user.isActive;
+              if (!hashOk || !ready) {
+                user = await db.user.update({
+                  where: { id: user.id },
+                  data: {
+                    passwordHash,
+                    emailVerified: new Date(),
+                    isActive: true,
+                  },
+                });
+              }
+            }
+            return toAuthUser(user);
+          }
 
-        const isValid = await bcrypt.compare(
-          parsed.data.password,
-          user.passwordHash,
-        );
-        if (!isValid) return null;
+          const user = await db.user.findUnique({
+            where: { email },
+          });
 
-        return user;
+          if (!user?.passwordHash) return null;
+
+          const skipVerify = env.SKIP_EMAIL_VERIFICATION === "true";
+          if (!skipVerify && !user.emailVerified) return null;
+
+          const isValid = await bcrypt.compare(
+            parsed.data.password,
+            user.passwordHash,
+          );
+          if (!isValid) return null;
+
+          return toAuthUser(user);
+        } catch (e) {
+          if (e instanceof CredentialsSignin) throw e;
+          if (isPrismaConnectivityError(e)) {
+            console.error(
+              "[auth] database unreachable — check DATABASE_URL and that Postgres is running",
+              e,
+            );
+            throw new ServiceUnavailableSignin();
+          }
+          console.error("[auth] credentials authorize failed", e);
+          throw e;
+        }
       },
     }),
   ],
-  adapter: PrismaAdapter(db),
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    // Default redirect uses `new URL(url)`; a malformed `callbackUrl` in the sign-in form throws
+    // a TypeError and Auth.js reports `error=Configuration` (it only surfaces client-safe
+    // AuthError types in the query string).
+    redirect({ url, baseUrl }) {
+      if (typeof url !== "string" || !url) return baseUrl;
+      if (url.startsWith("/") && !url.startsWith("//")) return `${baseUrl}${url}`;
+      try {
+        const u = new URL(url);
+        if (u.protocol !== "http:" && u.protocol !== "https:") return baseUrl;
+        if (u.origin === new URL(baseUrl).origin) return u.href;
+        return baseUrl;
+      } catch {
+        return baseUrl;
+      }
+    },
+    jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
+      }
+      return token;
+    },
+    session({
+      session,
+      user,
+      token,
+    }: {
+      session: Session;
+      user?: import("next-auth").User | null;
+      token?: import("next-auth/jwt").JWT | null;
+    }) {
+      const email =
+        (typeof token?.email === "string" ? token.email : null) ??
+        user?.email ??
+        session.user?.email ??
+        "";
+      const id = token?.sub ?? user?.id ?? "";
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id,
+          email: email || session.user?.email,
+          isSudoAdmin: isSudoAdminEmail(email),
+        },
+      };
+    },
   },
 } satisfies NextAuthConfig;
