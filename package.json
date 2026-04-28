@@ -10,6 +10,7 @@
     "db:down": "docker compose down",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
+    "db:seed:baby": "node scripts/seed-baby.mjs",
     "db:studio": "prisma studio",
     "dev": "next dev --turbo",
     "postinstall": "prisma generate",
