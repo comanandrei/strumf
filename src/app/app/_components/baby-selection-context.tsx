@@ -17,6 +17,7 @@ const STORAGE_KEY = "strumf.selectedBabyId";
 export type BabyOption = {
   id: string;
   displayName: string;
+  birthDateTime: Date;
   householdLabel: string;
 };
 
@@ -42,6 +43,7 @@ export function BabySelectionProvider({ children }: { children: ReactNode }) {
         out.push({
           id: b.id,
           displayName: b.displayName,
+          birthDateTime: b.birthDateTime,
           householdLabel: label,
         });
       }

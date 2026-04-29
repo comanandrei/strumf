@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const tabs = [
-  { href: "/app", label: "Home", match: (p: string) => p === "/app" },
-  { href: "/app/log", label: "Log", match: (p: string) => p.startsWith("/app/log") },
-  { href: "/app/you", label: "You", match: (p: string) => p.startsWith("/app/you") },
+  { href: "/app", label: "Home", icon: "✦", match: (p: string) => p === "/app" },
+  { href: "/app/log", label: "Log", icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
+  { href: "/app/you", label: "You", icon: "♡", match: (p: string) => p.startsWith("/app/you") },
 ] as const;
 
 export function AppBottomNav() {
@@ -14,7 +14,7 @@ export function AppBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-strumf-border bg-strumf-bg-bottom pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-strumf-border bg-strumf-surface/90 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-soft backdrop-blur-md"
       aria-label="Main"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-around px-2">
@@ -24,10 +24,13 @@ export function AppBottomNav() {
             <li key={tab.href} className="flex-1">
               <Link
                 href={tab.href}
-                className={`flex min-h-12 flex-col items-center justify-center rounded-lg text-sm font-medium transition ${
-                  active ? "text-strumf-accent" : "text-white/65 hover:text-white"
+                className={`transition-smooth flex min-h-12 flex-col items-center justify-center rounded-2xl text-sm font-bold ${
+                  active
+                    ? "bg-gradient-primary text-white shadow-card"
+                    : "text-strumf-muted hover:bg-white/50 hover:text-strumf-foreground"
                 }`}
               >
+                <span className="text-base leading-none">{tab.icon}</span>
                 {tab.label}
               </Link>
             </li>
