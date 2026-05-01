@@ -5,20 +5,20 @@
   --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-  /* Lovable-inspired cozy baby-app palette */
-  --color-strumf-bg-top: #fff8f0;
-  --color-strumf-bg-bottom: #f7eafd;
-  --color-strumf-foreground: #3b2f3f;
-  --color-strumf-muted: #8a758f;
-  --color-strumf-card: #fffdfa;
+  /* Gender-neutral cozy baby-app palette */
+  --color-strumf-bg-top: #fbf7ef;
+  --color-strumf-bg-bottom: #edf4ee;
+  --color-strumf-foreground: #34352f;
+  --color-strumf-muted: #777266;
+  --color-strumf-card: #fffdf7;
   --color-strumf-surface: rgb(255 253 250 / 0.84);
   --color-strumf-surface-strong: rgb(255 255 255 / 0.96);
-  --color-strumf-border: rgb(116 84 122 / 0.13);
-  --color-strumf-accent: #d78bdc;
-  --color-strumf-accent-muted: #edc4f0;
-  --color-strumf-mint: #b9ead8;
-  --color-strumf-blue: #c7defc;
-  --color-strumf-warm: #ffe5bd;
+  --color-strumf-border: rgb(97 110 86 / 0.16);
+  --color-strumf-accent: #8aa79a;
+  --color-strumf-accent-muted: #d7e5dc;
+  --color-strumf-mint: #cfe8dc;
+  --color-strumf-blue: #d7e2ec;
+  --color-strumf-warm: #f2dfc2;
   --color-strumf-success: hsl(150 48% 43%);
   --color-strumf-danger: hsl(0 68% 55%);
   --radius-strumf-card: 1.5rem;
@@ -28,35 +28,35 @@
 @utility bg-gradient-soft {
   background:
     radial-gradient(circle at 20% 15%, rgb(255 255 255 / 0.95), transparent 30%),
-    linear-gradient(160deg, #fff8f0 0%, #f9e8f6 48%, #e8f3ff 100%);
+    linear-gradient(160deg, #fbf7ef 0%, #f3eddc 45%, #e7f2ed 100%);
 }
 
 @utility bg-gradient-primary {
-  background-image: linear-gradient(135deg, #d78bdc 0%, #f4b3c4 100%);
+  background-image: linear-gradient(135deg, #8aa79a 0%, #d8c49f 100%);
 }
 
 @utility bg-gradient-mint {
-  background-image: linear-gradient(135deg, #b9ead8 0%, #dff8e7 100%);
+  background-image: linear-gradient(135deg, #cfe8dc 0%, #eef7ef 100%);
 }
 
 @utility bg-gradient-blue {
-  background-image: linear-gradient(135deg, #c7defc 0%, #dfeaff 100%);
+  background-image: linear-gradient(135deg, #d7e2ec 0%, #eef4f8 100%);
 }
 
 @utility bg-gradient-warm {
-  background-image: linear-gradient(135deg, #fff8f0 0%, #ffe5bd 100%);
+  background-image: linear-gradient(135deg, #fff8ec 0%, #f2dfc2 100%);
 }
 
 @utility shadow-card {
-  box-shadow: 0 12px 34px rgb(68 48 72 / 0.08);
+  box-shadow: 0 12px 34px rgb(63 70 54 / 0.08);
 }
 
 @utility shadow-soft {
-  box-shadow: 0 18px 45px rgb(123 79 132 / 0.14);
+  box-shadow: 0 18px 45px rgb(99 116 88 / 0.14);
 }
 
 @utility shadow-glow {
-  box-shadow: 0 18px 48px rgb(215 139 220 / 0.34);
+  box-shadow: 0 18px 48px rgb(138 167 154 / 0.32);
 }
 
 @utility transition-smooth {
