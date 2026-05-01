@@ -12,6 +12,12 @@ export function AppBottomNav() {
   const tabs = [
     { href: "/app", label: "Dashboard", icon: "✦", match: (p: string) => p === "/app" },
     { href: "/app/log", label: "Log", icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
+    {
+      href: "/app/go-outside",
+      label: "Outside",
+      icon: "☁",
+      match: (p: string) => p.startsWith("/app/go-outside"),
+    },
     { href: babyHref, label: "Baby", icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
     {
       href: "/app/you",
