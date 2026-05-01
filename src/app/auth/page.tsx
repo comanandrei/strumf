@@ -4,10 +4,18 @@ import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+const TEMP_DEV_LOGIN_PREFILL =
+  process.env.NODE_ENV === "development"
+    ? {
+        email: "andrei.coman.88@gmail.com",
+        password: "Password123!",
+      }
+    : null;
+
 function AuthPageInner() {
   const searchParams = useSearchParams();
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const [loginEmail, setLoginEmail] = useState(TEMP_DEV_LOGIN_PREFILL?.email ?? "");
+  const [loginPassword, setLoginPassword] = useState(TEMP_DEV_LOGIN_PREFILL?.password ?? "");
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
@@ -54,14 +62,12 @@ function AuthPageInner() {
     setError(null);
 
     try {
-      // `redirect: false` makes next-auth parse `data.url` with `new URL(data.url)`, which
-      // throws for relative URLs like `/` and breaks the return path — no redirect happens.
-      // Full-page redirect lets Auth.js use `data.url ?? callbackUrl` without that bug.
+      // Full-page redirect avoids Auth.js parsing relative callback URLs client-side.
       await signIn("credentials", {
         email: loginEmail,
         password: loginPassword,
         callbackUrl:
-          typeof window !== "undefined" ? `${window.location.origin}/` : "/",
+          typeof window !== "undefined" ? `${window.location.origin}/app` : "/app",
         redirect: true,
       });
     } catch (e) {
@@ -159,7 +165,7 @@ function AuthPageInner() {
               className="transition-smooth mt-2 rounded-xl bg-gradient-primary px-4 py-3 font-bold text-white shadow-soft hover:shadow-glow"
               disabled={loadingSignIn}
             >
-              {loadingSignIn ? "Signing in…" : "Sign in"}
+              {loadingSignIn ? "Signing in..." : "Sign in"}
             </button>
           </form>
         </div>
@@ -217,7 +223,7 @@ function AuthPageInner() {
               className="transition-smooth mt-2 rounded-xl bg-gradient-mint px-4 py-3 font-bold text-strumf-foreground shadow-card hover:shadow-soft"
               disabled={loadingRegister}
             >
-              {loadingRegister ? "Registering…" : "Register"}
+              {loadingRegister ? "Registering..." : "Register"}
             </button>
           </form>
         </div>
@@ -234,7 +240,7 @@ export default function AuthPage() {
     <Suspense
       fallback={
         <main className="flex min-h-screen items-center justify-center bg-gradient-soft text-strumf-foreground">
-          <p className="text-sm text-strumf-muted">Loading…</p>
+          <p className="text-sm text-strumf-muted">Loading...</p>
         </main>
       }
     >

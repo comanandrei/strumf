@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
-import { CreateHouseholdForm } from "~/app/_components/create-household-form";
 import {
   ageLabel,
   formatClock,
@@ -17,8 +17,8 @@ import { api } from "~/trpc/react";
 import { useBabySelection } from "./baby-selection-context";
 
 export function AppDashboard() {
+  const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
-
   const since24h = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000), []);
 
   const { data: recentFeeds, isLoading: loadingFeeds } = api.feeding.listByBaby.useQuery(
@@ -40,6 +40,12 @@ export function AppDashboard() {
     };
   }, [recentFeeds]);
 
+  useEffect(() => {
+    if (!isLoading && babies.length === 0) {
+      router.replace("/app/onboarding");
+    }
+  }, [babies.length, isLoading, router]);
+
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-4">
@@ -56,22 +62,9 @@ export function AppDashboard() {
           <div className="animate-float mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary text-4xl shadow-glow">
             ✦
           </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight">
-            Welcome to Little Moments
-          </h1>
-          <p className="mt-2 text-sm text-strumf-muted">
-            Create a household, then add your first little one to start logging feeds.
-          </p>
+          <h1 className="font-display text-3xl font-bold tracking-tight">Setting up...</h1>
+          <p className="mt-2 text-sm text-strumf-muted">Taking you to onboarding.</p>
         </header>
-        <Card>
-          <CreateHouseholdForm />
-        </Card>
-        <FirstBabyCard />
-        <p className="text-center text-sm text-strumf-muted">
-          <Link href="/" className="text-strumf-muted underline hover:text-strumf-foreground">
-            Marketing home
-          </Link>
-        </p>
       </div>
     );
   }
@@ -80,7 +73,7 @@ export function AppDashboard() {
     <div className="flex flex-col gap-6 pb-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm text-strumf-muted">Hello, little</p>
+          <p className="text-sm text-strumf-muted">Dashboard</p>
           <h1 className="font-display text-4xl font-bold tracking-tight">
             {activeBaby?.displayName ?? "Home"}
           </h1>
@@ -121,10 +114,34 @@ export function AppDashboard() {
       ) : null}
 
       <section className="grid grid-cols-2 gap-3">
-        <StatCard tone="primary" icon="🍼" label="Milk last 24h" value={`${summary.totalMl} ml`} sub={`${summary.feedCount} feed${summary.feedCount === 1 ? "" : "s"}`} />
-        <StatCard tone="mint" icon="↗" label="Avg / feed" value={`${summary.avgMl} ml`} sub="last 24h" />
-        <StatCard tone="blue" icon="◷" label="Last feed" value={last ? formatClock(last.startedAt) : "—"} sub={last ? formatTimeAgo(last.startedAt) : "no feeds yet"} />
-        <StatCard tone="warm" icon="♡" label="Care team" value={activeBaby?.householdLabel ?? "Home"} sub="household" />
+        <StatCard
+          tone="primary"
+          icon="🍼"
+          label="Milk last 24h"
+          value={`${summary.totalMl} ml`}
+          sub={`${summary.feedCount} feed${summary.feedCount === 1 ? "" : "s"}`}
+        />
+        <StatCard
+          tone="mint"
+          icon="↗"
+          label="Avg / feed"
+          value={`${summary.avgMl} ml`}
+          sub="last 24h"
+        />
+        <StatCard
+          tone="blue"
+          icon="◷"
+          label="Last feed"
+          value={last ? formatClock(last.startedAt) : "—"}
+          sub={last ? formatTimeAgo(last.startedAt) : "no feeds yet"}
+        />
+        <StatCard
+          tone="warm"
+          icon="♡"
+          label="Care team"
+          value={activeBaby?.householdLabel ?? "Home"}
+          sub="household"
+        />
       </section>
 
       <Card>
@@ -144,9 +161,7 @@ export function AppDashboard() {
                 className="flex items-center justify-between rounded-2xl bg-white/55 px-4 py-3"
               >
                 <div>
-                  <p className="font-display text-base font-semibold">
-                    {feed.amountMl} ml
-                  </p>
+                  <p className="font-display text-base font-semibold">{feed.amountMl} ml</p>
                   <p className="text-xs text-strumf-muted">
                     {formatClock(feed.startedAt)} · {formatTimeAgo(feed.startedAt)}
                   </p>
@@ -207,79 +222,5 @@ function StatCard({
       <p className="font-display text-2xl font-bold leading-tight">{value}</p>
       <p className="text-[11px] opacity-75">{sub}</p>
     </div>
-  );
-}
-
-function FirstBabyCard() {
-  const { data: households, isLoading } = api.household.myHouseholds.useQuery();
-  const { setSelectedBabyId } = useBabySelection();
-  const utils = api.useUtils();
-  const [displayName, setDisplayName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const householdId = households?.[0]?.id;
-
-  const createBaby = api.baby.create.useMutation({
-    onSuccess: async (baby) => {
-      setDisplayName("");
-      setBirthDate("");
-      setSelectedBabyId(baby.id);
-      await utils.household.myHouseholds.invalidate();
-    },
-  });
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!householdId || !displayName.trim() || !birthDate) return;
-    createBaby.mutate({
-      householdId,
-      displayName: displayName.trim(),
-      birthDateTime: new Date(`${birthDate}T12:00:00`),
-    });
-  };
-
-  if (isLoading || !households?.length) return null;
-
-  return (
-    <Card>
-      <div className="mb-4 text-center">
-        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary text-3xl shadow-glow">
-          👶
-        </div>
-        <h2 className="font-display text-2xl font-bold">A new little one</h2>
-        <p className="mt-1 text-sm text-strumf-muted">Tell us about your baby.</p>
-      </div>
-      <form className="space-y-3" onSubmit={submit}>
-        <label className="block text-sm font-bold" htmlFor="baby-name">
-          Name
-        </label>
-        <input
-          id="baby-name"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          maxLength={120}
-          className="w-full rounded-xl border border-strumf-border bg-white/70 px-3 py-3"
-        />
-        <label className="block text-sm font-bold" htmlFor="baby-dob">
-          Date of birth
-        </label>
-        <input
-          id="baby-dob"
-          type="date"
-          value={birthDate}
-          onChange={(e) => setBirthDate(e.target.value)}
-          className="w-full rounded-xl border border-strumf-border bg-white/70 px-3 py-3"
-        />
-        <button
-          type="submit"
-          disabled={createBaby.isPending || !displayName.trim() || !birthDate}
-          className="transition-smooth min-h-12 w-full rounded-xl bg-gradient-primary px-4 py-3 font-bold text-white shadow-soft disabled:opacity-50"
-        >
-          {createBaby.isPending ? "Saving…" : "Add baby"}
-        </button>
-        {createBaby.error ? (
-          <p className="text-sm text-strumf-danger">{createBaby.error.message}</p>
-        ) : null}
-      </form>
-    </Card>
   );
 }

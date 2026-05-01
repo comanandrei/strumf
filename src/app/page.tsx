@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { auth } from "~/server/auth";
@@ -8,9 +9,14 @@ export default async function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-soft text-strumf-foreground">
       <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16 text-center">
-        <div className="animate-float flex h-44 w-44 items-center justify-center rounded-full bg-gradient-primary text-7xl shadow-glow">
-          👶
-        </div>
+        <Image
+          src="/baby-hero.jpg"
+          alt="Sleeping baby illustration"
+          width={176}
+          height={176}
+          priority
+          className="animate-float h-44 w-44 rounded-full object-cover shadow-glow"
+        />
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-strumf-muted">
             Little moments
