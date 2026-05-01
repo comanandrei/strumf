@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
+import { formatClock, formatShortDate, formatTimeAgo, milkTypeLabel } from "~/app/lib/time-ago";
 import { api } from "~/trpc/react";
 
 import { useBabySelection } from "./baby-selection-context";
@@ -33,11 +34,11 @@ export function QuickLogForm() {
   const [undoId, setUndoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: lastFeeds } = api.feeding.listByBaby.useQuery(
-    { babyId: selectedBabyId ?? "", limit: 1 },
+  const { data: recentFeeds } = api.feeding.listByBaby.useQuery(
+    { babyId: selectedBabyId ?? "", limit: 50 },
     { enabled: !!selectedBabyId },
   );
-  const last = lastFeeds?.[0];
+  const last = recentFeeds?.[0];
 
   const utils = api.useUtils();
 
@@ -69,8 +70,8 @@ export function QuickLogForm() {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-10 w-40 rounded-lg bg-white/10" />
-        <div className="h-48 w-full rounded-strumf-card bg-white/10" />
+        <div className="h-10 w-40 rounded-2xl bg-white/60" />
+        <div className="h-48 w-full rounded-strumf-card bg-white/60" />
       </div>
     );
   }
@@ -78,7 +79,7 @@ export function QuickLogForm() {
   if (babies.length === 0) {
     return (
       <Card>
-        <p className="text-white/80">Add a baby to your household first.</p>
+        <p className="text-strumf-muted">Add a baby to your household first.</p>
         <Link href="/app/onboarding" className="mt-4 inline-block text-strumf-accent underline">
           Go to onboarding
         </Link>
@@ -105,13 +106,13 @@ export function QuickLogForm() {
   return (
     <div className="flex flex-col gap-5 pb-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Log feed</h1>
-        <p className="mt-1 text-sm text-white/65">Big targets · defaults first</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">Log moments</h1>
+        <p className="mt-1 text-sm text-strumf-muted">Big targets · defaults first</p>
       </header>
 
       {babies.length > 1 ? (
         <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-white/50">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
             Baby
           </p>
           <div className="flex flex-wrap gap-2">
@@ -128,39 +129,68 @@ export function QuickLogForm() {
         </div>
       ) : null}
 
-      <Card>
-        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">
-          Amount (ml)
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {AMOUNT_PRESETS.map((n) => (
-            <Chip key={n} selected={amountMl === n} onClick={() => setAmountMl(n)}>
-              {n}
-            </Chip>
-          ))}
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-white/80">
-            <span>Custom</span>
+      {last ? (
+        <button
+          type="button"
+          onClick={applyLastAmount}
+          className="transition-smooth flex w-full items-center justify-between rounded-3xl bg-gradient-blue px-5 py-3 text-left shadow-card hover:shadow-soft"
+        >
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-strumf-muted">
+              Same as last
+            </p>
+            <p className="font-display text-lg font-bold">
+              {last.amountMl} ml · {milkTypeLabel(last.milkType)}
+            </p>
+          </div>
+          <div className="rounded-full bg-white/65 px-3 py-1 text-xs font-bold">
+            Tap to fill
+          </div>
+        </button>
+      ) : null}
+
+      <Card className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <label className="space-y-1.5 text-sm font-bold">
+            <span>Amount (ml)</span>
             <input
               type="number"
               min={1}
               max={2000}
               value={amountMl}
               onChange={(e) => setAmountMl(Number(e.target.value) || 0)}
-              className="w-24 rounded-lg border border-strumf-border bg-white/10 px-3 py-2 text-white"
+              className="font-display w-full rounded-xl border border-strumf-border bg-white/70 px-3 py-3 text-lg font-semibold"
             />
           </label>
-          {last ? (
-            <Button type="button" variant="ghost" className="!min-h-10 py-2 text-sm" onClick={applyLastAmount}>
-              Same as last ({last.amountMl} ml)
-            </Button>
-          ) : null}
+          <div className="space-y-1.5">
+            <p className="text-sm font-bold">Started</p>
+            <div className="flex rounded-xl bg-white/60 p-1">
+              {TIME_OPTIONS.map((opt) => (
+                <button
+                  type="button"
+                  key={opt.min}
+                  onClick={() => setOffsetMin(opt.min)}
+                  className={`transition-smooth flex-1 rounded-lg py-2 text-sm font-bold ${
+                    offsetMin === opt.min ? "bg-strumf-card shadow-card" : "text-strumf-muted"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {AMOUNT_PRESETS.map((n) => (
+            <Chip key={n} selected={amountMl === n} onClick={() => setAmountMl(n)}>
+              {n} ml
+            </Chip>
+          ))}
         </div>
       </Card>
 
       <Card>
-        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">
+        <p className="mb-3 text-xs font-bold uppercase tracking-wide text-strumf-muted">
           Milk type
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -177,32 +207,15 @@ export function QuickLogForm() {
         </div>
       </Card>
 
-      <Card>
-        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">
-          Started
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {TIME_OPTIONS.map((opt) => (
-            <Chip
-              key={opt.min}
-              selected={offsetMin === opt.min}
-              onClick={() => setOffsetMin(opt.min)}
-            >
-              {opt.label}
-            </Chip>
-          ))}
-        </div>
-      </Card>
-
       {error ? <p className="text-sm text-strumf-danger">{error}</p> : null}
 
       {undoId ? (
-        <Card className="flex flex-col gap-3 border-strumf-accent/40 bg-strumf-accent/10 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="flex flex-col gap-3 border-strumf-accent/40 bg-strumf-accent/15 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-medium text-strumf-accent">Saved.</p>
           <Button
             type="button"
             variant="ghost"
-            className="!min-h-10 border border-white/20"
+            className="!min-h-10 border border-strumf-border"
             disabled={remove.isPending}
             onClick={() => remove.mutate({ feedingEventId: undoId })}
           >
@@ -220,6 +233,46 @@ export function QuickLogForm() {
       >
         {create.isPending ? "Saving…" : "Save feed"}
       </Button>
+
+      {recentFeeds?.length ? (
+        <section className="space-y-2">
+          <h2 className="font-display text-lg font-semibold">All feedings</h2>
+          <ul className="space-y-2">
+            {recentFeeds.map((feed) => (
+              <li
+                key={feed.id}
+                className="flex items-center justify-between rounded-2xl bg-strumf-surface px-4 py-3 shadow-card backdrop-blur"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-lg text-white">
+                    🍼
+                  </div>
+                  <div>
+                    <p className="font-display text-base font-semibold">
+                      {feed.amountMl} ml
+                      <span className="ml-2 text-xs font-normal text-strumf-muted">
+                        {milkTypeLabel(feed.milkType)}
+                      </span>
+                    </p>
+                    <p className="text-xs text-strumf-muted">
+                      {formatShortDate(feed.startedAt)} · {formatClock(feed.startedAt)} ·{" "}
+                      {formatTimeAgo(feed.startedAt)}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => remove.mutate({ feedingEventId: feed.id })}
+                  className="transition-smooth text-strumf-muted hover:text-strumf-danger"
+                  aria-label="Delete feeding"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }
