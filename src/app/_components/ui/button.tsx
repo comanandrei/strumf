@@ -2,10 +2,10 @@ import type { ButtonHTMLAttributes } from "react";
 
 const variants = {
   primary:
-    "bg-strumf-surface-strong text-white shadow-sm hover:bg-white/20 active:scale-[0.99]",
+    "border border-strumf-border bg-strumf-surface-strong text-[#22332d] shadow-sm hover:bg-white active:scale-[0.99]",
   accent:
-    "bg-strumf-accent text-strumf-bg-bottom font-semibold hover:brightness-110 active:scale-[0.99]",
-  ghost: "bg-transparent text-white/90 hover:bg-white/10",
+    "bg-strumf-accent text-white font-semibold hover:bg-strumf-accent-muted active:scale-[0.99]",
+  ghost: "bg-transparent text-[#42564e] hover:bg-white/70",
 } as const;
 
 type Variant = keyof typeof variants;

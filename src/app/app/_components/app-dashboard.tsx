@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
-import { CreateHouseholdForm } from "~/app/_components/create-household-form";
 import { formatTimeAgo, milkTypeLabel } from "~/app/lib/time-ago";
 import { api } from "~/trpc/react";
 
 import { useBabySelection } from "./baby-selection-context";
 
 export function AppDashboard() {
+  const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
 
   const { data: lastFeeds, isLoading: loadingFeeds } = api.feeding.listByBaby.useQuery(
@@ -29,6 +30,12 @@ export function AppDashboard() {
     };
   }, [last]);
 
+  useEffect(() => {
+    if (!isLoading && babies.length === 0) {
+      router.replace("/app/onboarding");
+    }
+  }, [babies.length, isLoading, router]);
+
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-4">
@@ -42,19 +49,9 @@ export function AppDashboard() {
     return (
       <div className="space-y-6">
         <header>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome</h1>
-          <p className="mt-1 text-white/70">
-            Add a household, then add a baby (API or future UI) to start logging feeds.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">Setting up...</h1>
+          <p className="mt-1 text-white/70">Taking you to onboarding.</p>
         </header>
-        <Card>
-          <CreateHouseholdForm />
-        </Card>
-        <p className="text-center text-sm text-white/55">
-          <Link href="/" className="underline hover:text-white">
-            Marketing home
-          </Link>
-        </p>
       </div>
     );
   }
@@ -65,7 +62,7 @@ export function AppDashboard() {
     <div className="flex flex-col gap-6 pb-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Home</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-white/65">Quick glance · one-thumb friendly</p>
         </div>
         <Link href="/" className="shrink-0 text-sm text-strumf-accent underline-offset-2 hover:underline">
@@ -117,7 +114,7 @@ export function AppDashboard() {
         <div className="mx-auto w-full max-w-lg">
           <Link
             href="/app/log"
-            className="flex min-h-12 w-full items-center justify-center rounded-strumf-pill bg-strumf-accent px-5 py-3 text-base font-semibold text-strumf-bg-bottom no-underline shadow-md transition hover:brightness-110 active:scale-[0.99]"
+            className="flex min-h-12 w-full items-center justify-center rounded-strumf-pill bg-strumf-accent px-5 py-3 text-base font-semibold text-white no-underline shadow-[0_10px_30px_rgba(127,161,148,0.28)] transition hover:bg-strumf-accent-muted active:scale-[0.99]"
           >
             Log feed
           </Link>

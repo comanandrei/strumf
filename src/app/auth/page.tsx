@@ -4,10 +4,18 @@ import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+const TEMP_DEV_LOGIN_PREFILL =
+  process.env.NODE_ENV === "development"
+    ? {
+        email: "andrei.coman.88@gmail.com",
+        password: "Password123!",
+      }
+    : null;
+
 function AuthPageInner() {
   const searchParams = useSearchParams();
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const [loginEmail, setLoginEmail] = useState(TEMP_DEV_LOGIN_PREFILL?.email ?? "");
+  const [loginPassword, setLoginPassword] = useState(TEMP_DEV_LOGIN_PREFILL?.password ?? "");
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
@@ -61,7 +69,7 @@ function AuthPageInner() {
         email: loginEmail,
         password: loginPassword,
         callbackUrl:
-          typeof window !== "undefined" ? `${window.location.origin}/` : "/",
+          typeof window !== "undefined" ? `${window.location.origin}/app` : "/app",
         redirect: true,
       });
     } catch (e) {
@@ -72,58 +80,58 @@ function AuthPageInner() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-strumf-bg-top to-strumf-bg-bottom px-4 py-10 text-white">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-[linear-gradient(180deg,#fbf8ef_0%,#eef7f1_100%)] px-4 py-10 text-[#22332d]">
       <div className="w-full max-w-md space-y-8">
         <div>
           <h1 className="text-2xl font-bold">Log in</h1>
-          <p className="mt-1 text-sm text-white/80">
+          <p className="mt-1 text-sm text-[#5f7068]">
             Use your email and password. New users can register below.
           </p>
         </div>
 
-        <div className="rounded-xl bg-white/10 p-6">
+        <div className="rounded-3xl border border-[#d7e5dd] bg-white/85 p-6 shadow-[0_18px_50px_rgba(127,161,148,0.18)] backdrop-blur">
           {verified === "1" ? (
-            <p className="mb-4 rounded-md bg-green-500/20 px-3 py-2 text-sm text-green-200">
+            <p className="mb-4 rounded-md bg-green-100 px-3 py-2 text-sm text-green-800">
               Your email is confirmed. Sign in with your password below.
             </p>
           ) : null}
           {urlError === "missing_token" ? (
-            <p className="mb-4 rounded-md bg-amber-500/20 px-3 py-2 text-sm text-amber-100">
+            <p className="mb-4 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
               That confirmation link is missing a token. Request a new registration or contact
               support.
             </p>
           ) : null}
           {urlError === "invalid_token" ? (
-            <p className="mb-4 rounded-md bg-amber-500/20 px-3 py-2 text-sm text-amber-100">
+            <p className="mb-4 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
               That confirmation link is invalid or expired. Register again with the same email to
               receive a new link.
             </p>
           ) : null}
           {errorCode === "service_unavailable" ? (
-            <p className="mb-4 rounded-md bg-red-500/20 px-3 py-2 text-sm text-red-200">
-              The app cannot reach PostgreSQL. Set <code className="rounded bg-black/30 px-1">DATABASE_URL</code>{" "}
-              and <code className="rounded bg-black/30 px-1">DIRECT_URL</code> in{" "}
-              <code className="rounded bg-black/30 px-1">.env</code>, run{" "}
-              <code className="rounded bg-black/30 px-1">docker compose up -d</code> if you use the
+            <p className="mb-4 rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">
+              The app cannot reach PostgreSQL. Set <code className="rounded bg-black/10 px-1">DATABASE_URL</code>{" "}
+              and <code className="rounded bg-black/10 px-1">DIRECT_URL</code> in{" "}
+              <code className="rounded bg-black/10 px-1">.env</code>, run{" "}
+              <code className="rounded bg-black/10 px-1">docker compose up -d</code> if you use the
               repo&apos;s database service, then{" "}
-              <code className="rounded bg-black/30 px-1">npx prisma migrate dev</code>.
+              <code className="rounded bg-black/10 px-1">npx prisma migrate dev</code>.
             </p>
           ) : null}
           {urlError === "Configuration" ? (
-            <p className="mb-4 rounded-md bg-red-500/20 px-3 py-2 text-sm text-red-200">
+            <p className="mb-4 rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">
               Sign-in failed for an internal reason. Check the dev server terminal for{" "}
-              <code className="rounded bg-black/30 px-1">[auth]</code> logs, clear auth cookies for
+              <code className="rounded bg-black/10 px-1">[auth]</code> logs, clear auth cookies for
               this site if you switched hosts, then try again.
             </p>
           ) : null}
           {urlError === "CredentialsSignin" && errorCode !== "service_unavailable" ? (
-            <p className="mb-4 rounded-md bg-amber-500/20 px-3 py-2 text-sm text-amber-100">
+            <p className="mb-4 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
               Invalid email or password.
             </p>
           ) : null}
 
           <form className="flex flex-col gap-3" onSubmit={onSignIn}>
-            <label className="text-sm font-medium text-white/90" htmlFor="login-email">
+            <label className="text-sm font-medium text-[#42564e]" htmlFor="login-email">
               Email
             </label>
             <input
@@ -133,10 +141,10 @@ function AuthPageInner() {
               placeholder="you@example.com"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              className="rounded-md bg-white/10 px-3 py-2 text-white placeholder:text-white/40"
+              className="rounded-xl border border-[#cbdcd3] bg-white px-3 py-2 text-[#22332d] shadow-sm outline-none placeholder:text-[#8da39a] focus:border-[#7fa194] focus:ring-2 focus:ring-[#7fa194]/20"
               required
             />
-            <label className="text-sm font-medium text-white/90" htmlFor="login-password">
+            <label className="text-sm font-medium text-[#42564e]" htmlFor="login-password">
               Password
             </label>
             <input
@@ -146,13 +154,13 @@ function AuthPageInner() {
               placeholder="••••••••"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
-              className="rounded-md bg-white/10 px-3 py-2 text-white placeholder:text-white/40"
+              className="rounded-xl border border-[#cbdcd3] bg-white px-3 py-2 text-[#22332d] shadow-sm outline-none placeholder:text-[#8da39a] focus:border-[#7fa194] focus:ring-2 focus:ring-[#7fa194]/20"
               minLength={8}
               required
             />
             <button
               type="submit"
-              className="mt-2 rounded-full bg-white/20 px-4 py-2 font-semibold hover:bg-white/30"
+              className="mt-2 rounded-full bg-[#7fa194] px-4 py-2 font-semibold text-white shadow-[0_10px_30px_rgba(127,161,148,0.28)] hover:bg-[#6d9184] disabled:opacity-60"
               disabled={loadingSignIn}
             >
               {loadingSignIn ? "Signing in…" : "Sign in"}
@@ -160,17 +168,17 @@ function AuthPageInner() {
           </form>
         </div>
 
-        <div className="rounded-xl bg-white/10 p-6">
+        <div className="rounded-3xl border border-[#d7e5dd] bg-white/85 p-6 shadow-[0_18px_50px_rgba(127,161,148,0.18)] backdrop-blur">
           <h2 className="mb-1 text-lg font-semibold">Create an account</h2>
-          <p className="mb-4 text-sm text-white/80">
+          <p className="mb-4 text-sm text-[#5f7068]">
             We send a confirmation link first. Use{" "}
-            <code className="rounded bg-black/30 px-1">SKIP_EMAIL_VERIFICATION=true</code> in dev
+            <code className="rounded bg-black/10 px-1 text-[#22332d]">SKIP_EMAIL_VERIFICATION=true</code> in dev
             to skip email.
           </p>
 
           <form className="flex flex-col gap-3" onSubmit={onRegister}>
-            <label className="text-sm font-medium text-white/90" htmlFor="register-name">
-              Name <span className="font-normal text-white/50">(optional)</span>
+            <label className="text-sm font-medium text-[#42564e]" htmlFor="register-name">
+              Name <span className="font-normal text-[#7b8e86]">(optional)</span>
             </label>
             <input
               id="register-name"
@@ -179,9 +187,9 @@ function AuthPageInner() {
               placeholder="Your name"
               value={registerName}
               onChange={(e) => setRegisterName(e.target.value)}
-              className="rounded-md bg-white/10 px-3 py-2 text-white placeholder:text-white/40"
+              className="rounded-xl border border-[#cbdcd3] bg-white px-3 py-2 text-[#22332d] shadow-sm outline-none placeholder:text-[#8da39a] focus:border-[#7fa194] focus:ring-2 focus:ring-[#7fa194]/20"
             />
-            <label className="text-sm font-medium text-white/90" htmlFor="register-email">
+            <label className="text-sm font-medium text-[#42564e]" htmlFor="register-email">
               Email
             </label>
             <input
@@ -191,11 +199,11 @@ function AuthPageInner() {
               placeholder="you@example.com"
               value={registerEmail}
               onChange={(e) => setRegisterEmail(e.target.value)}
-              className="rounded-md bg-white/10 px-3 py-2 text-white placeholder:text-white/40"
+              className="rounded-xl border border-[#cbdcd3] bg-white px-3 py-2 text-[#22332d] shadow-sm outline-none placeholder:text-[#8da39a] focus:border-[#7fa194] focus:ring-2 focus:ring-[#7fa194]/20"
               required
             />
-            <label className="text-sm font-medium text-white/90" htmlFor="register-password">
-              Password <span className="text-white/50">(min 8 characters)</span>
+            <label className="text-sm font-medium text-[#42564e]" htmlFor="register-password">
+              Password <span className="text-[#7b8e86]">(min 8 characters)</span>
             </label>
             <input
               id="register-password"
@@ -204,13 +212,13 @@ function AuthPageInner() {
               placeholder="••••••••"
               value={registerPassword}
               onChange={(e) => setRegisterPassword(e.target.value)}
-              className="rounded-md bg-white/10 px-3 py-2 text-white placeholder:text-white/40"
+              className="rounded-xl border border-[#cbdcd3] bg-white px-3 py-2 text-[#22332d] shadow-sm outline-none placeholder:text-[#8da39a] focus:border-[#7fa194] focus:ring-2 focus:ring-[#7fa194]/20"
               minLength={8}
               required
             />
             <button
               type="submit"
-              className="mt-2 rounded-full bg-white/20 px-4 py-2 font-semibold hover:bg-white/30"
+              className="mt-2 rounded-full bg-[#7fa194] px-4 py-2 font-semibold text-white shadow-[0_10px_30px_rgba(127,161,148,0.28)] hover:bg-[#6d9184] disabled:opacity-60"
               disabled={loadingRegister}
             >
               {loadingRegister ? "Registering…" : "Register"}
@@ -218,8 +226,8 @@ function AuthPageInner() {
           </form>
         </div>
 
-        {message ? <p className="text-center text-sm text-green-300">{message}</p> : null}
-        {error ? <p className="text-center text-sm text-red-300">{error}</p> : null}
+        {message ? <p className="text-center text-sm font-medium text-green-800">{message}</p> : null}
+        {error ? <p className="text-center text-sm font-medium text-red-800">{error}</p> : null}
       </div>
     </main>
   );
@@ -229,8 +237,8 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-strumf-bg-top to-strumf-bg-bottom text-white">
-          <p className="text-sm text-white/80">Loading…</p>
+        <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#fbf8ef_0%,#eef7f1_100%)] text-[#22332d]">
+          <p className="text-sm text-[#5f7068]">Loading…</p>
         </main>
       }
     >

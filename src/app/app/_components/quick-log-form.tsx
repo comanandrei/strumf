@@ -79,8 +79,8 @@ export function QuickLogForm() {
     return (
       <Card>
         <p className="text-white/80">Add a baby to your household first.</p>
-        <Link href="/app" className="mt-4 inline-block text-strumf-accent underline">
-          Go home
+        <Link href="/app/onboarding" className="mt-4 inline-block text-strumf-accent underline">
+          Go to onboarding
         </Link>
       </Card>
     );

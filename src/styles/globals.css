@@ -4,18 +4,60 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-  /* Calm baby-app palette: deep violet base, soft accent */
-  --color-strumf-bg-top: #2e026d;
-  --color-strumf-bg-bottom: #15162c;
-  --color-strumf-surface: rgb(255 255 255 / 0.08);
-  --color-strumf-surface-strong: rgb(255 255 255 / 0.12);
-  --color-strumf-border: rgb(255 255 255 / 0.12);
-  --color-strumf-accent: hsl(280 100% 72%);
-  --color-strumf-accent-muted: hsl(280 60% 55%);
+  /* Calm baby-app palette: warm light base, sage accent */
+  --color-strumf-bg-top: #fbf8ef;
+  --color-strumf-bg-bottom: #eef7f1;
+  --color-strumf-surface: rgb(255 255 255 / 0.86);
+  --color-strumf-surface-strong: rgb(255 255 255 / 0.96);
+  --color-strumf-border: #d7e5dd;
+  --color-strumf-accent: #7fa194;
+  --color-strumf-accent-muted: #6d9184;
   --color-strumf-success: hsl(145 55% 45%);
   --color-strumf-danger: hsl(0 70% 55%);
   --radius-strumf-card: 1rem;
   --radius-strumf-pill: 9999px;
+}
+
+.strumf-app {
+  color: #22332d;
+}
+
+.strumf-app .text-white,
+.strumf-app .text-white\/90,
+.strumf-app .text-white\/85,
+.strumf-app .text-white\/80 {
+  color: #22332d !important;
+}
+
+.strumf-app .text-white\/75,
+.strumf-app .text-white\/70,
+.strumf-app .text-white\/65,
+.strumf-app .text-white\/60 {
+  color: #5f7068 !important;
+}
+
+.strumf-app .text-white\/55,
+.strumf-app .text-white\/50,
+.strumf-app .text-white\/45,
+.strumf-app .text-white\/40 {
+  color: #7b8e86 !important;
+}
+
+.strumf-app .bg-strumf-accent {
+  color: #ffffff !important;
+}
+
+.strumf-app input,
+.strumf-app textarea,
+.strumf-app select {
+  border-color: #cbdcd3 !important;
+  background-color: #ffffff !important;
+  color: #22332d !important;
+}
+
+.strumf-app input::placeholder,
+.strumf-app textarea::placeholder {
+  color: #8da39a !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

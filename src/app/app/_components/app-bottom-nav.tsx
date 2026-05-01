@@ -3,14 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const tabs = [
-  { href: "/app", label: "Home", match: (p: string) => p === "/app" },
-  { href: "/app/log", label: "Log", match: (p: string) => p.startsWith("/app/log") },
-  { href: "/app/you", label: "You", match: (p: string) => p.startsWith("/app/you") },
-] as const;
+import { useBabySelection } from "./baby-selection-context";
 
 export function AppBottomNav() {
   const pathname = usePathname();
+  const { selectedBabyId } = useBabySelection();
+  const babyHref = selectedBabyId ? `/app/baby/${selectedBabyId}` : "/app/onboarding";
+  const tabs = [
+    { href: "/app", label: "Dashboard", match: (p: string) => p === "/app" },
+    { href: "/app/log", label: "Log", match: (p: string) => p.startsWith("/app/log") },
+    { href: babyHref, label: "Baby", match: (p: string) => p.startsWith("/app/baby") },
+    {
+      href: "/app/you",
+      label: "You",
+      match: (p: string) => p.startsWith("/app/you") || p.startsWith("/app/onboarding"),
+    },
+  ] as const;
 
   return (
     <nav
