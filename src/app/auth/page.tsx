@@ -61,7 +61,7 @@ function AuthPageInner() {
         email: loginEmail,
         password: loginPassword,
         callbackUrl:
-          typeof window !== "undefined" ? `${window.location.origin}/` : "/",
+          typeof window !== "undefined" ? `${window.location.origin}/app` : "/app",
         redirect: true,
       });
     } catch (e) {

@@ -62,15 +62,12 @@ export function AppDashboard() {
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Home</h1>
-          <p className="text-sm text-white/65">Quick glance · one-thumb friendly</p>
-        </div>
-        <Link href="/" className="shrink-0 text-sm text-strumf-accent underline-offset-2 hover:underline">
-          Exit
-        </Link>
+    <div className="flex flex-col gap-6 pb-24">
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {activeBaby?.displayName ?? "Home"}
+        </h1>
+        <p className="text-sm text-white/65">Quick glance · one-thumb friendly</p>
       </header>
 
       {babies.length > 1 ? (
@@ -113,7 +110,7 @@ export function AppDashboard() {
         )}
       </Card>
 
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-4">
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-4">
         <div className="mx-auto w-full max-w-lg">
           <Link
             href="/app/log"
