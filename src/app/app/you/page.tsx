@@ -13,16 +13,18 @@ export default function YouPage() {
   return (
     <div className="flex flex-col gap-6 pb-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">You</h1>
-        <p className="mt-1 text-sm text-white/65">Account and household</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">You</h1>
+        <p className="mt-1 text-sm text-strumf-muted">Account and household</p>
       </header>
 
-      <Card>
-        <p className="text-xs font-medium uppercase tracking-wide text-white/50">Signed in</p>
+      <Card className="bg-gradient-blue">
+        <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">Signed in</p>
         {status === "loading" ? (
-          <p className="mt-2 text-white/60">Loading…</p>
+          <p className="mt-2 text-strumf-muted">Loading…</p>
         ) : (
-          <p className="mt-2 break-all text-lg text-white">{session?.user?.email ?? "—"}</p>
+          <p className="mt-2 break-all font-display text-lg font-bold text-strumf-foreground">
+            {session?.user?.email ?? "—"}
+          </p>
         )}
         {session?.user && "isSudoAdmin" in session.user && session.user.isSudoAdmin ? (
           <p className="mt-2 text-xs text-strumf-accent">Sudo admin</p>
@@ -30,7 +32,7 @@ export default function YouPage() {
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-lg font-semibold">New household</h2>
+        <h2 className="font-display mb-3 text-lg font-semibold">New household</h2>
         <CreateHouseholdForm />
       </Card>
 
@@ -45,7 +47,7 @@ export default function YouPage() {
         </Button>
         <Link
           href="/"
-          className="min-h-12 rounded-strumf-pill border border-strumf-border py-3 text-center text-sm font-medium text-white/85 no-underline hover:bg-white/5"
+          className="transition-smooth min-h-12 rounded-strumf-pill border border-strumf-border bg-white/45 py-3 text-center text-sm font-bold text-strumf-foreground/85 no-underline hover:bg-white/75"
         >
           Marketing home
         </Link>

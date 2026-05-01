@@ -21,3 +21,37 @@ export function milkTypeLabel(milk: string): string {
       return "Milk";
   }
 }
+
+export function formatClock(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+export function formatShortDate(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
+export function ageLabel(birthDateTime: Date, now = new Date()): string {
+  const diffDays = Math.max(
+    0,
+    Math.floor((now.getTime() - birthDateTime.getTime()) / 86_400_000),
+  );
+  if (diffDays < 14) return `${diffDays} day${diffDays === 1 ? "" : "s"} old`;
+
+  const weeks = Math.floor(diffDays / 7);
+  if (weeks < 12) return `${weeks} week${weeks === 1 ? "" : "s"} old`;
+
+  const months =
+    (now.getFullYear() - birthDateTime.getFullYear()) * 12 +
+    now.getMonth() -
+    birthDateTime.getMonth();
+  if (months < 24) return `${months} month${months === 1 ? "" : "s"} old`;
+
+  const years = Math.floor(months / 12);
+  return `${years} year${years === 1 ? "" : "s"} old`;
+}
