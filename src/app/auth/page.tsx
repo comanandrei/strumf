@@ -4,18 +4,18 @@ import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-const TEMP_DEV_LOGIN_PREFILL =
-  process.env.NODE_ENV === "development"
-    ? {
-        email: "andrei.coman.88@gmail.com",
-        password: "Password123!",
-      }
-    : null;
+// Demo credentials for the seeded household — prefilled in both dev and prod
+// so the deployed app is immediately usable without an account. Remove this
+// (and reset the password) when the app moves past the demo phase.
+const DEMO_LOGIN_PREFILL = {
+  email: "andrei.coman.88@gmail.com",
+  password: "Password123!",
+};
 
 function AuthPageInner() {
   const searchParams = useSearchParams();
-  const [loginEmail, setLoginEmail] = useState(TEMP_DEV_LOGIN_PREFILL?.email ?? "");
-  const [loginPassword, setLoginPassword] = useState(TEMP_DEV_LOGIN_PREFILL?.password ?? "");
+  const [loginEmail, setLoginEmail] = useState(DEMO_LOGIN_PREFILL.email);
+  const [loginPassword, setLoginPassword] = useState(DEMO_LOGIN_PREFILL.password);
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");

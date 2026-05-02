@@ -14,6 +14,12 @@ export function AppBottomNav() {
     { href: "/app/log", label: "Log", icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
     { href: babyHref, label: "Baby", icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
     {
+      href: "/app/nearby",
+      label: "Nearby",
+      icon: "🌳",
+      match: (p: string) => p.startsWith("/app/nearby"),
+    },
+    {
       href: "/app/you",
       label: "You",
       icon: "♡",
