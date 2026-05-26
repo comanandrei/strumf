@@ -17,6 +17,9 @@ import { api } from "~/trpc/react";
 
 import { useBabySelection } from "./baby-selection-context";
 
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+
 export function AppDashboard() {
   const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
@@ -44,12 +47,25 @@ export function AppDashboard() {
     const feeds = recentFeeds ?? [];
     const totalMl = feeds.reduce((sum, feed) => sum + feed.amountMl, 0);
     const avgMl = feeds.length ? Math.round(totalMl / feeds.length) : 0;
+    const feedTimes = feeds.map((feed) => feed.startedAt.getTime());
+    const intervalTotalMs = feedTimes
+      .slice(0, -1)
+      .reduce((sum, startedAtMs, index) => sum + startedAtMs - feedTimes[index + 1]!, 0);
+    const averageIntervalMs =
+      feedTimes.length > 1 ? Math.round(intervalTotalMs / (feedTimes.length - 1)) : null;
+    const nextFeedAt =
+      last && averageIntervalMs && averageIntervalMs > 0
+        ? new Date(last.startedAt.getTime() + averageIntervalMs)
+        : null;
+
     return {
       totalMl,
       avgMl,
       feedCount: feeds.length,
+      averageIntervalMs,
+      nextFeedAt,
     };
-  }, [recentFeeds]);
+  }, [last, recentFeeds]);
 
   useEffect(() => {
     if (!isLoading && babies.length === 0) {
@@ -152,6 +168,24 @@ export function AppDashboard() {
           label="Next appointment"
           value={nextAppointment ? formatShortDate(nextAppointment.startsAt) : "None"}
           sub={nextAppointment ? formatClock(nextAppointment.startsAt) : "not scheduled"}
+        />
+        <StatCard
+          tone="mint"
+          icon="⏱"
+          label="Interval mediu între hrăniri"
+          value={
+            summary.averageIntervalMs ? formatDuration(summary.averageIntervalMs) : "—"
+          }
+          sub={summary.averageIntervalMs ? "last 24h" : "need 2 feeds"}
+        />
+        <StatCard
+          tone="blue"
+          icon="⌁"
+          label="Estimare „următoarea hrănire”"
+          value={summary.nextFeedAt ? formatClock(summary.nextFeedAt) : "—"}
+          sub={
+            summary.nextFeedAt ? formatFutureDistance(summary.nextFeedAt) : "need 2 feeds"
+          }
         />
       </section>
 
@@ -323,4 +357,25 @@ function StatCard({
       <p className="text-[11px] opacity-75">{sub}</p>
     </div>
   );
+}
+
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.max(1, Math.round(ms / MINUTE_MS));
+  if (totalMinutes < 60) return `${totalMinutes} min`;
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+function formatFutureDistance(date: Date, now = new Date()): string {
+  const ms = date.getTime() - now.getTime();
+  if (ms <= 0) return "due now";
+
+  if (ms < HOUR_MS) {
+    const minutes = Math.max(1, Math.round(ms / MINUTE_MS));
+    return `in ${minutes} min`;
+  }
+
+  return `in ${formatDuration(ms)}`;
 }
