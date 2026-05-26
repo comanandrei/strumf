@@ -308,7 +308,8 @@ async function fetchOpenStreetMapPlacesByKind(args: {
   return dedupePlaces(
     elements
       .map((element) => mapOverpassElementToPlace(element, kind, { lat, lon }))
-      .filter((place): place is Omit<NearbyPlace, "durationSeconds"> => place !== null),
+      .filter((place): place is Omit<NearbyPlace, "durationSeconds"> => place !== null)
+      .filter((place) => place.distanceMeters <= radiusMeters),
   )
     .sort((a, b) => a.distanceMeters - b.distanceMeters)
     .slice(0, limit);
@@ -362,17 +363,24 @@ function buildOverpassQuery(args: {
   limit: number;
 }) {
   const { lat, lon, kind, radiusMeters, limit } = args;
-  const selectors =
+  const bbox = boundingBox({ lat, lon }, radiusMeters);
+  const tags =
     kind === "park"
       ? [
-          `nwr(around:${radiusMeters},${lat},${lon})["leisure"="park"]["name"];`,
-          `nwr(around:${radiusMeters},${lat},${lon})["landuse"="recreation_ground"]["name"];`,
+          { key: "leisure", value: "park" },
+          { key: "landuse", value: "recreation_ground" },
         ]
       : [
-          `nwr(around:${radiusMeters},${lat},${lon})["shop"="mall"]["name"];`,
-          `nwr(around:${radiusMeters},${lat},${lon})["building"="retail"]["name"];`,
-          `nwr(around:${radiusMeters},${lat},${lon})["landuse"="retail"]["name"];`,
+          { key: "shop", value: "mall" },
+          { key: "building", value: "retail" },
+          { key: "landuse", value: "retail" },
         ];
+  const selectors = tags.flatMap(({ key, value }) =>
+    (["node", "way", "relation"] as const).map(
+      (elementType) =>
+        `${elementType}(${bbox.south},${bbox.west},${bbox.north},${bbox.east})["${key}"="${value}"]["name"];`,
+    ),
+  );
 
   return [
     `[out:json][timeout:${OVERPASS_TIMEOUT_SECONDS}];`,
@@ -477,4 +485,23 @@ function distanceMeters(
 
 function toRadians(value: number): number {
   return (value * Math.PI) / 180;
+}
+
+function boundingBox(
+  center: { lat: number; lon: number },
+  radiusMeters: number,
+): { south: number; west: number; north: number; east: number } {
+  const latDelta = radiusMeters / 111_320;
+  const cosLat = Math.cos(toRadians(center.lat));
+  const lonDelta = radiusMeters / Math.max(111_320 * Math.abs(cosLat), 1);
+  return {
+    south: clamp(center.lat - latDelta, -90, 90),
+    west: clamp(center.lon - lonDelta, -180, 180),
+    north: clamp(center.lat + latDelta, -90, 90),
+    east: clamp(center.lon + lonDelta, -180, 180),
+  };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
