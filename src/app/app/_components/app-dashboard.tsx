@@ -145,6 +145,18 @@ export function AppDashboard() {
       </section>
 
       <Card>
+        <h2 className="font-display mb-3 text-lg font-semibold">Menu</h2>
+        <ul className="space-y-2">
+          <MenuItem
+            href="/app/calendar"
+            icon="◷"
+            label="Calendar"
+            description={`Review daily rhythm for ${activeBaby?.displayName ?? "your baby"}.`}
+          />
+        </ul>
+      </Card>
+
+      <Card>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold">Recent feedings</h2>
           <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
@@ -190,6 +202,38 @@ export function AppDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function MenuItem({
+  href,
+  icon,
+  label,
+  description,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+  description: string;
+}) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className="transition-smooth flex items-center gap-3 rounded-2xl bg-white/55 px-4 py-3 no-underline hover:bg-white/75"
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-blue text-lg shadow-card">
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-base font-semibold text-strumf-foreground">
+            {label}
+          </span>
+          <span className="block text-xs text-strumf-muted">{description}</span>
+        </span>
+        <span className="text-strumf-muted">→</span>
+      </Link>
+    </li>
   );
 }
 
