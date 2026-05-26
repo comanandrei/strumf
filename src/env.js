@@ -1,6 +1,15 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+// Prisma `directUrl` and our schema expect DIRECT_URL. Many hosts (e.g. Vercel) only set
+// DATABASE_URL — mirror it so builds, postinstall `prisma generate`, and runtime work.
+// Neon with a pooler can set a separate DIRECT_URL for migrations.
+const databaseUrlForEnv = process.env.DATABASE_URL;
+const directUrlForEnv = process.env.DIRECT_URL ?? databaseUrlForEnv;
+if (directUrlForEnv && !process.env.DIRECT_URL) {
+  process.env.DIRECT_URL = directUrlForEnv;
+}
+
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -9,6 +18,7 @@ export const env = createEnv({
   server: {
     /** Prefer a strong random value; auth falls back if unset so local/bootstrap never hard-fails. */
     AUTH_SECRET: z.string().optional(),
+    /** Defaults to DATABASE_URL when unset (see bootstrap above). */
     DIRECT_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
@@ -37,8 +47,8 @@ export const env = createEnv({
    */
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
-    DIRECT_URL: process.env.DIRECT_URL,
-    DATABASE_URL: process.env.DATABASE_URL,
+    DIRECT_URL: directUrlForEnv,
+    DATABASE_URL: databaseUrlForEnv,
     NODE_ENV: process.env.NODE_ENV,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
