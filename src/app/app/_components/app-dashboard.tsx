@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect, useMemo } from "react";
 
 import { Card } from "~/app/_components/ui/card";
@@ -15,6 +16,7 @@ import {
 } from "~/app/lib/time-ago";
 import { api, type RouterOutputs } from "~/trpc/react";
 
+import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
 
 type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
@@ -214,7 +216,7 @@ export function AppDashboard() {
         <ul className="space-y-2">
           <MenuItem
             href="/app/calendar"
-            icon="◷"
+            icon={<CalendarColorIcon className="h-7 w-7" />}
             label="Calendar"
             description={`Review daily rhythm for ${activeBaby?.displayName ?? "your baby"}.`}
           />
@@ -388,7 +390,7 @@ function MenuItem({
   description,
 }: {
   href: string;
-  icon: string;
+  icon: ReactNode;
   label: string;
   description: string;
 }) {
@@ -398,7 +400,7 @@ function MenuItem({
         href={href}
         className="transition-smooth flex items-center gap-3 rounded-2xl bg-white/55 px-4 py-3 no-underline hover:bg-white/75"
       >
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-blue text-lg shadow-card">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-blue text-lg shadow-card">
           {icon}
         </span>
         <span className="min-w-0 flex-1">
