@@ -11,6 +11,8 @@ import { api, type RouterOutputs } from "~/trpc/react";
 import { useBabySelection } from "../_components/baby-selection-context";
 
 type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
+type Consultation = RouterOutputs["consultation"]["listByBaby"][number];
+type Appointment = RouterOutputs["appointment"]["listByBaby"][number];
 
 type CalendarDay = {
   date: Date;
@@ -41,10 +43,37 @@ export default function CalendarPage() {
     },
     { enabled: !!selectedBabyId },
   );
+  const { data: consultations, isLoading: loadingConsultations } =
+    api.consultation.listByBaby.useQuery(
+      { babyId: selectedBabyId ?? "" },
+      { enabled: !!selectedBabyId },
+    );
+  const { data: appointments, isLoading: loadingAppointments } =
+    api.appointment.listByBaby.useQuery(
+      { babyId: selectedBabyId ?? "" },
+      { enabled: !!selectedBabyId },
+    );
 
   const feedingsByDay = useMemo(() => groupFeedingsByDay(feedings ?? []), [feedings]);
+  const consultationsByDay = useMemo(
+    () => groupConsultationsByDay(consultations ?? []),
+    [consultations],
+  );
+  const appointmentsByDay = useMemo(
+    () => groupAppointmentsByDay(appointments ?? []),
+    [appointments],
+  );
   const selectedFeedings = selectedDay ? (feedingsByDay.get(selectedDay.key) ?? []) : [];
+  const selectedConsultations = selectedDay
+    ? (consultationsByDay.get(selectedDay.key) ?? [])
+    : [];
+  const selectedAppointments = selectedDay ? (appointmentsByDay.get(selectedDay.key) ?? []) : [];
   const selectedSummary = useMemo(() => summarizeFeedings(selectedFeedings), [selectedFeedings]);
+  const medicalEventDays = useMemo(
+    () => countMedicalEventDays(consultationsByDay, appointmentsByDay),
+    [consultationsByDay, appointmentsByDay],
+  );
+  const isLoadingCalendarItems = loadingFeedings || loadingConsultations || loadingAppointments;
 
   const moveMonth = useCallback((offset: number) => {
     setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
@@ -100,7 +129,7 @@ export default function CalendarPage() {
           </p>
         </div>
         <span className="rounded-full bg-white/60 px-3 py-1.5 text-xs font-bold text-strumf-muted shadow-card">
-          {countInputDays(feedingsByDay)} days
+          {countInputDays(feedingsByDay)} input days
         </span>
       </header>
 
@@ -137,7 +166,9 @@ export default function CalendarPage() {
           <div className="text-center">
             <p className="font-display text-2xl font-bold">{formatMonth(visibleMonth)}</p>
             <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-              {loadingFeedings ? "Loading inputs" : `${feedings?.length ?? 0} inputs`}
+              {isLoadingCalendarItems
+                ? "Loading calendar"
+                : `${feedings?.length ?? 0} inputs · ${medicalEventDays} medical days`}
             </p>
           </div>
           <Button
@@ -163,7 +194,11 @@ export default function CalendarPage() {
 
           {days.map((day) => {
             const dayFeedings = feedingsByDay.get(day.key) ?? [];
+            const dayConsultations = consultationsByDay.get(day.key) ?? [];
+            const dayAppointments = appointmentsByDay.get(day.key) ?? [];
             const hasInput = dayFeedings.length > 0;
+            const medicalCount = dayConsultations.length + dayAppointments.length;
+            const hasMedical = medicalCount > 0;
             return (
               <button
                 key={day.key}
@@ -174,14 +209,19 @@ export default function CalendarPage() {
                     ? "border-strumf-border bg-white/55 text-strumf-foreground"
                     : "border-transparent bg-white/25 text-strumf-muted/70",
                   day.isToday ? "ring-2 ring-strumf-accent/50" : "",
-                  hasInput ? "shadow-card" : "hover:bg-white/70",
+                  hasInput || hasMedical ? "shadow-card" : "hover:bg-white/70",
                 ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => setSelectedDay(day)}
-                aria-label={`${formatDayFull(day.date)}${hasInput ? `, ${dayFeedings.length} inputs` : ""}`}
+                aria-label={`${formatDayFull(day.date)}${hasInput ? `, ${dayFeedings.length} inputs` : ""}${hasMedical ? `, ${medicalCount} medical events` : ""}`}
               >
                 <span className="font-display text-base font-bold">{day.dayNumber}</span>
+                {hasMedical ? (
+                  <span className="absolute bottom-1.5 left-1.5 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-gradient-blue px-1.5 text-[11px] font-black text-strumf-foreground shadow-card">
+                    {medicalCount}
+                  </span>
+                ) : null}
                 {hasInput ? (
                   <span className="absolute bottom-1.5 right-1.5 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-gradient-primary px-1.5 text-[11px] font-black text-white shadow-card">
                     {dayFeedings.length}
@@ -193,7 +233,7 @@ export default function CalendarPage() {
         </div>
 
         <p className="mt-4 rounded-2xl bg-white/45 px-4 py-3 text-center text-xs text-strumf-muted">
-          Badges show days with feeding inputs. Open any day for the daily dashboard.
+          Purple badges show feeds; blue badges show consultations and appointments.
         </p>
       </Card>
 
@@ -201,6 +241,8 @@ export default function CalendarPage() {
         <DayDashboardModal
           day={selectedDay}
           feedings={selectedFeedings}
+          consultations={selectedConsultations}
+          appointments={selectedAppointments}
           summary={selectedSummary}
           onClose={() => setSelectedDay(null)}
         />
@@ -212,14 +254,20 @@ export default function CalendarPage() {
 function DayDashboardModal({
   day,
   feedings,
+  consultations,
+  appointments,
   summary,
   onClose,
 }: {
   day: CalendarDay;
   feedings: Feeding[];
+  consultations: Consultation[];
+  appointments: Appointment[];
   summary: ReturnType<typeof summarizeFeedings>;
   onClose: () => void;
 }) {
+  const medicalCount = consultations.length + appointments.length;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end bg-strumf-foreground/35 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-12 backdrop-blur-sm sm:items-center sm:justify-center"
@@ -305,6 +353,105 @@ function DayDashboardModal({
             </p>
           )}
         </div>
+
+        <div className="mt-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-display text-lg font-semibold">Medical care</h3>
+            <span className="rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
+              {medicalCount}
+            </span>
+          </div>
+
+          {medicalCount ? (
+            <div className="space-y-3">
+              {appointments.length ? (
+                <div>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
+                    Appointments
+                  </p>
+                  <ul className="space-y-2">
+                    {appointments.map((appointment) => (
+                      <li
+                        key={appointment.id}
+                        className="rounded-2xl bg-white/60 px-4 py-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-display text-base font-semibold">
+                              {appointment.title}
+                            </p>
+                            <p className="text-xs text-strumf-muted">
+                              {formatClock(appointment.startsAt)}
+                              {appointment.endsAt ? `-${formatClock(appointment.endsAt)}` : ""}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
+                            Planned
+                          </span>
+                        </div>
+                        {appointment.location ? (
+                          <p className="mt-2 text-xs text-strumf-muted">
+                            {appointment.location}
+                          </p>
+                        ) : null}
+                        {appointment.notes ? (
+                          <p className="mt-2 whitespace-pre-wrap text-sm text-strumf-foreground/80">
+                            {appointment.notes}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {consultations.length ? (
+                <div>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
+                    Consultations
+                  </p>
+                  <ul className="space-y-2">
+                    {consultations.map((consultation) => (
+                      <li
+                        key={consultation.id}
+                        className="rounded-2xl bg-white/60 px-4 py-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-display text-base font-semibold">
+                              {consultation.reason}
+                            </p>
+                            <p className="text-xs text-strumf-muted">
+                              {formatClock(consultation.occurredAt)}
+                              {consultation.providerName
+                                ? ` · ${consultation.providerName}`
+                                : ""}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-strumf-accent-muted/70 px-3 py-1 text-xs font-bold text-strumf-foreground">
+                            Visit
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-strumf-muted">
+                          {consultation.location}
+                        </p>
+                        {consultation.outcomeNotes ? (
+                          <p className="mt-2 whitespace-pre-wrap text-sm text-strumf-foreground/80">
+                            {consultation.outcomeNotes}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="rounded-2xl bg-white/60 px-4 py-6 text-center text-sm text-strumf-muted">
+              No medical events for this day yet.
+            </p>
+          )}
+        </div>
       </section>
     </div>
   );
@@ -386,6 +533,44 @@ function groupFeedingsByDay(feedings: Feeding[]) {
   return grouped;
 }
 
+function groupConsultationsByDay(consultations: Consultation[]) {
+  const grouped = new Map<string, Consultation[]>();
+
+  for (const consultation of consultations) {
+    const key = toDateKey(consultation.occurredAt);
+    const dayConsultations = grouped.get(key) ?? [];
+    dayConsultations.push(consultation);
+    grouped.set(key, dayConsultations);
+  }
+
+  for (const dayConsultations of grouped.values()) {
+    dayConsultations.sort(
+      (a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime(),
+    );
+  }
+
+  return grouped;
+}
+
+function groupAppointmentsByDay(appointments: Appointment[]) {
+  const grouped = new Map<string, Appointment[]>();
+
+  for (const appointment of appointments) {
+    const key = toDateKey(appointment.startsAt);
+    const dayAppointments = grouped.get(key) ?? [];
+    dayAppointments.push(appointment);
+    grouped.set(key, dayAppointments);
+  }
+
+  for (const dayAppointments of grouped.values()) {
+    dayAppointments.sort(
+      (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
+    );
+  }
+
+  return grouped;
+}
+
 function summarizeFeedings(feedings: Feeding[]) {
   const totalMl = feedings.reduce((sum, feeding) => sum + feeding.amountMl, 0);
   const feedCount = feedings.length;
@@ -400,6 +585,13 @@ function summarizeFeedings(feedings: Feeding[]) {
 
 function countInputDays(feedingsByDay: Map<string, Feeding[]>) {
   return Array.from(feedingsByDay.values()).filter((feedings) => feedings.length > 0).length;
+}
+
+function countMedicalEventDays(
+  consultationsByDay: Map<string, Consultation[]>,
+  appointmentsByDay: Map<string, Appointment[]>,
+) {
+  return new Set([...consultationsByDay.keys(), ...appointmentsByDay.keys()]).size;
 }
 
 function toDateKey(value: Date) {
