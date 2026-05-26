@@ -18,6 +18,8 @@ export interface NearbyPlace {
 
 const PLACES_URL = "https://api.geoapify.com/v2/places";
 const ROUTING_URL = "https://api.geoapify.com/v1/routing";
+const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_TIMEOUT_SECONDS = 12;
 
 const CATEGORY_FOR_KIND: Record<NearbyKind, string> = {
   park: "leisure.park",
@@ -45,6 +47,19 @@ interface RouteResponse {
   features?: { properties?: { distance?: number; time?: number } }[];
 }
 
+interface OverpassElement {
+  type?: "node" | "way" | "relation";
+  id?: number;
+  lat?: number;
+  lon?: number;
+  center?: { lat?: number; lon?: number };
+  tags?: Record<string, string | undefined>;
+}
+
+interface OverpassResponse {
+  elements?: OverpassElement[];
+}
+
 export async function findNearbyPlaces(params: {
   lat: number;
   lon: number;
@@ -65,8 +80,49 @@ export async function findNearbyPlaces(params: {
   } = params;
   const apiKey = env.GEOAPIFY_API_KEY;
   if (!apiKey) {
-    throw new Error("GEOAPIFY_API_KEY is not configured.");
+    return findOpenStreetMapNearbyPlaces({
+      lat,
+      lon,
+      mode,
+      radiusMeters,
+      perKind,
+      minPerKind,
+      expandedRadiusMeters,
+    });
   }
+
+  return findGeoapifyNearbyPlaces({
+    apiKey,
+    lat,
+    lon,
+    mode,
+    radiusMeters,
+    perKind,
+    minPerKind,
+    expandedRadiusMeters,
+  });
+}
+
+async function findGeoapifyNearbyPlaces(params: {
+  apiKey: string;
+  lat: number;
+  lon: number;
+  mode: TravelMode;
+  radiusMeters: number;
+  perKind: number;
+  minPerKind: number;
+  expandedRadiusMeters: number;
+}): Promise<NearbyPlace[]> {
+  const {
+    apiKey,
+    lat,
+    lon,
+    mode,
+    radiusMeters,
+    perKind,
+    minPerKind,
+    expandedRadiusMeters,
+  } = params;
 
   const candidatesByKind = await Promise.all(
     (Object.keys(CATEGORY_FOR_KIND) as NearbyKind[]).map(async (kind) => {
@@ -109,6 +165,54 @@ export async function findNearbyPlaces(params: {
   );
 
   return enriched.sort((a, b) => a.durationSeconds - b.durationSeconds);
+}
+
+async function findOpenStreetMapNearbyPlaces(params: {
+  lat: number;
+  lon: number;
+  mode: TravelMode;
+  radiusMeters: number;
+  perKind: number;
+  minPerKind: number;
+  expandedRadiusMeters: number;
+}): Promise<NearbyPlace[]> {
+  const {
+    lat,
+    lon,
+    mode,
+    radiusMeters,
+    perKind,
+    minPerKind,
+    expandedRadiusMeters,
+  } = params;
+
+  const candidatesByKind = await Promise.all(
+    (Object.keys(CATEGORY_FOR_KIND) as NearbyKind[]).map(async (kind) => {
+      const local = await fetchOpenStreetMapPlacesByKind({
+        lat,
+        lon,
+        kind,
+        radiusMeters,
+        limit: perKind,
+      });
+      if (local.length >= minPerKind) return local;
+      return fetchOpenStreetMapPlacesByKind({
+        lat,
+        lon,
+        kind,
+        radiusMeters: expandedRadiusMeters,
+        limit: Math.max(perKind, minPerKind),
+      });
+    }),
+  );
+
+  return candidatesByKind
+    .flat()
+    .map((place) => ({
+      ...place,
+      durationSeconds: estimateDurationSeconds(place.distanceMeters, mode),
+    }))
+    .sort((a, b) => a.durationSeconds - b.durationSeconds);
 }
 
 async function fetchPlacesByKind(args: {
@@ -184,6 +288,112 @@ function mapFeatureToPlace(
   };
 }
 
+async function fetchOpenStreetMapPlacesByKind(args: {
+  lat: number;
+  lon: number;
+  kind: NearbyKind;
+  radiusMeters: number;
+  limit: number;
+}): Promise<Omit<NearbyPlace, "durationSeconds">[]> {
+  const { lat, lon, kind, radiusMeters, limit } = args;
+  const query = buildOverpassQuery({ lat, lon, kind, radiusMeters, limit });
+  const res = await fetch(OVERPASS_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    },
+    body: new URLSearchParams({ data: query }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`OpenStreetMap places (${kind}) failed: ${res.status} ${res.statusText}`);
+  }
+
+  const data = (await res.json()) as OverpassResponse;
+  const elements = Array.isArray(data?.elements) ? data.elements : [];
+
+  return dedupePlaces(
+    elements
+      .map((element) => mapOverpassElementToPlace(element, kind, { lat, lon }))
+      .filter((place): place is Omit<NearbyPlace, "durationSeconds"> => place !== null),
+  )
+    .sort((a, b) => a.distanceMeters - b.distanceMeters)
+    .slice(0, limit);
+}
+
+function buildOverpassQuery(args: {
+  lat: number;
+  lon: number;
+  kind: NearbyKind;
+  radiusMeters: number;
+  limit: number;
+}) {
+  const { lat, lon, kind, radiusMeters, limit } = args;
+  const selectors =
+    kind === "park"
+      ? [
+          `nwr(around:${radiusMeters},${lat},${lon})["leisure"="park"]["name"];`,
+          `nwr(around:${radiusMeters},${lat},${lon})["landuse"="recreation_ground"]["name"];`,
+        ]
+      : [
+          `nwr(around:${radiusMeters},${lat},${lon})["shop"="mall"]["name"];`,
+          `nwr(around:${radiusMeters},${lat},${lon})["building"="retail"]["name"];`,
+          `nwr(around:${radiusMeters},${lat},${lon})["landuse"="retail"]["name"];`,
+        ];
+
+  return [
+    `[out:json][timeout:${OVERPASS_TIMEOUT_SECONDS}];`,
+    "(",
+    ...selectors,
+    ");",
+    `out center ${Math.max(limit * 5, 25)};`,
+  ].join("\n");
+}
+
+function mapOverpassElementToPlace(
+  element: OverpassElement,
+  kind: NearbyKind,
+  origin: { lat: number; lon: number },
+): Omit<NearbyPlace, "durationSeconds"> | null {
+  const type = element.type;
+  const id = element.id;
+  const name = (element.tags?.name ?? "").trim();
+  const lat = element.lat ?? element.center?.lat;
+  const lon = element.lon ?? element.center?.lon;
+  if (
+    !type ||
+    typeof id !== "number" ||
+    !name ||
+    typeof lat !== "number" ||
+    typeof lon !== "number"
+  ) {
+    return null;
+  }
+
+  return {
+    id: `osm:${type}:${id}`,
+    name,
+    kind,
+    lat,
+    lon,
+    distanceMeters: Math.round(distanceMeters(origin, { lat, lon })),
+    providerUrl: `https://www.openstreetmap.org/${type}/${id}`,
+  };
+}
+
+function dedupePlaces(
+  places: Omit<NearbyPlace, "durationSeconds">[],
+): Omit<NearbyPlace, "durationSeconds">[] {
+  const seen = new Set<string>();
+  return places.filter((place) => {
+    const key = `${place.kind}:${place.name.toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 async function fetchRoute(args: {
   apiKey: string;
   from: { lat: number; lon: number };
@@ -216,4 +426,23 @@ function estimateDurationSeconds(distanceMeters: number, mode: TravelMode): numb
   // Conservative fallback used only when the routing call fails. Walking ~5 km/h, driving ~30 km/h in city.
   const metersPerSecond = mode === "walk" ? 1.4 : 8.3;
   return Math.round(distanceMeters / metersPerSecond);
+}
+
+function distanceMeters(
+  a: { lat: number; lon: number },
+  b: { lat: number; lon: number },
+): number {
+  const earthRadiusMeters = 6_371_000;
+  const dLat = toRadians(b.lat - a.lat);
+  const dLon = toRadians(b.lon - a.lon);
+  const lat1 = toRadians(a.lat);
+  const lat2 = toRadians(b.lat);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * earthRadiusMeters * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function toRadians(value: number): number {
+  return (value * Math.PI) / 180;
 }

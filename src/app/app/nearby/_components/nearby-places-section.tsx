@@ -30,23 +30,19 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
     staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
-  const placesEnabled = configQuery.data?.placesEnabled ?? false;
+  const placesProvider = configQuery.data?.placesProvider ?? "openstreetmap";
 
   const placesQuery = api.nearby.list.useQuery(
     coords
       ? { lat: coords.latitude, lon: coords.longitude, mode: travelMode }
       : { lat: 0, lon: 0, mode: travelMode },
     {
-      enabled: !!coords && placesEnabled,
+      enabled: !!coords,
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
         const code = error?.data?.code;
-        if (
-          code === "PRECONDITION_FAILED" ||
-          code === "BAD_REQUEST" ||
-          code === "UNAUTHORIZED"
-        ) {
+        if (code === "BAD_REQUEST" || code === "UNAUTHORIZED") {
           return false;
         }
         return failureCount < 1;
@@ -85,27 +81,7 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
         </div>
       </div>
 
-      {!placesEnabled ? (
-        <SectionBanner
-          tone="info"
-          title="Nearby places provider is not set up"
-          description={
-            <>
-              Add <code className="rounded bg-white/70 px-1">GEOAPIFY_API_KEY</code>{" "}
-              to your <code>.env</code> and restart the dev server. Sign up free at{" "}
-              <a
-                href="https://myprojects.geoapify.com/"
-                target="_blank"
-                rel="noreferrer"
-                className="underline"
-              >
-                myprojects.geoapify.com
-              </a>
-              .
-            </>
-          }
-        />
-      ) : !coords ? (
+      {!coords ? (
         <SectionBanner
           tone="info"
           title="Allow location to see parks and malls nearby"
@@ -138,16 +114,7 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
       )}
 
       <p className="mt-3 text-center text-[10px] text-strumf-muted">
-        Places by{" "}
-        <a
-          href="https://www.geoapify.com/"
-          target="_blank"
-          rel="noreferrer"
-          className="underline"
-        >
-          Geoapify
-        </a>{" "}
-        ·{" "}
+        Places by <PlacesProviderLabel provider={placesProvider} /> ·{" "}
         <a
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
@@ -158,6 +125,32 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
         </a>
       </p>
     </Card>
+  );
+}
+
+function PlacesProviderLabel({ provider }: { provider: "geoapify" | "openstreetmap" }) {
+  if (provider === "geoapify") {
+    return (
+      <a
+        href="https://www.geoapify.com/"
+        target="_blank"
+        rel="noreferrer"
+        className="underline"
+      >
+        Geoapify
+      </a>
+    );
+  }
+
+  return (
+    <a
+      href="https://www.openstreetmap.org/"
+      target="_blank"
+      rel="noreferrer"
+      className="underline"
+    >
+      OpenStreetMap
+    </a>
   );
 }
 
