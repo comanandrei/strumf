@@ -30,6 +30,8 @@ export const env = createEnv({
     EMAIL_FROM: z.string().optional(),
     /** Set to "true" to skip email verification (local testing only). */
     SKIP_EMAIL_VERIFICATION: z.enum(["true", "false"]).optional(),
+    /** Geoapify free-tier API key for the Nearby feature (server-side only). */
+    GEOAPIFY_API_KEY: z.string().optional(),
   },
 
   /**
@@ -53,6 +55,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     SKIP_EMAIL_VERIFICATION: process.env.SKIP_EMAIL_VERIFICATION,
+    GEOAPIFY_API_KEY: process.env.GEOAPIFY_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
