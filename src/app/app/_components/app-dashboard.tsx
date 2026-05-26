@@ -13,9 +13,18 @@ import {
   formatTimeAgo,
   milkTypeLabel,
 } from "~/app/lib/time-ago";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 
 import { useBabySelection } from "./baby-selection-context";
+
+type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
+type DailyFeedingTotal = {
+  dateKey: string;
+  label: string;
+  totalMl: number;
+  feedCount: number;
+  isToday: boolean;
+};
 
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -24,9 +33,10 @@ export function AppDashboard() {
   const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
   const since24h = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000), []);
+  const since7d = useMemo(() => startOfLast7Days(), []);
 
-  const { data: recentFeeds, isLoading: loadingFeeds } = api.feeding.listByBaby.useQuery(
-    { babyId: selectedBabyId ?? "", from: since24h, limit: 50 },
+  const { data: feedingsInRange, isLoading: loadingFeeds } = api.feeding.listByBaby.useQuery(
+    { babyId: selectedBabyId ?? "", from: since7d, limit: 200 },
     { enabled: !!selectedBabyId },
   );
   const { data: appointments, isLoading: loadingAppointments } =
@@ -35,8 +45,16 @@ export function AppDashboard() {
       { enabled: !!selectedBabyId },
     );
 
-  const last = recentFeeds?.[0];
+  const recentFeeds = useMemo(() => {
+    const feeds = feedingsInRange ?? [];
+    return feeds.filter((feed) => feed.startedAt >= since24h);
+  }, [feedingsInRange, since24h]);
+  const last = feedingsInRange?.[0];
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
+  const last7Days = useMemo(
+    () => buildLast7DaysSeries(feedingsInRange ?? []),
+    [feedingsInRange],
+  );
   const upcomingAppointments = useMemo(() => {
     const now = Date.now();
     return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
@@ -189,6 +207,8 @@ export function AppDashboard() {
         />
       </section>
 
+      <Last7DaysChart days={last7Days} isLoading={loadingFeeds} />
+
       <Card>
         <h2 className="font-display mb-3 text-lg font-semibold">Menu</h2>
         <ul className="space-y-2">
@@ -295,6 +315,72 @@ export function AppDashboard() {
   );
 }
 
+function Last7DaysChart({
+  days,
+  isLoading,
+}: {
+  days: DailyFeedingTotal[];
+  isLoading: boolean;
+}) {
+  const totalMl = days.reduce((sum, day) => sum + day.totalMl, 0);
+  const totalFeeds = days.reduce((sum, day) => sum + day.feedCount, 0);
+  const maxMl = Math.max(...days.map((day) => day.totalMl), 1);
+
+  return (
+    <Card>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold">Last 7 days</h2>
+          <p className="text-xs text-strumf-muted">Daily milk totals</p>
+        </div>
+        <div className="rounded-full bg-strumf-accent-muted/60 px-3 py-1 text-right text-xs font-bold text-strumf-foreground">
+          {totalMl} ml
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="h-44 w-full animate-pulse rounded-3xl bg-white/60" />
+      ) : totalFeeds ? (
+        <div
+          className="rounded-3xl bg-white/45 px-3 pb-3 pt-4"
+          role="img"
+          aria-label={`Milk total for the last 7 days is ${totalMl} milliliters`}
+        >
+          <div className="flex h-40 items-end gap-2">
+            {days.map((day) => {
+              const height = day.totalMl ? Math.max((day.totalMl / maxMl) * 100, 8) : 0;
+
+              return (
+                <div key={day.dateKey} className="flex h-full min-w-0 flex-1 flex-col gap-2">
+                  <div className="flex min-h-0 flex-1 items-end rounded-full bg-white/65 p-1 shadow-inner">
+                    <div
+                      className="w-full rounded-full bg-gradient-primary shadow-card transition-smooth"
+                      style={{ height: `${height}%` }}
+                      title={`${day.label}: ${day.totalMl} ml across ${day.feedCount} feed${
+                        day.feedCount === 1 ? "" : "s"
+                      }`}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="truncate text-[10px] font-bold text-strumf-muted">
+                      {day.isToday ? "Today" : day.label}
+                    </p>
+                    <p className="text-[10px] text-strumf-muted">{day.totalMl} ml</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <p className="rounded-3xl bg-white/45 py-8 text-center text-sm text-strumf-muted">
+          No feedings logged in the last 7 days.
+        </p>
+      )}
+    </Card>
+  );
+}
+
 function MenuItem({
   href,
   icon,
@@ -325,6 +411,52 @@ function MenuItem({
       </Link>
     </li>
   );
+}
+
+function buildLast7DaysSeries(feedings: Feeding[]): DailyFeedingTotal[] {
+  const start = startOfLast7Days();
+  const todayKey = toDateKey(new Date());
+  const days = new Map<string, DailyFeedingTotal>();
+
+  for (let index = 0; index < 7; index++) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const dateKey = toDateKey(date);
+
+    days.set(dateKey, {
+      dateKey,
+      label: formatShortDate(date),
+      totalMl: 0,
+      feedCount: 0,
+      isToday: dateKey === todayKey,
+    });
+  }
+
+  for (const feeding of feedings) {
+    const dateKey = toDateKey(feeding.startedAt);
+    const day = days.get(dateKey);
+    if (!day) continue;
+
+    day.totalMl += feeding.amountMl;
+    day.feedCount += 1;
+  }
+
+  return Array.from(days.values());
+}
+
+function startOfLast7Days() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - 6);
+  return date;
+}
+
+function toDateKey(value: Date) {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function StatCard({
