@@ -45,6 +45,7 @@ export default function CalendarPage() {
   const feedingsByDay = useMemo(() => groupFeedingsByDay(feedings ?? []), [feedings]);
   const selectedFeedings = selectedDay ? (feedingsByDay.get(selectedDay.key) ?? []) : [];
   const selectedSummary = useMemo(() => summarizeFeedings(selectedFeedings), [selectedFeedings]);
+  const inputDayCount = countInputDays(feedingsByDay);
 
   const moveMonth = useCallback((offset: number) => {
     setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
@@ -91,17 +92,26 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col gap-5 pb-8">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-strumf-muted">Calendar</p>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Daily rhythm</h1>
-          <p className="mt-2 text-sm text-strumf-muted">
-            Tap a day to see the dashboard for {activeBaby?.displayName ?? "your baby"}.
+      <header className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-warm p-5 shadow-soft">
+        <div className="absolute -right-10 -top-12 h-32 w-32 rounded-full bg-white/45" />
+        <div className="absolute bottom-4 right-5 h-16 w-16 rounded-[1.5rem] bg-strumf-mint/70 blur-sm" />
+        <div className="relative">
+          <span className="inline-flex rounded-full bg-white/60 px-3 py-1 text-xs font-black uppercase tracking-wide text-strumf-muted shadow-card">
+            Calendar
+          </span>
+          <h1 className="mt-3 font-display text-4xl font-bold leading-none tracking-tight">
+            Daily rhythm
+          </h1>
+          <p className="mt-2 max-w-xs text-sm text-strumf-muted">
+            Tap a square day to review feeds and spot patterns for{" "}
+            {activeBaby?.displayName ?? "your baby"}.
           </p>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <CalendarMetric value={`${inputDayCount}`} label="days" />
+            <CalendarMetric value={`${feedings?.length ?? 0}`} label="inputs" />
+            <CalendarMetric value={formatMonthShort(visibleMonth)} label="month" />
+          </div>
         </div>
-        <span className="rounded-full bg-white/60 px-3 py-1.5 text-xs font-bold text-strumf-muted shadow-card">
-          {countInputDays(feedingsByDay)} days
-        </span>
       </header>
 
       {babies.length > 1 ? (
@@ -123,39 +133,41 @@ export default function CalendarPage() {
         </div>
       ) : null}
 
-      <Card className="overflow-hidden">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            className="px-3"
-            aria-label="Previous month"
-            onClick={() => moveMonth(-1)}
-          >
-            Prev
-          </Button>
-          <div className="text-center">
-            <p className="font-display text-2xl font-bold">{formatMonth(visibleMonth)}</p>
-            <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-              {loadingFeedings ? "Loading inputs" : `${feedings?.length ?? 0} inputs`}
-            </p>
+      <Card className="overflow-hidden bg-white/75 p-0">
+        <div className="border-b border-strumf-border/70 bg-white/45 px-4 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              className="min-h-10 min-w-10 px-3 text-sm"
+              aria-label="Previous month"
+              onClick={() => moveMonth(-1)}
+            >
+              Prev
+            </Button>
+            <div className="text-center">
+              <p className="font-display text-2xl font-bold">{formatMonth(visibleMonth)}</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+                {loadingFeedings ? "Loading inputs" : `${feedings?.length ?? 0} inputs`}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              className="min-h-10 min-w-10 px-3 text-sm"
+              aria-label="Next month"
+              onClick={() => moveMonth(1)}
+            >
+              Next
+            </Button>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            className="px-3"
-            aria-label="Next month"
-            onClick={() => moveMonth(1)}
-          >
-            Next
-          </Button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center">
+        <div className="grid grid-cols-7 gap-1.5 p-4 text-center">
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="pb-2 text-[11px] font-bold uppercase tracking-wide text-strumf-muted"
+              className="pb-1 text-[10px] font-black uppercase tracking-wide text-strumf-muted"
             >
               {label}
             </div>
@@ -169,21 +181,25 @@ export default function CalendarPage() {
                 key={day.key}
                 type="button"
                 className={[
-                  "transition-smooth relative min-h-16 rounded-3xl border p-1.5 text-left shadow-sm",
+                  "transition-smooth relative aspect-square rounded-[1.15rem] border p-1 text-center shadow-sm active:scale-[0.98]",
                   day.isCurrentMonth
-                    ? "border-strumf-border bg-white/55 text-strumf-foreground"
-                    : "border-transparent bg-white/25 text-strumf-muted/70",
-                  day.isToday ? "ring-2 ring-strumf-accent/50" : "",
-                  hasInput ? "shadow-card" : "hover:bg-white/70",
+                    ? "border-strumf-border bg-white/70 text-strumf-foreground"
+                    : "border-transparent bg-white/25 text-strumf-muted/55",
+                  day.isToday ? "ring-2 ring-strumf-accent/60 ring-offset-2 ring-offset-white" : "",
+                  hasInput
+                    ? "border-strumf-accent/35 bg-strumf-accent-muted/55 shadow-card"
+                    : "hover:border-strumf-accent/25 hover:bg-white/90",
                 ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => setSelectedDay(day)}
                 aria-label={`${formatDayFull(day.date)}${hasInput ? `, ${dayFeedings.length} inputs` : ""}`}
               >
-                <span className="font-display text-base font-bold">{day.dayNumber}</span>
+                <span className="flex h-full items-center justify-center font-display text-base font-bold">
+                  {day.dayNumber}
+                </span>
                 {hasInput ? (
-                  <span className="absolute bottom-1.5 right-1.5 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-gradient-primary px-1.5 text-[11px] font-black text-white shadow-card">
+                  <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-strumf-foreground px-1 text-[9px] font-black leading-none text-white shadow-card">
                     {dayFeedings.length}
                   </span>
                 ) : null}
@@ -192,9 +208,16 @@ export default function CalendarPage() {
           })}
         </div>
 
-        <p className="mt-4 rounded-2xl bg-white/45 px-4 py-3 text-center text-xs text-strumf-muted">
-          Badges show days with feeding inputs. Open any day for the daily dashboard.
-        </p>
+        <div className="mx-4 mb-4 flex items-center justify-center gap-4 rounded-2xl bg-strumf-surface-strong/70 px-4 py-3 text-xs text-strumf-muted">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-strumf-accent" />
+            Feeding logged
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full ring-2 ring-strumf-accent/60" />
+            Today
+          </span>
+        </div>
       </Card>
 
       {selectedDay ? (
@@ -205,6 +228,17 @@ export default function CalendarPage() {
           onClose={() => setSelectedDay(null)}
         />
       ) : null}
+    </div>
+  );
+}
+
+function CalendarMetric({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-2xl bg-white/60 px-3 py-2 shadow-card backdrop-blur">
+      <p className="font-display text-xl font-bold leading-none">{value}</p>
+      <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-strumf-muted">
+        {label}
+      </p>
     </div>
   );
 }
@@ -414,6 +448,12 @@ function formatMonth(value: Date) {
   return new Intl.DateTimeFormat(undefined, {
     month: "long",
     year: "numeric",
+  }).format(value);
+}
+
+function formatMonthShort(value: Date) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
   }).format(value);
 }
 

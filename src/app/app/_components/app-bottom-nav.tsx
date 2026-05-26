@@ -2,20 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
+import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
+
+type NavTab = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  match: (pathname: string) => boolean;
+};
 
 export function AppBottomNav() {
   const pathname = usePathname();
   const { selectedBabyId } = useBabySelection();
   const babyHref = selectedBabyId ? `/app/baby/${selectedBabyId}` : "/app/onboarding";
-  const tabs = [
+  const tabs: NavTab[] = [
     { href: "/app", label: "Dashboard", icon: "✦", match: (p: string) => p === "/app" },
     { href: "/app/log", label: "Log", icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
     {
       href: "/app/calendar",
       label: "Calendar",
-      icon: "◷",
+      icon: <CalendarColorIcon className="h-5 w-5" />,
       match: (p: string) => p.startsWith("/app/calendar"),
     },
     {
@@ -37,7 +46,7 @@ export function AppBottomNav() {
       icon: "♡",
       match: (p: string) => p.startsWith("/app/you") || p.startsWith("/app/onboarding"),
     },
-  ] as const;
+  ];
 
   return (
     <nav
@@ -57,7 +66,9 @@ export function AppBottomNav() {
                     : "text-strumf-muted hover:bg-white/50 hover:text-strumf-foreground"
                 }`}
               >
-                <span className="text-base leading-none">{tab.icon}</span>
+                <span className="flex h-5 items-center justify-center text-base leading-none">
+                  {tab.icon}
+                </span>
                 {tab.label}
               </Link>
             </li>
