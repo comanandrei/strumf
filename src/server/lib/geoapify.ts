@@ -18,8 +18,12 @@ export interface NearbyPlace {
 
 const PLACES_URL = "https://api.geoapify.com/v2/places";
 const ROUTING_URL = "https://api.geoapify.com/v1/routing";
-const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_URLS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+] as const;
 const OVERPASS_TIMEOUT_SECONDS = 12;
+const OVERPASS_REQUEST_TIMEOUT_MS = 15_000;
 
 const CATEGORY_FOR_KIND: Record<NearbyKind, string> = {
   park: "leisure.park",
@@ -297,20 +301,8 @@ async function fetchOpenStreetMapPlacesByKind(args: {
 }): Promise<Omit<NearbyPlace, "durationSeconds">[]> {
   const { lat, lon, kind, radiusMeters, limit } = args;
   const query = buildOverpassQuery({ lat, lon, kind, radiusMeters, limit });
-  const res = await fetch(OVERPASS_URL, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-    },
-    body: new URLSearchParams({ data: query }),
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    throw new Error(`OpenStreetMap places (${kind}) failed: ${res.status} ${res.statusText}`);
-  }
 
-  const data = (await res.json()) as OverpassResponse;
+  const data = await fetchOverpass(query, kind);
   const elements = Array.isArray(data?.elements) ? data.elements : [];
 
   return dedupePlaces(
@@ -320,6 +312,46 @@ async function fetchOpenStreetMapPlacesByKind(args: {
   )
     .sort((a, b) => a.distanceMeters - b.distanceMeters)
     .slice(0, limit);
+}
+
+async function fetchOverpass(
+  query: string,
+  kind: NearbyKind,
+): Promise<OverpassResponse> {
+  let lastError: Error | null = null;
+
+  for (const endpoint of OVERPASS_URLS) {
+    try {
+      const url = new URL(endpoint);
+      url.searchParams.set("data", query);
+      const res = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "strumf-nearby/0.1 (https://strumf.vercel.app)",
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(OVERPASS_REQUEST_TIMEOUT_MS),
+      });
+      if (!res.ok) {
+        lastError = new Error(
+          `${res.status} ${res.statusText} from ${new URL(endpoint).hostname}`,
+        );
+        continue;
+      }
+      return (await res.json()) as OverpassResponse;
+    } catch (err) {
+      lastError =
+        err instanceof Error
+          ? err
+          : new Error("OpenStreetMap places request failed.");
+    }
+  }
+
+  throw new Error(
+    `OpenStreetMap places (${kind}) failed${
+      lastError ? `: ${lastError.message}` : "."
+    }`,
+  );
 }
 
 function buildOverpassQuery(args: {
