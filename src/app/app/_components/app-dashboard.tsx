@@ -9,6 +9,7 @@ import { Chip } from "~/app/_components/ui/chip";
 import {
   ageLabel,
   formatClock,
+  formatShortDate,
   formatTimeAgo,
   milkTypeLabel,
 } from "~/app/lib/time-ago";
@@ -25,9 +26,19 @@ export function AppDashboard() {
     { babyId: selectedBabyId ?? "", from: since24h, limit: 50 },
     { enabled: !!selectedBabyId },
   );
+  const { data: appointments, isLoading: loadingAppointments } =
+    api.appointment.listByBaby.useQuery(
+      { babyId: selectedBabyId ?? "" },
+      { enabled: !!selectedBabyId },
+    );
 
   const last = recentFeeds?.[0];
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
+  const upcomingAppointments = useMemo(() => {
+    const now = Date.now();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
+  }, [appointments]);
+  const nextAppointment = upcomingAppointments[0];
 
   const summary = useMemo(() => {
     const feeds = recentFeeds ?? [];
@@ -137,10 +148,10 @@ export function AppDashboard() {
         />
         <StatCard
           tone="warm"
-          icon="♡"
-          label="Care team"
-          value={activeBaby?.householdLabel ?? "Home"}
-          sub="household"
+          icon="+"
+          label="Next appointment"
+          value={nextAppointment ? formatShortDate(nextAppointment.startsAt) : "None"}
+          sub={nextAppointment ? formatClock(nextAppointment.startsAt) : "not scheduled"}
         />
       </section>
 
@@ -153,7 +164,52 @@ export function AppDashboard() {
             label="Calendar"
             description={`Review daily rhythm for ${activeBaby?.displayName ?? "your baby"}.`}
           />
+          <MenuItem
+            href="/app/log"
+            icon="+"
+            label="Medical log"
+            description="Record consultations and schedule appointments."
+          />
         </ul>
+      </Card>
+
+      <Card>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold">Upcoming appointments</h2>
+          <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
+            Add →
+          </Link>
+        </div>
+        {loadingAppointments ? (
+          <div className="h-20 w-full animate-pulse rounded-2xl bg-white/60" />
+        ) : upcomingAppointments.length ? (
+          <ul className="space-y-2">
+            {upcomingAppointments.slice(0, 3).map((appointment) => (
+              <li
+                key={appointment.id}
+                className="rounded-2xl bg-white/55 px-4 py-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-display text-base font-semibold">{appointment.title}</p>
+                    <p className="text-xs text-strumf-muted">
+                      {formatShortDate(appointment.startsAt)} ·{" "}
+                      {formatClock(appointment.startsAt)}
+                      {appointment.location ? ` · ${appointment.location}` : ""}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
+                    Planned
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="py-6 text-center text-sm text-strumf-muted">
+            No upcoming appointments scheduled.
+          </p>
+        )}
       </Card>
 
       <Card>
