@@ -67,7 +67,7 @@ export default function GoOutsidePage() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
-  const hasWeatherRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   const isBusy = loadState === "locating" || loadState === "loading";
 
@@ -81,25 +81,41 @@ export default function GoOutsidePage() {
     return "Use your current location for today's local weather.";
   }, [error, loadState, weather]);
 
-  const loadWeatherForCoordinates = useCallback(async (coordinates: StoredCoordinates) => {
-    setLoadState("loading");
-    try {
-      const forecast = await fetchWeather(coordinates.latitude, coordinates.longitude);
-      setWeather(forecast);
-      storeWeather(forecast);
-      hasWeatherRef.current = true;
-      setLoadState("ready");
+  const loadWeatherForCoordinates = useCallback(
+    async (coordinates: StoredCoordinates, requestId?: number) => {
+      const activeRequestId = requestId ?? ++requestIdRef.current;
+      setLoadState("loading");
       setError(null);
-    } catch (err) {
-      setLoadState("error");
-      setError(err instanceof Error ? err.message : "Could not load the weather.");
-    }
-  }, []);
+      try {
+        const forecast = await fetchWeather(coordinates.latitude, coordinates.longitude);
+        if (activeRequestId !== requestIdRef.current) return;
+        setWeather(forecast);
+        storeWeather(forecast);
+        setLoadState("ready");
+        setError(null);
+      } catch (err) {
+        if (activeRequestId !== requestIdRef.current) return;
+        setLoadState("error");
+        setError(err instanceof Error ? err.message : "Could not load the weather.");
+      }
+    },
+    [],
+  );
 
   const requestWeather = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const requestId = ++requestIdRef.current;
+
     if (!("geolocation" in navigator)) {
       setLoadState("error");
       setError("This browser does not support location access.");
+      return;
+    }
+
+    if (!window.isSecureContext) {
+      setLoadState("error");
+      setError("Location access requires a secure HTTPS connection.");
       return;
     }
 
@@ -108,18 +124,16 @@ export default function GoOutsidePage() {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        if (requestId !== requestIdRef.current) return;
         const coordinates = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         };
         storeCoordinates(coordinates);
-        await loadWeatherForCoordinates(coordinates);
+        await loadWeatherForCoordinates(coordinates, requestId);
       },
       (geoError) => {
-        if (hasWeatherRef.current) {
-          setLoadState("ready");
-          return;
-        }
+        if (requestId !== requestIdRef.current) return;
         setLoadState("error");
         setError(locationErrorMessage(geoError));
       },
@@ -135,7 +149,6 @@ export default function GoOutsidePage() {
     const storedWeather = readStoredWeather();
     if (storedWeather) {
       setWeather(storedWeather);
-      hasWeatherRef.current = true;
       setLoadState("ready");
       setError(null);
     }
@@ -144,15 +157,16 @@ export default function GoOutsidePage() {
     if (storedCoordinates) {
       void loadWeatherForCoordinates(storedCoordinates);
     }
-    requestWeather();
-  }, [loadWeatherForCoordinates, requestWeather]);
+  }, [loadWeatherForCoordinates]);
 
   return (
     <div className="flex flex-col gap-6 pb-8">
       <header>
         <p className="text-sm text-strumf-muted">Go outside</p>
         <h1 className="font-display text-4xl font-bold tracking-tight">Today outside</h1>
-        <p className="mt-2 text-sm text-strumf-muted">{statusText}</p>
+        <p className="mt-2 text-sm text-strumf-muted" aria-live="polite">
+          {statusText}
+        </p>
       </header>
 
       <Card className="overflow-hidden">
@@ -200,7 +214,10 @@ export default function GoOutsidePage() {
           ) : null}
 
           {error ? (
-            <p className="rounded-2xl bg-white/60 px-4 py-3 text-sm font-medium text-strumf-foreground">
+            <p
+              className="rounded-2xl bg-white/60 px-4 py-3 text-sm font-medium text-strumf-foreground"
+              role="status"
+            >
               {error}
             </p>
           ) : null}
@@ -397,6 +414,8 @@ function locationErrorMessage(error: GeolocationPositionError) {
 }
 
 function readStoredCoordinates(): StoredCoordinates | null {
+  if (typeof window === "undefined") return null;
+
   try {
     const raw = window.localStorage.getItem(COORDINATES_STORAGE_KEY);
     if (!raw) return null;
@@ -416,7 +435,13 @@ function readStoredCoordinates(): StoredCoordinates | null {
 }
 
 function storeCoordinates(coordinates: StoredCoordinates) {
-  window.localStorage.setItem(COORDINATES_STORAGE_KEY, JSON.stringify(coordinates));
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(COORDINATES_STORAGE_KEY, JSON.stringify(coordinates));
+  } catch {
+    // Location still works when storage is unavailable.
+  }
 }
 
 function readStoredWeather(): WeatherData | null {
@@ -448,7 +473,13 @@ function readStoredWeather(): WeatherData | null {
 }
 
 function storeWeather(weather: WeatherData) {
-  window.localStorage.setItem(WEATHER_STORAGE_KEY, JSON.stringify(weather));
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(WEATHER_STORAGE_KEY, JSON.stringify(weather));
+  } catch {
+    // Weather has already rendered; caching is best effort.
+  }
 }
 
 function WeatherMetric({

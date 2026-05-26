@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type Coords = { latitude: number; longitude: number };
 
@@ -14,18 +14,27 @@ const STORAGE_KEY = "strumf.nearby.coords";
 
 export function useSharedLocation() {
   const [status, setStatus] = useState<LocationStatus>({ state: "idle" });
-  const watchOnceRef = useRef(false);
 
   const request = useCallback(() => {
     if (typeof window === "undefined") return;
-    if (!("geolocation" in navigator)) {
+
+    const failWithCachedCoords = (message: string) => {
       setStatus({
         state: "error",
-        coords: null,
-        message: "This device does not support location access.",
+        coords: readStoredCoords(),
+        message,
       });
+    };
+
+    if (!("geolocation" in navigator)) {
+      failWithCachedCoords("This device does not support location access.");
       return;
     }
+    if (!window.isSecureContext) {
+      failWithCachedCoords("Location access requires a secure HTTPS connection.");
+      return;
+    }
+
     setStatus({ state: "requesting" });
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -49,14 +58,11 @@ export function useSharedLocation() {
   }, []);
 
   useEffect(() => {
-    if (watchOnceRef.current) return;
-    watchOnceRef.current = true;
     const cached = readStoredCoords();
     if (cached) {
       setStatus({ state: "ready", coords: cached, updatedAt: 0 });
     }
-    request();
-  }, [request]);
+  }, []);
 
   return { status, request };
 }
