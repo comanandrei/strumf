@@ -1,5 +1,5 @@
-import { QuickLogForm } from "~/app/app/_components/quick-log-form";
+import { CareLogTabs } from "~/app/app/_components/care-log-tabs";
 
 export default function LogPage() {
-  return <QuickLogForm />;
+  return <CareLogTabs />;
 }

@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Card } from "~/app/_components/ui/card";
-import { api } from "~/trpc/react";
+import { formatClock, formatShortDate } from "~/app/lib/time-ago";
+import { api, type RouterOutputs } from "~/trpc/react";
 
 import { useBabySelection } from "../../_components/baby-selection-context";
+
+type Consultation = RouterOutputs["consultation"]["listByBaby"][number];
+type Appointment = RouterOutputs["appointment"]["listByBaby"][number];
 
 function formatDateTime(value: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -44,6 +48,15 @@ export default function BabyProfilePage() {
     { babyId: babyId ?? "" },
     { enabled: !!babyId },
   );
+  const { data: consultations, isLoading: loadingConsultations } =
+    api.consultation.listByBaby.useQuery({ babyId: babyId ?? "" }, { enabled: !!babyId });
+  const { data: appointments, isLoading: loadingAppointments } =
+    api.appointment.listByBaby.useQuery({ babyId: babyId ?? "" }, { enabled: !!babyId });
+
+  const upcomingAppointments = useMemo(() => {
+    const now = Date.now();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
+  }, [appointments]);
 
   useEffect(() => {
     if (!babyId || selectedBabyId === babyId) return;
@@ -111,6 +124,42 @@ export default function BabyProfilePage() {
           {baby.notes?.trim() || "No notes added yet."}
         </p>
       </Card>
+
+      <Card>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-white/50">
+              Medical care
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-white">Upcoming appointments</h2>
+          </div>
+          <Link href="/app/log" className="shrink-0 text-xs font-bold text-strumf-accent">
+            Add
+          </Link>
+        </div>
+        <AppointmentSummary
+          appointments={upcomingAppointments}
+          isLoading={loadingAppointments}
+        />
+      </Card>
+
+      <Card>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-white/50">
+              Medical history
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-white">Consultations</h2>
+          </div>
+          <Link href="/app/log" className="shrink-0 text-xs font-bold text-strumf-accent">
+            Record
+          </Link>
+        </div>
+        <ConsultationSummary
+          consultations={consultations ?? []}
+          isLoading={loadingConsultations}
+        />
+      </Card>
     </div>
   );
 }
@@ -121,5 +170,102 @@ function ProfileField({ label, value }: { label: string; value: string }) {
       <dt className="text-xs font-medium uppercase tracking-wide text-white/45">{label}</dt>
       <dd className="mt-1 text-base font-medium capitalize text-white">{value}</dd>
     </div>
+  );
+}
+
+function AppointmentSummary({
+  appointments,
+  isLoading,
+}: {
+  appointments: Appointment[];
+  isLoading: boolean;
+}) {
+  if (isLoading) {
+    return <div className="h-20 animate-pulse rounded-2xl bg-white/10" />;
+  }
+
+  if (!appointments.length) {
+    return <p className="rounded-2xl bg-white/10 px-4 py-5 text-center text-sm text-white/65">
+      No upcoming appointments.
+    </p>;
+  }
+
+  return (
+    <ul className="space-y-2">
+      {appointments.slice(0, 5).map((appointment) => (
+        <li key={appointment.id} className="rounded-2xl bg-white/10 px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-medium text-white">{appointment.title}</p>
+              <p className="text-xs text-white/60">
+                {formatShortDate(appointment.startsAt)} at {formatClock(appointment.startsAt)}
+                {appointment.endsAt ? `-${formatClock(appointment.endsAt)}` : ""}
+              </p>
+            </div>
+            <span className="rounded-full bg-strumf-accent/25 px-3 py-1 text-xs font-bold text-strumf-accent">
+              Upcoming
+            </span>
+          </div>
+          {appointment.location ? (
+            <p className="mt-2 text-xs text-white/60">{appointment.location}</p>
+          ) : null}
+          {appointment.notes ? (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-white/75">{appointment.notes}</p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ConsultationSummary({
+  consultations,
+  isLoading,
+}: {
+  consultations: Consultation[];
+  isLoading: boolean;
+}) {
+  if (isLoading) {
+    return <div className="h-20 animate-pulse rounded-2xl bg-white/10" />;
+  }
+
+  if (!consultations.length) {
+    return <p className="rounded-2xl bg-white/10 px-4 py-5 text-center text-sm text-white/65">
+      No consultations recorded.
+    </p>;
+  }
+
+  return (
+    <ul className="space-y-2">
+      {consultations.slice(0, 5).map((consultation) => (
+        <li key={consultation.id} className="rounded-2xl bg-white/10 px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-medium text-white">{consultation.reason}</p>
+              <p className="text-xs text-white/60">
+                {formatShortDate(consultation.occurredAt)} at{" "}
+                {formatClock(consultation.occurredAt)}
+                {consultation.providerName ? ` - ${consultation.providerName}` : ""}
+              </p>
+            </div>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/70">
+              Visit
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-white/60">{consultation.location}</p>
+          {consultation.outcomeNotes ? (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-white/75">
+              {consultation.outcomeNotes}
+            </p>
+          ) : null}
+          {consultation.followUpAt ? (
+            <p className="mt-2 text-xs font-bold text-strumf-accent">
+              Follow-up: {formatShortDate(consultation.followUpAt)} at{" "}
+              {formatClock(consultation.followUpAt)}
+            </p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }

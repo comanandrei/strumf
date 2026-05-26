@@ -10,6 +10,7 @@ import { Chip } from "~/app/_components/ui/chip";
 import {
   ageLabel,
   formatClock,
+  formatShortDate,
   formatTimeAgo,
   milkTypeLabel,
 } from "~/app/lib/time-ago";
@@ -17,6 +18,9 @@ import { api } from "~/trpc/react";
 
 import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
 
 export function AppDashboard() {
   const router = useRouter();
@@ -27,20 +31,43 @@ export function AppDashboard() {
     { babyId: selectedBabyId ?? "", from: since24h, limit: 50 },
     { enabled: !!selectedBabyId },
   );
+  const { data: appointments, isLoading: loadingAppointments } =
+    api.appointment.listByBaby.useQuery(
+      { babyId: selectedBabyId ?? "" },
+      { enabled: !!selectedBabyId },
+    );
 
   const last = recentFeeds?.[0];
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
+  const upcomingAppointments = useMemo(() => {
+    const now = Date.now();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
+  }, [appointments]);
+  const nextAppointment = upcomingAppointments[0];
 
   const summary = useMemo(() => {
     const feeds = recentFeeds ?? [];
     const totalMl = feeds.reduce((sum, feed) => sum + feed.amountMl, 0);
     const avgMl = feeds.length ? Math.round(totalMl / feeds.length) : 0;
+    const feedTimes = feeds.map((feed) => feed.startedAt.getTime());
+    const intervalTotalMs = feedTimes
+      .slice(0, -1)
+      .reduce((sum, startedAtMs, index) => sum + startedAtMs - feedTimes[index + 1]!, 0);
+    const averageIntervalMs =
+      feedTimes.length > 1 ? Math.round(intervalTotalMs / (feedTimes.length - 1)) : null;
+    const nextFeedAt =
+      last && averageIntervalMs && averageIntervalMs > 0
+        ? new Date(last.startedAt.getTime() + averageIntervalMs)
+        : null;
+
     return {
       totalMl,
       avgMl,
       feedCount: feeds.length,
+      averageIntervalMs,
+      nextFeedAt,
     };
-  }, [recentFeeds]);
+  }, [last, recentFeeds]);
 
   useEffect(() => {
     if (!isLoading && babies.length === 0) {
@@ -139,10 +166,28 @@ export function AppDashboard() {
         />
         <StatCard
           tone="warm"
-          icon="♡"
-          label="Care team"
-          value={activeBaby?.householdLabel ?? "Home"}
-          sub="household"
+          icon="+"
+          label="Next appointment"
+          value={nextAppointment ? formatShortDate(nextAppointment.startsAt) : "None"}
+          sub={nextAppointment ? formatClock(nextAppointment.startsAt) : "not scheduled"}
+        />
+        <StatCard
+          tone="mint"
+          icon="⏱"
+          label="Interval mediu între hrăniri"
+          value={
+            summary.averageIntervalMs ? formatDuration(summary.averageIntervalMs) : "—"
+          }
+          sub={summary.averageIntervalMs ? "last 24h" : "need 2 feeds"}
+        />
+        <StatCard
+          tone="blue"
+          icon="⌁"
+          label="Estimare „următoarea hrănire”"
+          value={summary.nextFeedAt ? formatClock(summary.nextFeedAt) : "—"}
+          sub={
+            summary.nextFeedAt ? formatFutureDistance(summary.nextFeedAt) : "need 2 feeds"
+          }
         />
       </section>
 
@@ -155,7 +200,52 @@ export function AppDashboard() {
             label="Calendar"
             description={`Review daily rhythm for ${activeBaby?.displayName ?? "your baby"}.`}
           />
+          <MenuItem
+            href="/app/log"
+            icon="+"
+            label="Medical log"
+            description="Record consultations and schedule appointments."
+          />
         </ul>
+      </Card>
+
+      <Card>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold">Upcoming appointments</h2>
+          <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
+            Add →
+          </Link>
+        </div>
+        {loadingAppointments ? (
+          <div className="h-20 w-full animate-pulse rounded-2xl bg-white/60" />
+        ) : upcomingAppointments.length ? (
+          <ul className="space-y-2">
+            {upcomingAppointments.slice(0, 3).map((appointment) => (
+              <li
+                key={appointment.id}
+                className="rounded-2xl bg-white/55 px-4 py-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-display text-base font-semibold">{appointment.title}</p>
+                    <p className="text-xs text-strumf-muted">
+                      {formatShortDate(appointment.startsAt)} ·{" "}
+                      {formatClock(appointment.startsAt)}
+                      {appointment.location ? ` · ${appointment.location}` : ""}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
+                    Planned
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="py-6 text-center text-sm text-strumf-muted">
+            No upcoming appointments scheduled.
+          </p>
+        )}
       </Card>
 
       <Card>
@@ -269,4 +359,25 @@ function StatCard({
       <p className="text-[11px] opacity-75">{sub}</p>
     </div>
   );
+}
+
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.max(1, Math.round(ms / MINUTE_MS));
+  if (totalMinutes < 60) return `${totalMinutes} min`;
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+function formatFutureDistance(date: Date, now = new Date()): string {
+  const ms = date.getTime() - now.getTime();
+  if (ms <= 0) return "due now";
+
+  if (ms < HOUR_MS) {
+    const minutes = Math.max(1, Math.round(ms / MINUTE_MS));
+    return `in ${minutes} min`;
+  }
+
+  return `in ${formatDuration(ms)}`;
 }
