@@ -12,6 +12,18 @@ export function AppBottomNav() {
   const tabs = [
     { href: "/app", label: "Dashboard", icon: "✦", match: (p: string) => p === "/app" },
     { href: "/app/log", label: "Log", icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
+    {
+      href: "/app/calendar",
+      label: "Calendar",
+      icon: "◷",
+      match: (p: string) => p.startsWith("/app/calendar"),
+    },
+    {
+      href: "/app/go-outside",
+      label: "Outside",
+      icon: "☁",
+      match: (p: string) => p.startsWith("/app/go-outside"),
+    },
     { href: babyHref, label: "Baby", icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
     {
       href: "/app/nearby",
@@ -39,7 +51,7 @@ export function AppBottomNav() {
             <li key={tab.href} className="flex-1">
               <Link
                 href={tab.href}
-                className={`transition-smooth flex min-h-12 flex-col items-center justify-center rounded-2xl text-sm font-bold ${
+                className={`transition-smooth flex min-h-12 flex-col items-center justify-center rounded-2xl px-1 text-[11px] font-bold sm:text-sm ${
                   active
                     ? "bg-gradient-primary text-white shadow-card"
                     : "text-strumf-muted hover:bg-white/50 hover:text-strumf-foreground"

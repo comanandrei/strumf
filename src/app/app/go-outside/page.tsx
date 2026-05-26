@@ -113,7 +113,7 @@ export default function GoOutsidePage() {
           longitude: position.coords.longitude,
         };
         storeCoordinates(coordinates);
-        await loadWeatherForCoordi                                                                                                                                                                        nates(coordinates);
+        await loadWeatherForCoordinates(coordinates);
       },
       (geoError) => {
         if (hasWeatherRef.current) {
