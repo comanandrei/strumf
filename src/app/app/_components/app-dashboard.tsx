@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo } from "react";
 
+import { Button } from "~/app/_components/ui/button";
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
 import {
@@ -27,6 +28,7 @@ import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
 
 type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
+type DailySummaryToday = RouterOutputs["dailySummary"]["today"];
 type DailyFeedingTotal = {
   dateKey: string;
   label: string;
@@ -53,6 +55,19 @@ export function AppDashboard() {
       { babyId: selectedBabyId ?? "" },
       { enabled: !!selectedBabyId },
     );
+  const { data: dailySummary, isLoading: loadingDailySummary } =
+    api.dailySummary.today.useQuery(
+      { babyId: selectedBabyId ?? "" },
+      { enabled: !!selectedBabyId },
+    );
+  const utils = api.useUtils();
+  const generateDailySummary = api.dailySummary.generate.useMutation({
+    onSuccess: async () => {
+      if (selectedBabyId) {
+        await utils.dailySummary.today.invalidate({ babyId: selectedBabyId });
+      }
+    },
+  });
 
   const recentFeeds = useMemo(() => {
     const feeds = feedingsInRange ?? [];
@@ -223,6 +238,17 @@ export function AppDashboard() {
       <Last7DaysChart days={last7Days} isLoading={loadingFeeds} />
 
       <MilestonesWidget milestones={milestoneHighlights} babyName={activeBaby?.displayName} />
+
+      <DailyBabySummaryCard
+        babyName={activeBaby?.displayName}
+        data={dailySummary}
+        error={generateDailySummary.error?.message}
+        isGenerating={generateDailySummary.isPending}
+        isLoading={loadingDailySummary}
+        onGenerate={() => {
+          if (selectedBabyId) generateDailySummary.mutate({ babyId: selectedBabyId });
+        }}
+      />
 
       <Card>
         <h2 className="font-display mb-3 text-lg font-semibold">Menu</h2>
@@ -406,6 +432,150 @@ function MilestonesWidget({
         </ul>
       ) : null}
     </Card>
+  );
+}
+
+function DailyBabySummaryCard({
+  babyName,
+  data,
+  error,
+  isGenerating,
+  isLoading,
+  onGenerate,
+}: {
+  babyName?: string;
+  data?: DailySummaryToday;
+  error?: string;
+  isGenerating: boolean;
+  isLoading: boolean;
+  onGenerate: () => void;
+}) {
+  const dailySummary = data?.summary?.summary;
+  const generatedAt = data?.summary ? new Date(data.summary.generatedAt) : null;
+
+  return (
+    <Card className="overflow-hidden bg-white/80">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+            Daily GPT
+          </p>
+          <h2 className="font-display text-lg font-semibold">
+            {babyName ? `${babyName}'s daily summary` : "Daily baby summary"}
+          </h2>
+          <p className="mt-1 text-xs text-strumf-muted">
+            One GPT prompt per baby per day, based on feeds, milestones, and care notes.
+          </p>
+        </div>
+        {data?.dateKey ? (
+          <span className="shrink-0 rounded-full bg-strumf-accent-muted/60 px-3 py-1 text-xs font-bold text-strumf-foreground">
+            {data.dateKey}
+          </span>
+        ) : null}
+      </div>
+
+      {isLoading ? (
+        <div className="h-28 w-full animate-pulse rounded-3xl bg-white/60" />
+      ) : dailySummary ? (
+        <div className="space-y-3">
+          <div className="rounded-3xl bg-gradient-blue p-4 shadow-card">
+            <p className="font-display text-xl font-bold leading-tight">
+              {dailySummary.headline}
+            </p>
+            <p className="mt-2 text-sm text-strumf-foreground/80">
+              {dailySummary.feedingRhythm}
+            </p>
+            {generatedAt ? (
+              <p className="mt-3 text-xs font-bold text-strumf-muted">
+                Generated {formatShortDate(generatedAt)} · {formatClock(generatedAt)}
+              </p>
+            ) : null}
+          </div>
+
+          <SummaryBulletList title="Useful changes" items={dailySummary.changesToNotice} />
+          <SummaryBulletList title="Watch tomorrow" items={dailySummary.watchTomorrow} />
+          <SummaryBulletList title="Medical reminders" items={dailySummary.medicalReminders} />
+          <SummaryBulletList title="Doctor questions" items={dailySummary.doctorQuestions} />
+
+          <div className="rounded-2xl bg-strumf-accent-muted/45 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+              Development tip
+            </p>
+            <p className="mt-1 text-sm text-strumf-foreground/80">
+              {dailySummary.developmentTip}
+            </p>
+          </div>
+
+          <p className="rounded-2xl bg-white/55 px-4 py-3 text-xs text-strumf-muted">
+            {dailySummary.safetyNote}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="rounded-3xl bg-gradient-warm p-4 shadow-card">
+            <p className="font-display text-xl font-bold leading-tight">
+              Ready for today's parent summary
+            </p>
+            <p className="mt-2 text-sm text-strumf-foreground/80">
+              GPT will look for feeding rhythm, useful changes, milestones, appointment reminders,
+              and what to watch tomorrow.
+            </p>
+          </div>
+
+          {data?.isGptConfigured === false ? (
+            <p className="rounded-2xl bg-white/60 px-4 py-3 text-sm text-strumf-muted">
+              OpenAI is not configured yet. Add OPENAI_API_KEY on the server to generate summaries,
+              or copy the prompt below into GPT manually.
+            </p>
+          ) : null}
+
+          {error ? (
+            <p className="rounded-2xl bg-strumf-danger/10 px-4 py-3 text-sm text-strumf-danger">
+              {error}
+            </p>
+          ) : null}
+
+          <Button
+            type="button"
+            variant="accent"
+            fullWidth
+            disabled={!data?.isGptConfigured || isGenerating}
+            onClick={onGenerate}
+          >
+            {isGenerating ? "Asking GPT..." : "Generate today's GPT summary"}
+          </Button>
+        </div>
+      )}
+
+      {data?.prompt ? (
+        <details className="mt-3 rounded-2xl bg-white/55 px-4 py-3">
+          <summary className="cursor-pointer text-xs font-bold uppercase tracking-wide text-strumf-muted">
+            View daily prompt
+          </summary>
+          <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap text-xs leading-relaxed text-strumf-muted">
+            {data.prompt}
+          </pre>
+        </details>
+      ) : null}
+    </Card>
+  );
+}
+
+function SummaryBulletList({ title, items }: { title: string; items: string[] }) {
+  if (!items.length) return null;
+
+  return (
+    <div className="rounded-2xl bg-white/55 px-4 py-3">
+      <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">{title}</p>
+      <ul className="mt-2 space-y-1.5">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 text-sm text-strumf-foreground/80">
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-strumf-accent" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

@@ -32,6 +32,10 @@ export const env = createEnv({
     SKIP_EMAIL_VERIFICATION: z.enum(["true", "false"]).optional(),
     /** Geoapify free-tier API key for the Nearby feature (server-side only). */
     GEOAPIFY_API_KEY: z.string().optional(),
+    /** Optional OpenAI key used for one daily GPT baby summary. */
+    OPENAI_API_KEY: z.string().optional(),
+    /** Optional override for the GPT model used by daily summaries. */
+    OPENAI_MODEL: z.string().optional(),
   },
 
   /**
@@ -56,6 +60,8 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     SKIP_EMAIL_VERIFICATION: process.env.SKIP_EMAIL_VERIFICATION,
     GEOAPIFY_API_KEY: process.env.GEOAPIFY_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_MODEL: process.env.OPENAI_MODEL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

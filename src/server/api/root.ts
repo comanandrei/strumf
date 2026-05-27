@@ -1,6 +1,7 @@
 import { appointmentRouter } from "~/server/api/routers/appointment";
 import { babyRouter } from "~/server/api/routers/baby";
 import { consultationRouter } from "~/server/api/routers/consultation";
+import { dailySummaryRouter } from "~/server/api/routers/daily-summary";
 import { feedingRouter } from "~/server/api/routers/feeding";
 import { householdRouter } from "~/server/api/routers/household";
 import { inviteRouter } from "~/server/api/routers/invite";
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
   feeding: feedingRouter,
   consultation: consultationRouter,
   appointment: appointmentRouter,
+  dailySummary: dailySummaryRouter,
   nearby: nearbyRouter,
 });
 
