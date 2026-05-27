@@ -41,6 +41,7 @@ const HOUR_MS = 60 * MINUTE_MS;
 export function AppDashboard() {
   const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
+  const now = useMemo(() => new Date(), []);
   const since24h = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000), []);
   const since7d = useMemo(() => startOfLast7Days(), []);
 
@@ -50,7 +51,7 @@ export function AppDashboard() {
   );
   const { data: appointments, isLoading: loadingAppointments } =
     api.appointment.listByBaby.useQuery(
-      { babyId: selectedBabyId ?? "" },
+      { babyId: selectedBabyId ?? "", from: now, limit: 5 },
       { enabled: !!selectedBabyId },
     );
 
@@ -69,9 +70,9 @@ export function AppDashboard() {
     [feedingsInRange],
   );
   const upcomingAppointments = useMemo(() => {
-    const now = Date.now();
-    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
-  }, [appointments]);
+    const nowMs = now.getTime();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= nowMs);
+  }, [appointments, now]);
   const nextAppointment = upcomingAppointments[0];
 
   const summary = useMemo(() => {

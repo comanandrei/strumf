@@ -41,6 +41,7 @@ function profileValue(value: string | number | null | undefined, suffix = "") {
 export default function BabyProfilePage() {
   const params = useParams<{ babyId: string }>();
   const babyId = Array.isArray(params.babyId) ? params.babyId[0] : params.babyId;
+  const now = useMemo(() => new Date(), []);
   const { babies, selectedBabyId, setSelectedBabyId, isLoading: loadingBabies } =
     useBabySelection();
 
@@ -49,14 +50,20 @@ export default function BabyProfilePage() {
     { enabled: !!babyId },
   );
   const { data: consultations, isLoading: loadingConsultations } =
-    api.consultation.listByBaby.useQuery({ babyId: babyId ?? "" }, { enabled: !!babyId });
+    api.consultation.listByBaby.useQuery(
+      { babyId: babyId ?? "", limit: 5 },
+      { enabled: !!babyId },
+    );
   const { data: appointments, isLoading: loadingAppointments } =
-    api.appointment.listByBaby.useQuery({ babyId: babyId ?? "" }, { enabled: !!babyId });
+    api.appointment.listByBaby.useQuery(
+      { babyId: babyId ?? "", from: now, limit: 5 },
+      { enabled: !!babyId },
+    );
 
   const upcomingAppointments = useMemo(() => {
-    const now = Date.now();
-    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
-  }, [appointments]);
+    const nowMs = now.getTime();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= nowMs);
+  }, [appointments, now]);
 
   useEffect(() => {
     if (!babyId || selectedBabyId === babyId) return;
