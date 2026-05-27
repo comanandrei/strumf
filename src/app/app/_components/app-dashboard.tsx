@@ -225,7 +225,13 @@ export function AppDashboard() {
           icon="+"
           label="Next appointment"
           value={nextAppointment ? formatShortDate(nextAppointment.startsAt) : "None"}
-          sub={nextAppointment ? formatClock(nextAppointment.startsAt) : "not scheduled"}
+          sub={
+            nextAppointment?.reminderAt
+              ? `reminder ${formatShortDate(nextAppointment.reminderAt)}`
+              : nextAppointment
+                ? formatClock(nextAppointment.startsAt)
+                : "not scheduled"
+          }
         />
         <StatCard
           tone="mint"
@@ -320,6 +326,12 @@ export function AppDashboard() {
                       {formatClock(appointment.startsAt)}
                       {appointment.location ? ` · ${appointment.location}` : ""}
                     </p>
+                  {appointment.reminderAt ? (
+                    <p className="mt-1 text-xs font-bold text-strumf-accent">
+                      Reminder {formatShortDate(appointment.reminderAt)} ·{" "}
+                      {formatClock(appointment.reminderAt)}
+                    </p>
+                  ) : null}
                   </div>
                   <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
                     Planned

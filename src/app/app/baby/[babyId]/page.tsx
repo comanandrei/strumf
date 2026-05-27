@@ -216,6 +216,13 @@ function AppointmentSummary({
           {appointment.location ? (
             <p className="mt-2 text-xs text-white/60">{appointment.location}</p>
           ) : null}
+          {appointment.reminderAt ? (
+            <p className="mt-2 text-xs font-bold text-strumf-accent">
+              Reminder: {formatShortDate(appointment.reminderAt)} at{" "}
+              {formatClock(appointment.reminderAt)}
+              {appointment.reminderSentAt ? " · sent" : ""}
+            </p>
+          ) : null}
           {appointment.notes ? (
             <p className="mt-2 whitespace-pre-wrap text-sm text-white/75">{appointment.notes}</p>
           ) : null}

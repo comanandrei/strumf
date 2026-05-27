@@ -14,6 +14,20 @@ import { useBabySelection } from "./baby-selection-context";
 type Mode = "consultation" | "appointment";
 type Consultation = RouterOutputs["consultation"]["listByBaby"][number];
 type Appointment = RouterOutputs["appointment"]["listByBaby"][number];
+type ReminderPreset = "none" | "10m" | "1h" | "24h" | "2d";
+
+const REMINDER_OPTIONS: Array<{
+  value: ReminderPreset;
+  label: string;
+  description: string;
+  minutes: number | null;
+}> = [
+  { value: "none", label: "Off", description: "No reminder", minutes: null },
+  { value: "10m", label: "10 min", description: "Last check", minutes: 10 },
+  { value: "1h", label: "1 hour", description: "Pack up", minutes: 60 },
+  { value: "24h", label: "1 day", description: "Best default", minutes: 24 * 60 },
+  { value: "2d", label: "2 days", description: "Plan ahead", minutes: 2 * 24 * 60 },
+];
 
 const inputClass =
   "w-full rounded-xl border border-strumf-border bg-white/70 px-3 py-3 text-sm font-medium outline-none transition-smooth focus:border-strumf-accent";
@@ -36,6 +50,7 @@ export function MedicalLogForm({ mode }: { mode: Mode }) {
     endsAt: "",
     location: "",
     notes: "",
+    reminderPreset: "24h" as ReminderPreset,
   }));
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +104,7 @@ export function MedicalLogForm({ mode }: { mode: Mode }) {
         endsAt: "",
         location: "",
         notes: "",
+        reminderPreset: "24h",
       });
       await utils.appointment.listByBaby.invalidate({ babyId: row.babyId });
     },
@@ -139,6 +155,11 @@ export function MedicalLogForm({ mode }: { mode: Mode }) {
     if (!selectedBabyId) return;
     setError(null);
     setMessage(null);
+    const reminderAt = calculateReminderAt(appointmentForm.startsAt, appointmentForm.reminderPreset);
+    if (appointmentForm.reminderPreset !== "none" && !reminderAt) {
+      setError("Pick a shorter reminder or move the appointment later.");
+      return;
+    }
     createAppointment.mutate({
       babyId: selectedBabyId,
       title: appointmentForm.title.trim(),
@@ -146,6 +167,7 @@ export function MedicalLogForm({ mode }: { mode: Mode }) {
       endsAt: appointmentForm.endsAt ? new Date(appointmentForm.endsAt) : undefined,
       location: optionalText(appointmentForm.location),
       notes: optionalText(appointmentForm.notes),
+      reminderAt,
     });
   };
 
@@ -332,6 +354,7 @@ function AppointmentForm({
     endsAt: string;
     location: string;
     notes: string;
+    reminderPreset: ReminderPreset;
   };
   isPending: boolean;
   onChange: (next: {
@@ -340,69 +363,143 @@ function AppointmentForm({
     endsAt: string;
     location: string;
     notes: string;
+    reminderPreset: ReminderPreset;
   }) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  return (
-    <Card>
-      <form className="space-y-4" onSubmit={onSubmit}>
-        <label className="block space-y-1.5 text-sm font-bold">
-          <span>Title</span>
-          <input
-            required
-            value={form.title}
-            onChange={(e) => onChange({ ...form, title: e.target.value })}
-            placeholder="Pediatrician, vaccine, check-up"
-            className={inputClass}
-          />
-        </label>
+  const reminderAt = calculateReminderAt(form.startsAt, form.reminderPreset);
+  const reminderIsInvalid = form.reminderPreset !== "none" && !reminderAt;
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label className="space-y-1.5 text-sm font-bold">
-            <span>Starts</span>
-            <input
-              required
-              type="datetime-local"
-              value={form.startsAt}
-              onChange={(e) => onChange({ ...form, startsAt: e.target.value })}
-              className={inputClass}
-            />
-          </label>
-          <label className="space-y-1.5 text-sm font-bold">
-            <span>Ends</span>
-            <input
-              type="datetime-local"
-              value={form.endsAt}
-              onChange={(e) => onChange({ ...form, endsAt: e.target.value })}
-              className={inputClass}
-            />
-          </label>
+  return (
+    <Card className="overflow-hidden bg-white/80 p-0">
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <div className="relative overflow-hidden bg-gradient-blue p-5">
+          <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/45" />
+          <div className="relative">
+            <span className="inline-flex rounded-full bg-white/70 px-3 py-1 text-xs font-black uppercase tracking-wide text-strumf-muted shadow-card">
+              Smart reminder
+            </span>
+            <h2 className="mt-3 font-display text-3xl font-bold leading-none tracking-tight">
+              Never miss a visit
+            </h2>
+            <p className="mt-2 text-sm text-strumf-muted">
+              Save the appointment, then send a timely household email reminder before the visit.
+            </p>
+          </div>
         </div>
 
-        <label className="block space-y-1.5 text-sm font-bold">
-          <span>Location</span>
-          <input
-            value={form.location}
-            onChange={(e) => onChange({ ...form, location: e.target.value })}
-            placeholder="Clinic, address, video call"
-            className={inputClass}
-          />
-        </label>
+        <div className="space-y-4 p-5 pt-0">
+          <label className="block space-y-1.5 text-sm font-bold">
+            <span>Title</span>
+            <input
+              required
+              value={form.title}
+              onChange={(e) => onChange({ ...form, title: e.target.value })}
+              placeholder="Pediatrician, vaccine, check-up"
+              className={inputClass}
+            />
+          </label>
 
-        <label className="block space-y-1.5 text-sm font-bold">
-          <span>Notes</span>
-          <textarea
-            value={form.notes}
-            onChange={(e) => onChange({ ...form, notes: e.target.value })}
-            placeholder="What to bring, questions for the doctor..."
-            rows={3}
-            className={inputClass}
-          />
-        </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="space-y-1.5 text-sm font-bold">
+              <span>Starts</span>
+              <input
+                required
+                type="datetime-local"
+                value={form.startsAt}
+                onChange={(e) => onChange({ ...form, startsAt: e.target.value })}
+                className={inputClass}
+              />
+            </label>
+            <label className="space-y-1.5 text-sm font-bold">
+              <span>Ends</span>
+              <input
+                type="datetime-local"
+                value={form.endsAt}
+                onChange={(e) => onChange({ ...form, endsAt: e.target.value })}
+                className={inputClass}
+              />
+            </label>
+          </div>
 
-        <Button type="submit" variant="accent" fullWidth disabled={isPending || !form.title.trim()}>
-          {isPending ? "Scheduling..." : "Schedule appointment"}
-        </Button>
+          <div className="rounded-3xl border border-strumf-border bg-white/60 p-4 shadow-card">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-strumf-muted">
+                  Reminder
+                </p>
+                <p className="font-display text-lg font-semibold">
+                  {reminderAt ? formatReminderDate(reminderAt) : "No reminder scheduled"}
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full bg-strumf-accent-muted/70 px-3 py-1 text-xs font-bold text-strumf-foreground">
+                Email
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {REMINDER_OPTIONS.map((option) => {
+                const selected = form.reminderPreset === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={[
+                      "transition-smooth min-h-16 rounded-2xl border px-3 py-2 text-left active:scale-[0.98]",
+                      selected
+                        ? "border-strumf-accent bg-gradient-primary text-white shadow-soft"
+                        : "border-strumf-border bg-white/70 text-strumf-foreground hover:border-strumf-accent/40",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => onChange({ ...form, reminderPreset: option.value })}
+                  >
+                    <span className="block text-sm font-black">{option.label}</span>
+                    <span className="block text-[11px] opacity-75">{option.description}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {reminderIsInvalid ? (
+              <p className="mt-3 text-xs font-bold text-strumf-danger">
+                This reminder would be in the past. Pick a shorter reminder or move the appointment later.
+              </p>
+            ) : (
+              <p className="mt-3 text-xs text-strumf-muted">
+                Email reminders go to active caregivers in the household.
+              </p>
+            )}
+          </div>
+
+          <label className="block space-y-1.5 text-sm font-bold">
+            <span>Location</span>
+            <input
+              value={form.location}
+              onChange={(e) => onChange({ ...form, location: e.target.value })}
+              placeholder="Clinic, address, video call"
+              className={inputClass}
+            />
+          </label>
+
+          <label className="block space-y-1.5 text-sm font-bold">
+            <span>Notes</span>
+            <textarea
+              value={form.notes}
+              onChange={(e) => onChange({ ...form, notes: e.target.value })}
+              placeholder="What to bring, questions for the doctor..."
+              rows={3}
+              className={inputClass}
+            />
+          </label>
+
+          <Button
+            type="submit"
+            variant="accent"
+            fullWidth
+            disabled={isPending || !form.title.trim() || reminderIsInvalid}
+          >
+            {isPending ? "Scheduling..." : "Schedule appointment"}
+          </Button>
+        </div>
       </form>
     </Card>
   );
@@ -483,14 +580,18 @@ function AppointmentList({
     <section className="space-y-2">
       <h2 className="font-display text-lg font-semibold">Upcoming appointments</h2>
       {appointments.length ? (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {appointments.map((appointment) => (
             <li
               key={appointment.id}
-              className="rounded-2xl bg-strumf-surface px-4 py-3 shadow-card backdrop-blur"
+              className="relative overflow-hidden rounded-[1.75rem] border border-white/70 bg-strumf-surface px-4 py-4 shadow-card backdrop-blur"
             >
+              <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-primary" />
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0 pl-2">
+                  <p className="mb-1 text-[11px] font-black uppercase tracking-wide text-strumf-accent">
+                    {formatAppointmentCountdown(appointment.startsAt)}
+                  </p>
                   <p className="font-display text-base font-semibold">{appointment.title}</p>
                   <p className="text-xs text-strumf-muted">
                     {formatShortDate(appointment.startsAt)} at {formatClock(appointment.startsAt)}
@@ -501,11 +602,23 @@ function AppointmentList({
                   Planned
                 </span>
               </div>
+              <div className="mt-3 flex flex-wrap gap-2 pl-2">
+                <span className="rounded-full bg-strumf-accent-muted/70 px-3 py-1 text-xs font-bold text-strumf-foreground">
+                  {appointment.reminderAt
+                    ? `Reminder ${formatReminderDate(appointment.reminderAt)}`
+                    : "No reminder"}
+                </span>
+                {appointment.reminderSentAt ? (
+                  <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-strumf-muted">
+                    Sent
+                  </span>
+                ) : null}
+              </div>
               {appointment.location ? (
-                <p className="mt-2 text-xs text-strumf-muted">{appointment.location}</p>
+                <p className="mt-2 pl-2 text-xs text-strumf-muted">{appointment.location}</p>
               ) : null}
               {appointment.notes ? (
-                <p className="mt-2 whitespace-pre-wrap text-sm text-strumf-foreground/80">
+                <p className="mt-2 whitespace-pre-wrap pl-2 text-sm text-strumf-foreground/80">
                   {appointment.notes}
                 </p>
               ) : null}
@@ -533,6 +646,39 @@ function defaultAppointmentStart() {
   date.setDate(date.getDate() + 1);
   date.setHours(9, 0, 0, 0);
   return date;
+}
+
+function calculateReminderAt(startsAtValue: string, preset: ReminderPreset) {
+  const option = REMINDER_OPTIONS.find((item) => item.value === preset);
+  if (!option?.minutes) return undefined;
+
+  const startsAt = new Date(startsAtValue);
+  if (Number.isNaN(startsAt.getTime())) return undefined;
+
+  const reminderAt = new Date(startsAt.getTime() - option.minutes * 60 * 1000);
+  return reminderAt.getTime() > Date.now() ? reminderAt : undefined;
+}
+
+function formatReminderDate(value: Date) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(value);
+}
+
+function formatAppointmentCountdown(value: Date) {
+  const ms = value.getTime() - Date.now();
+  if (ms <= 0) return "Due now";
+
+  const totalHours = Math.round(ms / (60 * 60 * 1000));
+  if (totalHours < 24) {
+    return `In ${Math.max(1, totalHours)}h`;
+  }
+
+  const days = Math.round(totalHours / 24);
+  return `In ${days} day${days === 1 ? "" : "s"}`;
 }
 
 function toDateTimeLocalValue(date: Date) {

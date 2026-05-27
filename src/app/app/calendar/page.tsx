@@ -529,6 +529,12 @@ function DayDashboardModal({
                             {appointment.location}
                           </p>
                         ) : null}
+                        {appointment.reminderAt ? (
+                          <p className="mt-2 text-xs font-bold text-strumf-accent">
+                            Reminder: {formatReminderDate(appointment.reminderAt)}
+                            {appointment.reminderSentAt ? " · sent" : ""}
+                          </p>
+                        ) : null}
                         {appointment.notes ? (
                           <p className="mt-2 whitespace-pre-wrap text-sm text-strumf-foreground/80">
                             {appointment.notes}
@@ -786,5 +792,14 @@ function formatDayTitle(value: Date) {
     weekday: "short",
     month: "short",
     day: "numeric",
+  }).format(value);
+}
+
+function formatReminderDate(value: Date) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   }).format(value);
 }
