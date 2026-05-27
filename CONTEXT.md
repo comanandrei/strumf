@@ -28,6 +28,13 @@ A single bottle/expressed-milk event with start time, optional end time, volume
 in ml, and milk type. Volume only — no breastfeeding-side timers in v1.
 _Avoid_: meal, session, nursing.
 
+**Sleep**:
+A completed rest window for a Baby, with start time, end time, optional notes,
+and the Caregiver who logged it. Sleep Rhythm uses recent Sleep events to show a
+deterministic next-nap guide.
+_Avoid_: nap as the canonical entity name (use only when describing a short
+sleep), sleep training, schedule prescription.
+
 **Consultation**:
 A medical visit recorded against a baby (datetime, location, reason, outcome).
 _Avoid_: appointment, doctor visit, checkup.
@@ -73,7 +80,8 @@ _Avoid_: ETA, duration, travel duration.
 ## Relationships
 
 - A **Household** has many **Babies** and many **Caregivers** (via membership).
-- A **Baby** has many **Feedings**, **Consultations**, and **Appointments**.
+- A **Baby** has many **Feedings**, **Sleep** events, **Consultations**, and
+  **Appointments**.
 - A **Nearby Place** is computed for the current Caregiver session and is
   **not** persisted — it has no relationship to a Baby or Household.
 - A **Nearby Place** has exactly one **Travel Time** at a time, scoped to the
