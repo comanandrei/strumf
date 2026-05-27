@@ -27,12 +27,6 @@ export function AppBottomNav() {
       icon: <CalendarColorIcon className="h-5 w-5" />,
       match: (p: string) => p.startsWith("/app/calendar"),
     },
-    {
-      href: "/app/go-outside",
-      label: "Outside",
-      icon: "☁",
-      match: (p: string) => p.startsWith("/app/go-outside"),
-    },
     { href: babyHref, label: "Baby", icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
     {
       href: "/app/nearby",
