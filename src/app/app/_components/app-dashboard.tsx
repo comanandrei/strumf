@@ -14,6 +14,13 @@ import {
   formatTimeAgo,
   milkTypeLabel,
 } from "~/app/lib/time-ago";
+import {
+  formatMilestoneCategory,
+  formatMilestoneStatus,
+  formatRelativeMilestoneTime,
+  getDashboardMilestones,
+  type BabyMilestone,
+} from "~/app/lib/development-milestones";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 import { CalendarColorIcon } from "./app-icons";
@@ -53,6 +60,10 @@ export function AppDashboard() {
   }, [feedingsInRange, since24h]);
   const last = feedingsInRange?.[0];
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
+  const milestoneHighlights = useMemo(
+    () => (activeBaby ? getDashboardMilestones(activeBaby.birthDateTime, new Date(), 2) : []),
+    [activeBaby],
+  );
   const last7Days = useMemo(
     () => buildLast7DaysSeries(feedingsInRange ?? []),
     [feedingsInRange],
@@ -211,6 +222,8 @@ export function AppDashboard() {
 
       <Last7DaysChart days={last7Days} isLoading={loadingFeeds} />
 
+      <MilestonesWidget milestones={milestoneHighlights} babyName={activeBaby?.displayName} />
+
       <Card>
         <h2 className="font-display mb-3 text-lg font-semibold">Menu</h2>
         <ul className="space-y-2">
@@ -225,6 +238,12 @@ export function AppDashboard() {
             icon="+"
             label="Medical log"
             description="Record consultations and schedule appointments."
+          />
+          <MenuItem
+            href="/app/milestones"
+            icon="🌱"
+            label="Repere 0-3 ani"
+            description={`Pulseuri de crestere si dezvoltare pentru ${activeBaby?.displayName ?? "baby"}.`}
           />
         </ul>
       </Card>
@@ -314,6 +333,79 @@ export function AppDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function MilestonesWidget({
+  milestones,
+  babyName,
+}: {
+  milestones: BabyMilestone[];
+  babyName?: string;
+}) {
+  const primaryMilestone = milestones[0];
+
+  return (
+    <Card className="overflow-hidden bg-white/75">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+            Milestones
+          </p>
+          <h2 className="font-display text-lg font-semibold">Repere 0-3 ani</h2>
+        </div>
+        <Link href="/app/milestones" className="text-xs font-bold text-strumf-accent">
+          Vezi →
+        </Link>
+      </div>
+
+      {primaryMilestone ? (
+        <div className="rounded-3xl bg-gradient-warm p-4 shadow-card">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+                {formatMilestoneCategory(primaryMilestone.categorie)} ·{" "}
+                {primaryMilestone.etichetaVarsta}
+              </p>
+              <h3 className="mt-1 font-display text-xl font-bold leading-tight">
+                {primaryMilestone.titlu}
+              </h3>
+            </div>
+            <span className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-strumf-muted shadow-card">
+              {formatMilestoneStatus(primaryMilestone.status)}
+            </span>
+          </div>
+          <p className="mt-2 text-sm text-strumf-foreground/80">{primaryMilestone.rezumat}</p>
+          <p className="mt-3 text-xs font-bold text-strumf-muted">
+            {formatRelativeMilestoneTime(primaryMilestone)}
+          </p>
+        </div>
+      ) : (
+        <p className="rounded-3xl bg-white/45 px-4 py-6 text-center text-sm text-strumf-muted">
+          Adauga data nasterii pentru {babyName ?? "baby"} ca sa vezi urmatorul reper.
+        </p>
+      )}
+
+      {milestones.length > 1 ? (
+        <ul className="mt-3 space-y-2">
+          {milestones.slice(1).map((milestone) => (
+            <li key={milestone.id} className="rounded-2xl bg-white/55 px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-display text-base font-semibold">{milestone.titlu}</p>
+                  <p className="text-xs text-strumf-muted">
+                    {milestone.etichetaVarsta} · {formatRelativeMilestoneTime(milestone)}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
+                  {formatMilestoneStatus(milestone.status)}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </Card>
   );
 }
 

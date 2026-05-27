@@ -1,0 +1,442 @@
+{
+  "metadate": {
+    "titlu": "Repere de dezvoltare 0-3 ani",
+    "limba": "ro",
+    "descriere": "Date orientative pentru pulseuri de crestere si repere de dezvoltare in primii 3 ani. Intervalele sunt aproximative si nu inlocuiesc sfatul pediatrului.",
+    "actualizatLa": "2026-05-26"
+  },
+  "surse": [
+    {
+      "nume": "CDC - Learn the Signs. Act Early.",
+      "url": "https://www.cdc.gov/act-early/milestones/index.html",
+      "nota": "Checklist-uri pentru 2, 4, 6, 9, 12, 15, 18, 24, 30 si 36 luni; reperele sunt abilitati atinse de cel putin 75% dintre copii pana la varsta respectiva."
+    },
+    {
+      "nume": "American Academy of Pediatrics - Developmental surveillance and screening",
+      "url": "https://www.aap.org/en/patient-care/developmental-surveillance-and-screening-patient-care/",
+      "nota": "Recomanda urmarirea dezvoltarii la fiecare vizita si screening-uri la 9, 18 si 30 luni, plus screening pentru autism la 18 si 24 luni."
+    },
+    {
+      "nume": "Cleveland Clinic - Growth spurts",
+      "url": "https://my.clevelandclinic.org/health/diseases/22070-growth-spurts",
+      "nota": "Pulseurile de crestere la bebelusi apar frecvent in primul an, de obicei in jur de 2-3 saptamani, 6 saptamani, 3 luni, 6 luni si 9 luni."
+    }
+  ],
+  "milestoneuri": [
+    {
+      "id": "pulseu-7-10-zile",
+      "categorie": "pulseu_de_crestere",
+      "titlu": "Primul pulseu de crestere",
+      "varstaMinZile": 7,
+      "varstaTintaZile": 10,
+      "varstaMaxZile": 14,
+      "etichetaVarsta": "7-14 zile",
+      "rezumat": "Multi nou-nascuti cer mai des lapte si par mai agitati cand recupereaza greutatea de la nastere si intra intr-un ritm de crestere.",
+      "cePotiObserva": [
+        "foame mai frecventa sau mese grupate",
+        "somn mai fragmentat",
+        "nevoie mai mare de contact si linistire"
+      ],
+      "sprijin": [
+        "urmareste semnele de foame si satietate, nu doar ceasul",
+        "noteaza mesele si scutecele pentru discutia cu pediatrul",
+        "cere ajutor daca hranirea devine dureroasa sau foarte stresanta"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca sunt prea putine scutece ude",
+        "daca bebelusul este greu de trezit la mese",
+        "daca greutatea nu creste conform recomandarilor pediatrului"
+      ]
+    },
+    {
+      "id": "pulseu-2-3-saptamani",
+      "categorie": "pulseu_de_crestere",
+      "titlu": "Pulseu de crestere la 2-3 saptamani",
+      "varstaMinZile": 14,
+      "varstaTintaZile": 21,
+      "varstaMaxZile": 28,
+      "etichetaVarsta": "2-3 saptamani",
+      "rezumat": "Un interval scurt in care copilul poate cere mai multa hrana si poate avea nevoie de mai multa apropiere.",
+      "cePotiObserva": [
+        "cereri dese de san sau biberon",
+        "perioade scurte de agitatie seara",
+        "schimbari temporare ale somnului"
+      ],
+      "sprijin": [
+        "ofera mese la cerere cand este posibil",
+        "pastreaza rutina de somn cat mai calma",
+        "alterneaza perioadele de tinut in brate cu pauze sigure pentru parinte"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca apar febra sau letargie",
+        "daca refuza repetat mesele",
+        "daca plansul este inconsolabil sau diferit de obicei"
+      ]
+    },
+    {
+      "id": "pulseu-6-saptamani",
+      "categorie": "pulseu_de_crestere",
+      "titlu": "Pulseu de crestere la 6 saptamani",
+      "varstaMinZile": 35,
+      "varstaTintaZile": 42,
+      "varstaMaxZile": 49,
+      "etichetaVarsta": "6 saptamani",
+      "rezumat": "In jurul acestei varste pot aparea cateva zile cu apetit crescut, somn schimbat si mai multa nevoie de linistire.",
+      "cePotiObserva": [
+        "mese mai dese ziua sau noaptea",
+        "somn de zi imprevizibil",
+        "mai multa sensibilitate la stimuli"
+      ],
+      "sprijin": [
+        "redu stimulii cand copilul pare suprasolicitat",
+        "ofera contact piele pe piele sau leganat bland",
+        "verifica pozitionarea la hranire si confortul dupa masa"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca apar varsaturi persistente",
+        "daca plansul este asociat cu dificultati de respiratie",
+        "daca ai ingrijorari despre greutate sau hidratare"
+      ]
+    },
+    {
+      "id": "dezvoltare-2-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Primele zambete sociale si control mai bun al capului",
+      "varstaMinZile": 53,
+      "varstaTintaZile": 61,
+      "varstaMaxZile": 75,
+      "etichetaVarsta": "2 luni",
+      "rezumat": "La aceasta varsta multi bebelusi zambesc cand li se vorbeste, urmaresc fata parintelui si ridica pentru scurt timp capul pe burtica.",
+      "cePotiObserva": [
+        "se calmeaza cand este vorbit sau luat in brate",
+        "priveste fata parintelui si urmareste miscarea",
+        "scoate sunete diferite de plans",
+        "ridica usor capul cand sta pe burtica"
+      ],
+      "sprijin": [
+        "vorbeste, canta si raspunde la sunetele lui",
+        "fa scurte sesiuni de stat pe burtica cand este treaz",
+        "pune jucarii contrastante la nivelul privirii"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu reactioneaza la sunete puternice",
+        "daca nu urmareste deloc cu privirea",
+        "daca pare sa fi pierdut abilitati pe care le avea"
+      ]
+    },
+    {
+      "id": "pulseu-3-luni",
+      "categorie": "pulseu_de_crestere",
+      "titlu": "Pulseu de crestere la 3 luni",
+      "varstaMinZile": 84,
+      "varstaTintaZile": 91,
+      "varstaMaxZile": 105,
+      "etichetaVarsta": "3 luni",
+      "rezumat": "Poate veni cu foame mai mare si cateva nopti mai agitate, in timp ce copilul devine mai atent la lume.",
+      "cePotiObserva": [
+        "mese mai lungi sau mai dese",
+        "distragere usoara la hranire",
+        "nevoie de pauze in medii aglomerate"
+      ],
+      "sprijin": [
+        "hraneste intr-un loc linistit daca este distras",
+        "pastreaza flexibilitatea in program cateva zile",
+        "noteaza orice schimbare importanta de somn sau apetit"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca refuza majoritatea meselor",
+        "daca scade numarul de scutece ude",
+        "daca apar semne de boala"
+      ]
+    },
+    {
+      "id": "dezvoltare-4-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Gangurit, ras si maini mai active",
+      "varstaMinZile": 106,
+      "varstaTintaZile": 122,
+      "varstaMaxZile": 140,
+      "etichetaVarsta": "4 luni",
+      "rezumat": "Multi bebelusi ganguresc, rad, isi tin capul mai stabil si incep sa duca mainile sau jucariile spre gura.",
+      "cePotiObserva": [
+        "scoate sunete precum \"ooo\" si \"aaa\"",
+        "intoarce capul spre voce",
+        "tine o jucarie cand i-o pui in mana",
+        "impinge pe antebrate cand sta pe burtica"
+      ],
+      "sprijin": [
+        "imita sunetele copilului si asteapta raspunsul",
+        "ofera jucarii sigure, usor de prins",
+        "alterneaza joaca pe spate, pe burta si in brate"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu intoarce capul spre sunete",
+        "daca nu duce deloc mainile la gura",
+        "daca nu isi poate tine capul cand este sprijinit"
+      ]
+    },
+    {
+      "id": "dezvoltare-6-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Rostogolire, explorare cu gura si interes pentru mancare",
+      "varstaMinZile": 168,
+      "varstaTintaZile": 183,
+      "varstaMaxZile": 210,
+      "etichetaVarsta": "6 luni",
+      "rezumat": "In jur de 6 luni copilul poate rade, poate duce obiecte la gura, poate rostogoli de pe burta pe spate si poate arata semne de pregatire pentru diversificare.",
+      "cePotiObserva": [
+        "rade si face schimb de sunete cu tine",
+        "apuca jucarii dorite",
+        "inchide buzele cand nu mai vrea mancare",
+        "se sprijina in maini cand sta in sezut"
+      ],
+      "sprijin": [
+        "discuta cu pediatrul despre inceperea alimentelor solide",
+        "pune jucarii putin in afara razei ca sa incurajezi miscarea",
+        "citeste zilnic carti cu imagini mari si colorate"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu incearca sa apuce obiecte",
+        "daca nu reactioneaza la persoane familiare",
+        "daca pare foarte rigid sau foarte moale in miscari"
+      ]
+    },
+    {
+      "id": "pulseu-6-luni",
+      "categorie": "pulseu_de_crestere",
+      "titlu": "Pulseu de crestere la 6 luni",
+      "varstaMinZile": 175,
+      "varstaTintaZile": 183,
+      "varstaMaxZile": 196,
+      "etichetaVarsta": "6 luni",
+      "rezumat": "Un pulseu des intalnit in primul an, uneori suprapus cu achizitii motorii si inceputul diversificarii.",
+      "cePotiObserva": [
+        "apetit crescut",
+        "treziri de noapte legate de foame sau confort",
+        "mai multa practica pentru rostogolire si sezut"
+      ],
+      "sprijin": [
+        "continua laptele ca sursa principala de nutritie",
+        "ofera alimente sigure pentru varsta daca pediatrul a recomandat diversificarea",
+        "pastreaza somnul cat mai predictibil, fara presiune pe performanta"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca apar dificultati la inghitire",
+        "daca exista reactii alergice dupa alimente noi",
+        "daca somnul sau hranirea se degradeaza brusc si persistent"
+      ]
+    },
+    {
+      "id": "dezvoltare-9-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Stat in sezut, sunete repetate si cautarea obiectelor",
+      "varstaMinZile": 250,
+      "varstaTintaZile": 274,
+      "varstaMaxZile": 305,
+      "etichetaVarsta": "9 luni",
+      "rezumat": "Multi copii stau fara sprijin, cauta obiecte ascunse sau scapate, reactioneaza la nume si produc siruri de sunete.",
+      "cePotiObserva": [
+        "raspunde cand ii spui numele",
+        "face sunete precum \"mamama\" sau \"bababa\"",
+        "trece obiecte dintr-o mana in alta",
+        "foloseste degetele ca o grebla pentru bucati de mancare"
+      ],
+      "sprijin": [
+        "joaca-te cucu-bau si ascunde obiecte sub o paturica",
+        "ofera locuri sigure pentru tarare, rostogolire si explorare",
+        "spune numele obiectelor pe care le priveste"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu sta in sezut nici cu sprijin",
+        "daca nu raspunde la nume",
+        "daca nu duce obiecte la gura sau nu exploreaza"
+      ]
+    },
+    {
+      "id": "pulseu-9-luni",
+      "categorie": "pulseu_de_crestere",
+      "titlu": "Pulseu de crestere la 9 luni",
+      "varstaMinZile": 260,
+      "varstaTintaZile": 274,
+      "varstaMaxZile": 290,
+      "etichetaVarsta": "9 luni",
+      "rezumat": "Poate coincide cu mai multa miscare, anxietate fata de straini si o perioada de apetit sau somn schimbat.",
+      "cePotiObserva": [
+        "mai multa foame sau interes pentru mancare",
+        "treziri asociate cu practica motorie",
+        "lipire mai mare de parinti"
+      ],
+      "sprijin": [
+        "pastreaza ritualuri scurte si previzibile la culcare",
+        "ofera gustari si mese potrivite varstei",
+        "asigura casa pentru explorare"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca refuza lichidele",
+        "daca pierde abilitati motorii sau sociale",
+        "daca apar semne de deshidratare"
+      ]
+    },
+    {
+      "id": "dezvoltare-12-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Primele cuvinte, stat in picioare si joaca intentionata",
+      "varstaMinZile": 335,
+      "varstaTintaZile": 365,
+      "varstaMaxZile": 395,
+      "etichetaVarsta": "12 luni",
+      "rezumat": "In jurul primei aniversari, multi copii se ridica in picioare, merg tinandu-se de mobila si folosesc gesturi sau cuvinte familiare.",
+      "cePotiObserva": [
+        "face pa-pa cu mana",
+        "spune \"mama\", \"tata\" sau un nume special pentru parinte",
+        "intelege \"nu\" pentru scurt timp",
+        "ridica obiecte mici intre degetul mare si aratator"
+      ],
+      "sprijin": [
+        "raspunde verbal cand arata sau cere ceva",
+        "ofera obiecte sigure pentru impins si mers sustinut",
+        "citeste carti cu clapete si texturi"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu foloseste gesturi precum aratat sau facut pa-pa",
+        "daca nu cauta obiecte ascunse la vedere",
+        "daca nu se sprijina deloc pentru stat in picioare"
+      ]
+    },
+    {
+      "id": "dezvoltare-15-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Pasi singur, imitatie si prime incercari de cuvinte",
+      "varstaMinZile": 425,
+      "varstaTintaZile": 456,
+      "varstaMaxZile": 490,
+      "etichetaVarsta": "15 luni",
+      "rezumat": "Copilul incepe sa copieze mai mult, arata ce ii place si poate face cativa pasi singur.",
+      "cePotiObserva": [
+        "incearca sa spuna unul-doua cuvinte in afara de mama sau tata",
+        "arata spre ceva pentru a cere ajutor",
+        "foloseste obiecte in mod potrivit, ca un pahar sau o carte",
+        "mananca unele alimente cu degetele"
+      ],
+      "sprijin": [
+        "numeste obiectul cand copilul arata spre el",
+        "lasa-l sa ajute la activitati simple, precum stransul jucariilor",
+        "ofera blocuri si jocuri de pus in si scos din recipiente"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu incearca sa faca pasi",
+        "daca nu arata pentru a cere sau a impartasi",
+        "daca nu pare sa inteleaga instructiuni simple insotite de gest"
+      ]
+    },
+    {
+      "id": "dezvoltare-18-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Mers independent, joaca de rol simpla si mai multe cuvinte",
+      "varstaMinZile": 510,
+      "varstaTintaZile": 548,
+      "varstaMaxZile": 590,
+      "etichetaVarsta": "18 luni",
+      "rezumat": "La 18 luni multi copii merg fara sprijin, mazgalesc, imita treburile casei si spun cel putin cateva cuvinte.",
+      "cePotiObserva": [
+        "se indeparteaza, dar verifica daca parintele este aproape",
+        "arata ceva interesant",
+        "urmeaza o instructiune simpla fara gest",
+        "incearca sa foloseasca lingura si paharul"
+      ],
+      "sprijin": [
+        "incurajeaza joaca de prefacut cu papusi, masini sau obiecte de bucatarie sigure",
+        "ofera alegeri simple intre doua optiuni",
+        "citeste carti si numeste parti ale corpului"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu merge fara ajutor",
+        "daca nu foloseste cel putin cateva cuvinte",
+        "daca nu arata spre lucruri interesante",
+        "daca exista regres in limbaj sau interactiune"
+      ]
+    },
+    {
+      "id": "dezvoltare-24-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Propozitii scurte, alergat si joaca mai complexa",
+      "varstaMinZile": 680,
+      "varstaTintaZile": 730,
+      "varstaMaxZile": 790,
+      "etichetaVarsta": "2 ani",
+      "rezumat": "In jur de 2 ani copilul combina cuvinte, alearga, loveste mingea si incepe sa observe emotiile altora.",
+      "cePotiObserva": [
+        "spune doua cuvinte impreuna, precum \"mai mult lapte\"",
+        "arata parti ale corpului cand este intrebat",
+        "foloseste mai multe gesturi decat facut pa-pa si aratat",
+        "incearca butoane, manere sau mecanisme de jucarii"
+      ],
+      "sprijin": [
+        "repeta corect si extinde ce spune copilul",
+        "ofera jocuri de rol cu haine, farfurii sau animale de plus",
+        "lasa-l sa ajute cu treburi simple si sigure"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca nu combina doua cuvinte",
+        "daca nu poate urma instructiuni simple",
+        "daca nu merge stabil sau nu alearga deloc",
+        "daca ai ingrijorari despre auz, limbaj sau interactiune"
+      ]
+    },
+    {
+      "id": "dezvoltare-30-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Fraze cu actiuni, sarituri si rezolvare simpla de probleme",
+      "varstaMinZile": 850,
+      "varstaTintaZile": 913,
+      "varstaMaxZile": 970,
+      "etichetaVarsta": "30 luni",
+      "rezumat": "La 30 luni apar mai multe cuvinte, instructiuni in doi pasi, joaca de prefacut si miscari mai coordonate.",
+      "cePotiObserva": [
+        "spune aproximativ 50 de cuvinte",
+        "foloseste doua sau mai multe cuvinte cu un verb",
+        "urmeaza instructiuni in doi pasi",
+        "sare cu ambele picioare de pe sol"
+      ],
+      "sprijin": [
+        "pune intrebari simple despre carti: cine, ce, unde",
+        "exerseaza impartitul si randul meu/randul tau in joaca",
+        "deseneaza linii si cercuri impreuna, fara presiune"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca limbajul nu progreseaza",
+        "daca nu urmeaza instructiuni simple in doi pasi",
+        "daca nu se implica deloc in joaca de prefacut",
+        "daca apar regresii"
+      ]
+    },
+    {
+      "id": "dezvoltare-36-luni",
+      "categorie": "dezvoltare",
+      "titlu": "Conversatii, intrebari si autonomie mai mare",
+      "varstaMinZile": 1020,
+      "varstaTintaZile": 1095,
+      "varstaMaxZile": 1125,
+      "etichetaVarsta": "3 ani",
+      "rezumat": "La 3 ani multi copii poarta conversatii scurte, pun intrebari, se joaca impreuna cu alti copii si fac pasi spre imbracare independenta.",
+      "cePotiObserva": [
+        "are conversatii cu cel putin doua schimburi de replici",
+        "intreaba cine, ce, unde sau de ce",
+        "spune actiunea dintr-o poza sau carte",
+        "deseneaza un cerc dupa model",
+        "foloseste furculita si pune unele haine singur"
+      ],
+      "sprijin": [
+        "citeste povesti si intreaba ce crede ca se intampla mai departe",
+        "da instructiuni cu doi-trei pasi cand copilul este odihnit",
+        "incurajeaza joaca libera cu alti copii in medii sigure"
+      ],
+      "candDiscutiCuMedicul": [
+        "daca vorbirea este greu de inteles de majoritatea adultilor apropiati",
+        "daca nu se joaca sau nu observa alti copii",
+        "daca nu poate urma instructiuni simple",
+        "daca pierde abilitati deja castigate"
+      ]
+    }
+  ]
+}
