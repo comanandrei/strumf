@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Card } from "~/app/_components/ui/card";
+import { localeToIntl, type Locale } from "~/app/lib/i18n";
+import { useI18n } from "~/app/lib/i18n-provider";
 
 import { SectionBanner } from "./section-banner";
 import type { Coords } from "./use-location";
@@ -64,6 +66,7 @@ const REVERSE_GEOCODE_ENDPOINT =
 const WEATHER_STORAGE_KEY = "strumf.nearby.weather";
 
 export function WeatherSection({ coords }: { coords: Coords | null }) {
+  const { locale } = useI18n();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,15 +80,19 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchWeather(target);
+      const data = await fetchWeather(target, locale);
       setWeather(data);
       writeCachedWeather(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load weather.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : locale === "ro" ? "Nu am putut incarca vremea." : "Could not load weather.",
+      );
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (!coords) return;
@@ -94,22 +101,45 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
 
   const updatedLabel = useMemo(() => {
     if (!weather?.fetchedAt) return null;
-    return formatRelativeTime(weather.fetchedAt);
-  }, [weather?.fetchedAt]);
+    return formatRelativeTime(weather.fetchedAt, locale);
+  }, [locale, weather?.fetchedAt]);
+  const copy = locale === "ro"
+    ? {
+        weather: "Vreme",
+        outside: "Afara",
+        refreshError: "Nu am putut actualiza vremea",
+        temperature: "Temperatura",
+        humidity: "Umiditate",
+        wind: "Vant",
+        allowTitle: "Permite locatia ca sa vezi vremea de azi",
+        allowDescription: "Open-Meteo este gratuit si are nevoie doar de coordonate.",
+        by: "Vreme de la",
+      }
+    : {
+        weather: "Weather",
+        outside: "Outside",
+        refreshError: "Could not refresh the weather",
+        temperature: "Temperature",
+        humidity: "Humidity",
+        wind: "Wind",
+        allowTitle: "Allow location to see today's weather",
+        allowDescription: "Open-Meteo is free and needs only your coordinates.",
+        by: "Weather by",
+      };
 
   return (
     <Card className="overflow-hidden">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Weather
+            {copy.weather}
           </p>
           {weather ? (
             <h2 className="font-display text-lg font-semibold leading-tight">
               {weather.locationName}
             </h2>
           ) : (
-            <h2 className="font-display text-lg font-semibold">Outside</h2>
+            <h2 className="font-display text-lg font-semibold">{copy.outside}</h2>
           )}
         </div>
         {updatedLabel ? (
@@ -122,7 +152,7 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
       {error ? (
         <SectionBanner
           tone="warn"
-          title="Could not refresh the weather"
+          title={copy.refreshError}
           description={error}
         />
       ) : null}
@@ -132,7 +162,7 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-3xl bg-gradient-primary p-4 text-white shadow-card">
               <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">
-                Temperature
+                {copy.temperature}
               </p>
               <p className="font-display text-5xl font-bold leading-none">
                 {Math.round(weather.current.temperature)}
@@ -141,11 +171,11 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
             </div>
             <div className="grid gap-2">
               <Metric
-                label="Humidity"
+                label={copy.humidity}
                 value={`${Math.round(weather.current.humidity)}${weather.units.humidity}`}
               />
               <Metric
-                label="Wind"
+                label={copy.wind}
                 value={`${Math.round(weather.current.windSpeed)} ${weather.units.windSpeed}`}
               />
             </div>
@@ -158,7 +188,7 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
                 className="rounded-2xl bg-white/55 px-2 py-2 text-center text-[11px]"
               >
                 <p className="font-display text-[11px] font-semibold text-strumf-muted">
-                  {formatHour(hour.time)}
+                  {formatHour(hour.time, locale)}
                 </p>
                 <p className="font-display text-base font-bold leading-tight">
                   {Math.round(hour.temperature)}
@@ -169,7 +199,7 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
           </ul>
 
           <p className="mt-3 text-center text-[10px] text-strumf-muted">
-            Weather by{" "}
+            {copy.by}{" "}
             <a
               href="https://open-meteo.com/"
               target="_blank"
@@ -188,8 +218,8 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
       ) : !error ? (
         <SectionBanner
           tone="info"
-          title="Allow location to see today's weather"
-          description="Open-Meteo is free and needs only your coordinates."
+          title={copy.allowTitle}
+          description={copy.allowDescription}
         />
       ) : null}
     </Card>
@@ -207,10 +237,10 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-async function fetchWeather(coords: Coords): Promise<WeatherData> {
+async function fetchWeather(coords: Coords, locale: Locale): Promise<WeatherData> {
   const [forecast, locationName] = await Promise.all([
-    fetchForecast(coords),
-    fetchLocationName(coords),
+    fetchForecast(coords, locale),
+    fetchLocationName(coords, locale),
   ]);
   return {
     ...forecast,
@@ -218,13 +248,14 @@ async function fetchWeather(coords: Coords): Promise<WeatherData> {
       locationName ??
       forecast.timezoneAbbreviation ??
       forecast.timezone ??
-      "Your location",
+      locale === "ro" ? "Locatia ta" : "Your location",
     fetchedAt: Date.now(),
   };
 }
 
 async function fetchForecast(
   coords: Coords,
+  locale: Locale,
 ): Promise<Omit<WeatherData, "locationName" | "fetchedAt">> {
   const params = new URLSearchParams({
     latitude: coords.latitude.toString(),
@@ -236,7 +267,11 @@ async function fetchForecast(
   });
   const response = await fetch(`${WEATHER_ENDPOINT}?${params}`);
   if (!response.ok) {
-    throw new Error("The weather service did not respond.");
+    throw new Error(
+      locale === "ro"
+        ? "Serviciul meteo nu a raspuns."
+        : "The weather service did not respond.",
+    );
   }
   const data = (await response.json()) as OpenMeteoResponse;
   const hours = mapHourlyWeather(data).filter((hour) => {
@@ -244,7 +279,11 @@ async function fetchForecast(
     return Number.isFinite(t) && t >= Date.now() - 30 * 60 * 1000;
   });
   if (!hours.length) {
-    throw new Error("No remaining hourly forecast for today.");
+    throw new Error(
+      locale === "ro"
+        ? "Nu mai exista prognoze orare pentru azi."
+        : "No remaining hourly forecast for today.",
+    );
   }
   const nearest = findNearestHour(hours);
   return {
@@ -274,12 +313,12 @@ async function fetchForecast(
   };
 }
 
-async function fetchLocationName(coords: Coords): Promise<string | null> {
+async function fetchLocationName(coords: Coords, locale: Locale): Promise<string | null> {
   try {
     const params = new URLSearchParams({
       latitude: coords.latitude.toString(),
       longitude: coords.longitude.toString(),
-      localityLanguage: "en",
+      localityLanguage: locale,
     });
     const response = await fetch(`${REVERSE_GEOCODE_ENDPOINT}?${params}`);
     if (!response.ok) return null;
@@ -320,19 +359,19 @@ function findNearestHour(hours: WeatherHour[]) {
   }, hours[0]!);
 }
 
-function formatHour(value: string) {
-  return new Intl.DateTimeFormat(undefined, { hour: "numeric" }).format(
+function formatHour(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(localeToIntl(locale), { hour: "numeric" }).format(
     new Date(value),
   );
 }
 
-function formatRelativeTime(timestamp: number): string {
+function formatRelativeTime(timestamp: number, locale: Locale): string {
   const diffSec = Math.max(0, Math.round((Date.now() - timestamp) / 1000));
-  if (diffSec < 60) return "just now";
+  if (diffSec < 60) return locale === "ro" ? "chiar acum" : "just now";
   const min = Math.round(diffSec / 60);
-  if (min < 60) return `${min} min ago`;
+  if (min < 60) return locale === "ro" ? `acum ${min} min` : `${min} min ago`;
   const hr = Math.round(min / 60);
-  return `${hr} h ago`;
+  return locale === "ro" ? `acum ${hr} h` : `${hr} h ago`;
 }
 
 function readCachedWeather(): WeatherData | null {

@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
+import { localeToIntl, type Locale } from "~/app/lib/i18n";
+import { useI18n } from "~/app/lib/i18n-provider";
 import { formatClock, formatTimeAgo, milkTypeLabel } from "~/app/lib/time-ago";
 import { api, type RouterOutputs } from "~/trpc/react";
 
@@ -22,11 +24,15 @@ type CalendarDay = {
   isCurrentMonth: boolean;
 };
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_LABELS: Record<Locale, string[]> = {
+  ro: ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sam"],
+  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+};
 
 export default function CalendarPage() {
   const { babies, selectedBabyId, setSelectedBabyId, isLoading: loadingBabies } =
     useBabySelection();
+  const { locale } = useI18n();
   const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
 
@@ -75,6 +81,51 @@ export default function CalendarPage() {
     [consultationsByDay, appointmentsByDay],
   );
   const isLoadingCalendarItems = loadingFeedings || loadingConsultations || loadingAppointments;
+  const copy = locale === "ro"
+    ? {
+        calendar: "Calendar",
+        rhythm: "Ritm zilnic",
+        emptyBaby: "Adauga mai intai un profil de bebe, apoi hranirile zilnice vor aparea aici.",
+        intro: (name: string) => `Atinge o zi din calendar ca sa vezi hranirile si tiparele pentru ${name}.`,
+        yourBaby: "bebelusul tau",
+        inputDays: "zile cu date",
+        inputs: "intrari",
+        careDays: "zile ingrijire",
+        baby: "Bebe",
+        prev: "Inapoi",
+        next: "Inainte",
+        previousMonth: "Luna precedenta",
+        nextMonth: "Luna urmatoare",
+        loading: "Se incarca calendarul",
+        summary: (inputCount: number, careCount: number) => `${inputCount} intrari · ${careCount} zile ingrijire`,
+        dayInput: (count: number) => `${count} ${count === 1 ? "intrare" : "intrari"}`,
+        medicalEvents: (count: number) => `${count} evenimente medicale`,
+        feedingLogged: "Hranire notata",
+        medicalCare: "Ingrijire medicala",
+        today: "Azi",
+      }
+    : {
+        calendar: "Calendar",
+        rhythm: "Daily rhythm",
+        emptyBaby: "Add a baby profile first, then your daily feeding inputs will appear here.",
+        intro: (name: string) => `Tap a square day to review feeds and spot patterns for ${name}.`,
+        yourBaby: "your baby",
+        inputDays: "input days",
+        inputs: "inputs",
+        careDays: "care days",
+        baby: "Baby",
+        prev: "Prev",
+        next: "Next",
+        previousMonth: "Previous month",
+        nextMonth: "Next month",
+        loading: "Loading calendar",
+        summary: (inputCount: number, careCount: number) => `${inputCount} inputs · ${careCount} care days`,
+        dayInput: (count: number) => `${count} inputs`,
+        medicalEvents: (count: number) => `${count} medical events`,
+        feedingLogged: "Feeding logged",
+        medicalCare: "Medical care",
+        today: "Today",
+      };
 
   const moveMonth = useCallback((offset: number) => {
     setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
@@ -107,12 +158,12 @@ export default function CalendarPage() {
     return (
       <div className="flex flex-col gap-5 pb-8">
         <header>
-          <p className="text-sm text-strumf-muted">Calendar</p>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Daily rhythm</h1>
+          <p className="text-sm text-strumf-muted">{copy.calendar}</p>
+          <h1 className="font-display text-4xl font-bold tracking-tight">{copy.rhythm}</h1>
         </header>
         <Card>
           <p className="text-sm text-strumf-muted">
-            Add a baby profile first, then your daily feeding inputs will appear here.
+            {copy.emptyBaby}
           </p>
         </Card>
       </div>
@@ -126,19 +177,18 @@ export default function CalendarPage() {
         <div className="absolute bottom-4 right-5 h-16 w-16 rounded-[1.5rem] bg-strumf-mint/70 blur-sm" />
         <div className="relative">
           <span className="inline-flex rounded-full bg-white/60 px-3 py-1 text-xs font-black uppercase tracking-wide text-strumf-muted shadow-card">
-            Calendar
+            {copy.calendar}
           </span>
           <h1 className="mt-3 font-display text-4xl font-bold leading-none tracking-tight">
-            Daily rhythm
+            {copy.rhythm}
           </h1>
           <p className="mt-2 max-w-xs text-sm text-strumf-muted">
-            Tap a square day to review feeds and spot patterns for{" "}
-            {activeBaby?.displayName ?? "your baby"}.
+            {copy.intro(activeBaby?.displayName ?? copy.yourBaby)}
           </p>
           <div className="mt-5 grid grid-cols-3 gap-2">
-            <CalendarMetric value={`${inputDayCount}`} label="input days" />
-            <CalendarMetric value={`${feedings?.length ?? 0}`} label="inputs" />
-            <CalendarMetric value={`${medicalEventDays}`} label="care days" />
+            <CalendarMetric value={`${inputDayCount}`} label={copy.inputDays} />
+            <CalendarMetric value={`${feedings?.length ?? 0}`} label={copy.inputs} />
+            <CalendarMetric value={`${medicalEventDays}`} label={copy.careDays} />
           </div>
         </div>
       </header>
@@ -146,7 +196,7 @@ export default function CalendarPage() {
       {babies.length > 1 ? (
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Baby
+            {copy.baby}
           </p>
           <div className="flex flex-wrap gap-2">
             {babies.map((baby) => (
@@ -169,33 +219,33 @@ export default function CalendarPage() {
               type="button"
               variant="ghost"
               className="min-h-10 min-w-10 px-3 text-sm"
-              aria-label="Previous month"
+              aria-label={copy.previousMonth}
               onClick={() => moveMonth(-1)}
             >
-              Prev
+              {copy.prev}
             </Button>
             <div className="text-center">
-              <p className="font-display text-2xl font-bold">{formatMonth(visibleMonth)}</p>
+              <p className="font-display text-2xl font-bold">{formatMonth(visibleMonth, locale)}</p>
               <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
                 {isLoadingCalendarItems
-                  ? "Loading calendar"
-                  : `${feedings?.length ?? 0} inputs · ${medicalEventDays} care days`}
+                  ? copy.loading
+                  : copy.summary(feedings?.length ?? 0, medicalEventDays)}
               </p>
             </div>
             <Button
               type="button"
               variant="ghost"
               className="min-h-10 min-w-10 px-3 text-sm"
-              aria-label="Next month"
+              aria-label={copy.nextMonth}
               onClick={() => moveMonth(1)}
             >
-              Next
+              {copy.next}
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-7 gap-1.5 p-4 text-center">
-          {WEEKDAY_LABELS.map((label) => (
+          {WEEKDAY_LABELS[locale].map((label) => (
             <div
               key={label}
               className="pb-1 text-[10px] font-black uppercase tracking-wide text-strumf-muted"
@@ -230,7 +280,7 @@ export default function CalendarPage() {
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => setSelectedDay(day)}
-                aria-label={`${formatDayFull(day.date)}${hasInput ? `, ${dayFeedings.length} inputs` : ""}${hasMedical ? `, ${medicalCount} medical events` : ""}`}
+                aria-label={`${formatDayFull(day.date, locale)}${hasInput ? `, ${copy.dayInput(dayFeedings.length)}` : ""}${hasMedical ? `, ${copy.medicalEvents(medicalCount)}` : ""}`}
               >
                 <span className="flex h-full items-center justify-center font-display text-base font-bold">
                   {day.dayNumber}
@@ -253,15 +303,15 @@ export default function CalendarPage() {
         <div className="mx-4 mb-4 flex flex-wrap items-center justify-center gap-4 rounded-2xl bg-strumf-surface-strong/70 px-4 py-3 text-xs text-strumf-muted">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-strumf-accent" />
-            Feeding logged
+            {copy.feedingLogged}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-strumf-blue ring-1 ring-strumf-accent/30" />
-            Medical care
+            {copy.medicalCare}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full ring-2 ring-strumf-accent/60" />
-            Today
+            {copy.today}
           </span>
         </div>
       </Card>
@@ -307,6 +357,46 @@ function DayDashboardModal({
   onClose: () => void;
 }) {
   const medicalCount = consultations.length + appointments.length;
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        dailyDashboard: "Panou zilnic",
+        close: "Inchide",
+        totalMilk: "Total lapte",
+        feeds: (count: number) => `${count} ${count === 1 ? "hranire" : "hraniri"}`,
+        average: "Medie",
+        perFeed: "per hranire",
+        firstFeed: "Prima hranire",
+        lastFeed: "Ultima hranire",
+        noInput: "fara intrari",
+        inputs: "Intrari",
+        emptyInputs: "Nu exista hraniri notate pentru aceasta zi.",
+        medicalCare: "Ingrijire medicala",
+        appointments: "Programari",
+        planned: "Planificat",
+        consultations: "Consultatii",
+        visit: "Vizita",
+        emptyMedical: "Nu exista evenimente medicale pentru aceasta zi.",
+      }
+    : {
+        dailyDashboard: "Daily dashboard",
+        close: "Close",
+        totalMilk: "Total milk",
+        feeds: (count: number) => `${count} feed${count === 1 ? "" : "s"}`,
+        average: "Average",
+        perFeed: "per feed",
+        firstFeed: "First feed",
+        lastFeed: "Last feed",
+        noInput: "no input",
+        inputs: "Inputs",
+        emptyInputs: "No feeding inputs logged for this day yet.",
+        medicalCare: "Medical care",
+        appointments: "Appointments",
+        planned: "Planned",
+        consultations: "Consultations",
+        visit: "Visit",
+        emptyMedical: "No medical events for this day yet.",
+      };
 
   return (
     <div
@@ -322,46 +412,46 @@ function DayDashboardModal({
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-strumf-muted">Daily dashboard</p>
+            <p className="text-sm text-strumf-muted">{copy.dailyDashboard}</p>
             <h2 id="day-dashboard-title" className="font-display text-3xl font-bold tracking-tight">
-              {formatDayTitle(day.date)}
+              {formatDayTitle(day.date, locale)}
             </h2>
           </div>
           <Button type="button" variant="ghost" className="shrink-0 px-4" onClick={onClose}>
-            Close
+            {copy.close}
           </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <DailyStatCard
             tone="primary"
-            label="Total milk"
+            label={copy.totalMilk}
             value={`${summary.totalMl} ml`}
-            sub={`${summary.feedCount} feed${summary.feedCount === 1 ? "" : "s"}`}
+            sub={copy.feeds(summary.feedCount)}
           />
           <DailyStatCard
             tone="mint"
-            label="Average"
+            label={copy.average}
             value={`${summary.avgMl} ml`}
-            sub="per feed"
+            sub={copy.perFeed}
           />
           <DailyStatCard
             tone="blue"
-            label="First feed"
-            value={summary.firstFeed ? formatClock(summary.firstFeed.startedAt) : "-"}
-            sub={summary.firstFeed ? formatTimeAgo(summary.firstFeed.startedAt) : "no input"}
+            label={copy.firstFeed}
+            value={summary.firstFeed ? formatClock(summary.firstFeed.startedAt, locale) : "-"}
+            sub={summary.firstFeed ? formatTimeAgo(summary.firstFeed.startedAt, locale) : copy.noInput}
           />
           <DailyStatCard
             tone="warm"
-            label="Last feed"
-            value={summary.lastFeed ? formatClock(summary.lastFeed.startedAt) : "-"}
-            sub={summary.lastFeed ? formatTimeAgo(summary.lastFeed.startedAt) : "no input"}
+            label={copy.lastFeed}
+            value={summary.lastFeed ? formatClock(summary.lastFeed.startedAt, locale) : "-"}
+            sub={summary.lastFeed ? formatTimeAgo(summary.lastFeed.startedAt, locale) : copy.noInput}
           />
         </div>
 
         <div className="mt-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-display text-lg font-semibold">Inputs</h3>
+            <h3 className="font-display text-lg font-semibold">{copy.inputs}</h3>
             <span className="rounded-full bg-strumf-accent-muted/70 px-3 py-1 text-xs font-bold text-strumf-foreground">
               {feedings.length}
             </span>
@@ -377,26 +467,26 @@ function DayDashboardModal({
                   <div>
                     <p className="font-display text-lg font-semibold">{feeding.amountMl} ml</p>
                     <p className="text-xs text-strumf-muted">
-                      {formatClock(feeding.startedAt)}
+                      {formatClock(feeding.startedAt, locale)}
                       {feeding.notes ? ` · ${feeding.notes}` : ""}
                     </p>
                   </div>
                   <span className="shrink-0 rounded-full bg-strumf-accent-muted/70 px-3 py-1 text-xs font-bold text-strumf-foreground">
-                    {milkTypeLabel(feeding.milkType)}
+                    {milkTypeLabel(feeding.milkType, locale)}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
             <p className="rounded-2xl bg-white/60 px-4 py-6 text-center text-sm text-strumf-muted">
-              No feeding inputs logged for this day yet.
+              {copy.emptyInputs}
             </p>
           )}
         </div>
 
         <div className="mt-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-display text-lg font-semibold">Medical care</h3>
+            <h3 className="font-display text-lg font-semibold">{copy.medicalCare}</h3>
             <span className="rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
               {medicalCount}
             </span>
@@ -407,7 +497,7 @@ function DayDashboardModal({
               {appointments.length ? (
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-                    Appointments
+                    {copy.appointments}
                   </p>
                   <ul className="space-y-2">
                     {appointments.map((appointment) => (
@@ -421,12 +511,12 @@ function DayDashboardModal({
                               {appointment.title}
                             </p>
                             <p className="text-xs text-strumf-muted">
-                              {formatClock(appointment.startsAt)}
-                              {appointment.endsAt ? `-${formatClock(appointment.endsAt)}` : ""}
+                              {formatClock(appointment.startsAt, locale)}
+                              {appointment.endsAt ? `-${formatClock(appointment.endsAt, locale)}` : ""}
                             </p>
                           </div>
                           <span className="rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
-                            Planned
+                            {copy.planned}
                           </span>
                         </div>
                         {appointment.location ? (
@@ -448,7 +538,7 @@ function DayDashboardModal({
               {consultations.length ? (
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-                    Consultations
+                    {copy.consultations}
                   </p>
                   <ul className="space-y-2">
                     {consultations.map((consultation) => (
@@ -462,14 +552,14 @@ function DayDashboardModal({
                               {consultation.reason}
                             </p>
                             <p className="text-xs text-strumf-muted">
-                              {formatClock(consultation.occurredAt)}
+                              {formatClock(consultation.occurredAt, locale)}
                               {consultation.providerName
                                 ? ` · ${consultation.providerName}`
                                 : ""}
                             </p>
                           </div>
                           <span className="rounded-full bg-strumf-accent-muted/70 px-3 py-1 text-xs font-bold text-strumf-foreground">
-                            Visit
+                            {copy.visit}
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-strumf-muted">
@@ -488,7 +578,7 @@ function DayDashboardModal({
             </div>
           ) : (
             <p className="rounded-2xl bg-white/60 px-4 py-6 text-center text-sm text-strumf-muted">
-              No medical events for this day yet.
+              {copy.emptyMedical}
             </p>
           )}
         </div>
@@ -642,21 +732,21 @@ function toDateKey(value: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function formatMonth(value: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+function formatMonth(value: Date, locale: Locale) {
+  return new Intl.DateTimeFormat(localeToIntl(locale), {
     month: "long",
     year: "numeric",
   }).format(value);
 }
 
-function formatDayFull(value: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+function formatDayFull(value: Date, locale: Locale) {
+  return new Intl.DateTimeFormat(localeToIntl(locale), {
     dateStyle: "full",
   }).format(value);
 }
 
-function formatDayTitle(value: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+function formatDayTitle(value: Date, locale: Locale) {
+  return new Intl.DateTimeFormat(localeToIntl(locale), {
     weekday: "short",
     month: "short",
     day: "numeric",

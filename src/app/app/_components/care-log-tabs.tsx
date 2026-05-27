@@ -3,20 +3,22 @@
 import { useState } from "react";
 
 import { Chip } from "~/app/_components/ui/chip";
+import { useI18n } from "~/app/lib/i18n-provider";
 
 import { MedicalLogForm } from "./medical-log-form";
 import { QuickLogForm } from "./quick-log-form";
 
 type ActiveTab = "feeding" | "consultation" | "appointment";
 
-const TABS: Array<{ id: ActiveTab; label: string }> = [
-  { id: "feeding", label: "Feeding" },
-  { id: "consultation", label: "Consultation" },
-  { id: "appointment", label: "Appointment" },
+const TABS: Array<{ id: ActiveTab; labels: { ro: string; en: string } }> = [
+  { id: "feeding", labels: { ro: "Hranire", en: "Feeding" } },
+  { id: "consultation", labels: { ro: "Consultatie", en: "Consultation" } },
+  { id: "appointment", labels: { ro: "Programare", en: "Appointment" } },
 ];
 
 export function CareLogTabs() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("feeding");
+  const { locale } = useI18n();
 
   return (
     <div className="flex flex-col gap-5 pb-6">
@@ -29,7 +31,7 @@ export function CareLogTabs() {
               onClick={() => setActiveTab(tab.id)}
               className="justify-center"
             >
-              {tab.label}
+              {tab.labels[locale]}
             </Chip>
           ))}
         </div>

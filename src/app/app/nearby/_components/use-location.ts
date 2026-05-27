@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import type { Locale } from "~/app/lib/i18n";
+
 export type Coords = { latitude: number; longitude: number };
 
 export type LocationStatus =
@@ -17,7 +19,7 @@ export type LocationStatus =
 
 const STORAGE_KEY = "strumf.nearby.coords";
 
-export function useSharedLocation() {
+export function useSharedLocation(locale: Locale = "ro") {
   const [status, setStatus] = useState<LocationStatus>({ state: "idle" });
 
   const request = useCallback(async () => {
@@ -33,15 +35,23 @@ export function useSharedLocation() {
     };
 
     if (!("geolocation" in navigator)) {
-      failWithCachedCoords("This device does not support location access.");
+      failWithCachedCoords(
+        locale === "ro"
+          ? "Acest dispozitiv nu suporta accesul la locatie."
+          : "This device does not support location access.",
+      );
       return;
     }
     if (!window.isSecureContext) {
-      failWithCachedCoords("Location access requires a secure HTTPS connection.");
+      failWithCachedCoords(
+        locale === "ro"
+          ? "Accesul la locatie necesita o conexiune HTTPS securizata."
+          : "Location access requires a secure HTTPS connection.",
+      );
       return;
     }
     if ((await readPermissionState()) === "denied") {
-      failWithCachedCoords(blockedLocationMessage(), true);
+      failWithCachedCoords(blockedLocationMessage(locale), true);
       return;
     }
 
@@ -60,13 +70,13 @@ export function useSharedLocation() {
         setStatus({
           state: "error",
           coords: cached,
-          message: locationErrorMessage(error),
+          message: locationErrorMessage(error, locale),
           permissionDenied: error.code === error.PERMISSION_DENIED,
         });
       },
       { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 12_000 },
     );
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     const cached = readStoredCoords();
@@ -78,11 +88,11 @@ export function useSharedLocation() {
       setStatus({
         state: "error",
         coords: cached,
-        message: blockedLocationMessage(),
+        message: blockedLocationMessage(locale),
         permissionDenied: true,
       });
     });
-  }, []);
+  }, [locale]);
 
   return { status, request };
 }
@@ -131,19 +141,27 @@ async function readPermissionState(): Promise<PermissionState | null> {
   }
 }
 
-function blockedLocationMessage(): string {
-  return "Location is blocked for this site. Tap the site controls in the address bar, allow Location, then try again.";
+function blockedLocationMessage(locale: Locale): string {
+  return locale === "ro"
+    ? "Locatia este blocata pentru acest site. Deschide controalele site-ului din bara de adresa, permite Locatia, apoi incearca din nou."
+    : "Location is blocked for this site. Tap the site controls in the address bar, allow Location, then try again.";
 }
 
-function locationErrorMessage(error: GeolocationPositionError): string {
+function locationErrorMessage(error: GeolocationPositionError, locale: Locale): string {
   switch (error.code) {
     case error.PERMISSION_DENIED:
-      return blockedLocationMessage();
+      return blockedLocationMessage(locale);
     case error.POSITION_UNAVAILABLE:
-      return "Could not determine your location right now.";
+      return locale === "ro"
+        ? "Nu am putut determina locatia acum."
+        : "Could not determine your location right now.";
     case error.TIMEOUT:
-      return "Location request timed out. Please try again.";
+      return locale === "ro"
+        ? "Cererea de locatie a expirat. Incearca din nou."
+        : "Location request timed out. Please try again.";
     default:
-      return "Something went wrong while getting your location.";
+      return locale === "ro"
+        ? "Ceva nu a mers bine la obtinerea locatiei."
+        : "Something went wrong while getting your location.";
   }
 }

@@ -21,6 +21,7 @@ import {
   getDashboardMilestones,
   type BabyMilestone,
 } from "~/app/lib/development-milestones";
+import { useI18n } from "~/app/lib/i18n-provider";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 import { CalendarColorIcon } from "./app-icons";
@@ -41,6 +42,82 @@ const HOUR_MS = 60 * MINUTE_MS;
 export function AppDashboard() {
   const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        settingUp: "Se configureaza...",
+        onboarding: "Te ducem la onboarding.",
+        dashboard: "Acasa",
+        home: "Acasa",
+        exit: "Iesire",
+        baby: "Bebe",
+        milkLast24h: "Lapte in ultimele 24h",
+        feeds: (count: number) => `${count} ${count === 1 ? "hranire" : "hraniri"}`,
+        avgFeed: "Medie / hranire",
+        last24h: "ultimele 24h",
+        lastFeed: "Ultima hranire",
+        noFeedsYet: "fara hraniri",
+        nextAppointment: "Urmatoarea programare",
+        none: "Niciuna",
+        notScheduled: "neprogramat",
+        averageInterval: "Interval mediu intre hraniri",
+        need2Feeds: "necesita 2 hraniri",
+        nextFeedEstimate: "Estimare urmatoarea hranire",
+        menu: "Meniu",
+        calendar: "Calendar",
+        calendarDescription: (name: string) => `Revizuieste ritmul zilnic pentru ${name}.`,
+        yourBaby: "bebelusul tau",
+        medicalLog: "Jurnal medical",
+        medicalDescription: "Inregistreaza consultatii si programeaza vizite.",
+        milestones: "Repere 0-3 ani",
+        milestonesDescription: (name: string) => `Pulseuri de crestere si dezvoltare pentru ${name}.`,
+        babyFallback: "bebe",
+        upcomingAppointments: "Programari viitoare",
+        add: "Adauga ->",
+        planned: "Planificat",
+        noUpcoming: "Nu exista programari viitoare.",
+        recentFeedings: "Hraniri recente",
+        viewAll: "Vezi toate ->",
+        noRecentFeeds: "Nu exista hraniri in ultimele 24h.",
+        logFeeding: "Noteaza o hranire",
+      }
+    : {
+        settingUp: "Setting up...",
+        onboarding: "Taking you to onboarding.",
+        dashboard: "Dashboard",
+        home: "Home",
+        exit: "Exit",
+        baby: "Baby",
+        milkLast24h: "Milk last 24h",
+        feeds: (count: number) => `${count} feed${count === 1 ? "" : "s"}`,
+        avgFeed: "Avg / feed",
+        last24h: "last 24h",
+        lastFeed: "Last feed",
+        noFeedsYet: "no feeds yet",
+        nextAppointment: "Next appointment",
+        none: "None",
+        notScheduled: "not scheduled",
+        averageInterval: "Average interval",
+        need2Feeds: "need 2 feeds",
+        nextFeedEstimate: "Next feed estimate",
+        menu: "Menu",
+        calendar: "Calendar",
+        calendarDescription: (name: string) => `Review daily rhythm for ${name}.`,
+        yourBaby: "your baby",
+        medicalLog: "Medical log",
+        medicalDescription: "Record consultations and schedule appointments.",
+        milestones: "Milestones 0-3 years",
+        milestonesDescription: (name: string) => `Growth and development pulses for ${name}.`,
+        babyFallback: "baby",
+        upcomingAppointments: "Upcoming appointments",
+        add: "Add ->",
+        planned: "Planned",
+        noUpcoming: "No upcoming appointments scheduled.",
+        recentFeedings: "Recent feedings",
+        viewAll: "View all ->",
+        noRecentFeeds: "No feedings logged in the last 24h.",
+        logFeeding: "Log a feeding",
+      };
   const since24h = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000), []);
   const since7d = useMemo(() => startOfLast7Days(), []);
 
@@ -65,8 +142,8 @@ export function AppDashboard() {
     [activeBaby],
   );
   const last7Days = useMemo(
-    () => buildLast7DaysSeries(feedingsInRange ?? []),
-    [feedingsInRange],
+    () => buildLast7DaysSeries(feedingsInRange ?? [], locale),
+    [feedingsInRange, locale],
   );
   const upcomingAppointments = useMemo(() => {
     const now = Date.now();
@@ -120,8 +197,8 @@ export function AppDashboard() {
           <div className="animate-float mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary text-4xl shadow-glow">
             ✦
           </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight">Setting up...</h1>
-          <p className="mt-2 text-sm text-strumf-muted">Taking you to onboarding.</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight">{copy.settingUp}</h1>
+          <p className="mt-2 text-sm text-strumf-muted">{copy.onboarding}</p>
         </header>
       </div>
     );
@@ -131,13 +208,13 @@ export function AppDashboard() {
     <div className="flex flex-col gap-6 pb-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm text-strumf-muted">Dashboard</p>
+          <p className="text-sm text-strumf-muted">{copy.dashboard}</p>
           <h1 className="font-display text-4xl font-bold tracking-tight">
-            {activeBaby?.displayName ?? "Home"}
+            {activeBaby?.displayName ?? copy.home}
           </h1>
           {activeBaby?.birthDateTime ? (
             <p className="mt-1 text-sm text-strumf-muted">
-              {ageLabel(activeBaby.birthDateTime)}
+              {ageLabel(activeBaby.birthDateTime, locale)}
             </p>
           ) : null}
         </div>
@@ -145,14 +222,14 @@ export function AppDashboard() {
           href="/"
           className="shrink-0 rounded-full bg-white/60 px-3 py-1.5 text-sm font-bold text-strumf-muted shadow-card transition-smooth hover:text-strumf-foreground"
         >
-          Exit
+          {copy.exit}
         </Link>
       </header>
 
       {babies.length > 1 ? (
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Baby
+            {copy.baby}
           </p>
           <div className="flex flex-wrap gap-2">
             {babies.map((b) => (
@@ -175,47 +252,47 @@ export function AppDashboard() {
         <StatCard
           tone="primary"
           icon="🍼"
-          label="Milk last 24h"
+          label={copy.milkLast24h}
           value={`${summary.totalMl} ml`}
-          sub={`${summary.feedCount} feed${summary.feedCount === 1 ? "" : "s"}`}
+          sub={copy.feeds(summary.feedCount)}
         />
         <StatCard
           tone="mint"
           icon="↗"
-          label="Avg / feed"
+          label={copy.avgFeed}
           value={`${summary.avgMl} ml`}
-          sub="last 24h"
+          sub={copy.last24h}
         />
         <StatCard
           tone="blue"
           icon="◷"
-          label="Last feed"
-          value={last ? formatClock(last.startedAt) : "—"}
-          sub={last ? formatTimeAgo(last.startedAt) : "no feeds yet"}
+          label={copy.lastFeed}
+          value={last ? formatClock(last.startedAt, locale) : "—"}
+          sub={last ? formatTimeAgo(last.startedAt, locale) : copy.noFeedsYet}
         />
         <StatCard
           tone="warm"
           icon="+"
-          label="Next appointment"
-          value={nextAppointment ? formatShortDate(nextAppointment.startsAt) : "None"}
-          sub={nextAppointment ? formatClock(nextAppointment.startsAt) : "not scheduled"}
+          label={copy.nextAppointment}
+          value={nextAppointment ? formatShortDate(nextAppointment.startsAt, locale) : copy.none}
+          sub={nextAppointment ? formatClock(nextAppointment.startsAt, locale) : copy.notScheduled}
         />
         <StatCard
           tone="mint"
           icon="⏱"
-          label="Interval mediu între hrăniri"
+          label={copy.averageInterval}
           value={
-            summary.averageIntervalMs ? formatDuration(summary.averageIntervalMs) : "—"
+            summary.averageIntervalMs ? formatDuration(summary.averageIntervalMs, locale) : "—"
           }
-          sub={summary.averageIntervalMs ? "last 24h" : "need 2 feeds"}
+          sub={summary.averageIntervalMs ? copy.last24h : copy.need2Feeds}
         />
         <StatCard
           tone="blue"
           icon="⌁"
-          label="Estimare „următoarea hrănire”"
-          value={summary.nextFeedAt ? formatClock(summary.nextFeedAt) : "—"}
+          label={copy.nextFeedEstimate}
+          value={summary.nextFeedAt ? formatClock(summary.nextFeedAt, locale) : "—"}
           sub={
-            summary.nextFeedAt ? formatFutureDistance(summary.nextFeedAt) : "need 2 feeds"
+            summary.nextFeedAt ? formatFutureDistance(summary.nextFeedAt, locale) : copy.need2Feeds
           }
         />
       </section>
@@ -225,34 +302,34 @@ export function AppDashboard() {
       <MilestonesWidget milestones={milestoneHighlights} babyName={activeBaby?.displayName} />
 
       <Card>
-        <h2 className="font-display mb-3 text-lg font-semibold">Menu</h2>
+        <h2 className="font-display mb-3 text-lg font-semibold">{copy.menu}</h2>
         <ul className="space-y-2">
           <MenuItem
             href="/app/calendar"
             icon={<CalendarColorIcon className="h-7 w-7" />}
-            label="Calendar"
-            description={`Review daily rhythm for ${activeBaby?.displayName ?? "your baby"}.`}
+            label={copy.calendar}
+            description={copy.calendarDescription(activeBaby?.displayName ?? copy.yourBaby)}
           />
           <MenuItem
             href="/app/log"
             icon="+"
-            label="Medical log"
-            description="Record consultations and schedule appointments."
+            label={copy.medicalLog}
+            description={copy.medicalDescription}
           />
           <MenuItem
             href="/app/milestones"
             icon="🌱"
-            label="Repere 0-3 ani"
-            description={`Pulseuri de crestere si dezvoltare pentru ${activeBaby?.displayName ?? "baby"}.`}
+            label={copy.milestones}
+            description={copy.milestonesDescription(activeBaby?.displayName ?? copy.babyFallback)}
           />
         </ul>
       </Card>
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">Upcoming appointments</h2>
+          <h2 className="font-display text-lg font-semibold">{copy.upcomingAppointments}</h2>
           <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
-            Add →
+            {copy.add}
           </Link>
         </div>
         {loadingAppointments ? (
@@ -268,13 +345,13 @@ export function AppDashboard() {
                   <div>
                     <p className="font-display text-base font-semibold">{appointment.title}</p>
                     <p className="text-xs text-strumf-muted">
-                      {formatShortDate(appointment.startsAt)} ·{" "}
-                      {formatClock(appointment.startsAt)}
+                      {formatShortDate(appointment.startsAt, locale)} ·{" "}
+                      {formatClock(appointment.startsAt, locale)}
                       {appointment.location ? ` · ${appointment.location}` : ""}
                     </p>
                   </div>
                   <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
-                    Planned
+                    {copy.planned}
                   </span>
                 </div>
               </li>
@@ -282,16 +359,16 @@ export function AppDashboard() {
           </ul>
         ) : (
           <p className="py-6 text-center text-sm text-strumf-muted">
-            No upcoming appointments scheduled.
+            {copy.noUpcoming}
           </p>
         )}
       </Card>
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">Recent feedings</h2>
+          <h2 className="font-display text-lg font-semibold">{copy.recentFeedings}</h2>
           <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
-            View all →
+            {copy.viewAll}
           </Link>
         </div>
         {loadingFeeds ? (
@@ -306,18 +383,18 @@ export function AppDashboard() {
                 <div>
                   <p className="font-display text-base font-semibold">{feed.amountMl} ml</p>
                   <p className="text-xs text-strumf-muted">
-                    {formatClock(feed.startedAt)} · {formatTimeAgo(feed.startedAt)}
+                    {formatClock(feed.startedAt, locale)} · {formatTimeAgo(feed.startedAt, locale)}
                   </p>
                 </div>
                 <span className="rounded-full bg-strumf-accent-muted/60 px-3 py-1 text-xs font-bold text-strumf-foreground">
-                  {milkTypeLabel(feed.milkType)}
+                  {milkTypeLabel(feed.milkType, locale)}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
           <p className="py-6 text-center text-sm text-strumf-muted">
-            No feedings logged in the last 24h.
+            {copy.noRecentFeeds}
           </p>
         )}
       </Card>
@@ -328,7 +405,7 @@ export function AppDashboard() {
             href="/app/log"
             className="transition-smooth flex min-h-12 w-full items-center justify-center rounded-strumf-pill bg-gradient-primary px-5 py-3 text-base font-bold text-white no-underline shadow-soft hover:shadow-glow active:scale-[0.99]"
           >
-            Log a feeding
+            {copy.logFeeding}
           </Link>
         </div>
       </div>
@@ -344,18 +421,34 @@ function MilestonesWidget({
   babyName?: string;
 }) {
   const primaryMilestone = milestones[0];
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        eyebrow: "Repere",
+        title: "Repere 0-3 ani",
+        view: "Vezi ->",
+        empty: (name: string) => `Adauga data nasterii pentru ${name} ca sa vezi urmatorul reper.`,
+        baby: "bebe",
+      }
+    : {
+        eyebrow: "Milestones",
+        title: "Milestones 0-3 years",
+        view: "View ->",
+        empty: (name: string) => `Add a birth date for ${name} to see the next milestone.`,
+        baby: "baby",
+      };
 
   return (
     <Card className="overflow-hidden bg-white/75">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Milestones
+            {copy.eyebrow}
           </p>
-          <h2 className="font-display text-lg font-semibold">Repere 0-3 ani</h2>
+          <h2 className="font-display text-lg font-semibold">{copy.title}</h2>
         </div>
         <Link href="/app/milestones" className="text-xs font-bold text-strumf-accent">
-          Vezi →
+          {copy.view}
         </Link>
       </div>
 
@@ -364,7 +457,7 @@ function MilestonesWidget({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-                {formatMilestoneCategory(primaryMilestone.categorie)} ·{" "}
+                {formatMilestoneCategory(primaryMilestone.categorie, locale)} ·{" "}
                 {primaryMilestone.etichetaVarsta}
               </p>
               <h3 className="mt-1 font-display text-xl font-bold leading-tight">
@@ -372,17 +465,17 @@ function MilestonesWidget({
               </h3>
             </div>
             <span className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-strumf-muted shadow-card">
-              {formatMilestoneStatus(primaryMilestone.status)}
+              {formatMilestoneStatus(primaryMilestone.status, locale)}
             </span>
           </div>
           <p className="mt-2 text-sm text-strumf-foreground/80">{primaryMilestone.rezumat}</p>
           <p className="mt-3 text-xs font-bold text-strumf-muted">
-            {formatRelativeMilestoneTime(primaryMilestone)}
+            {formatRelativeMilestoneTime(primaryMilestone, locale)}
           </p>
         </div>
       ) : (
         <p className="rounded-3xl bg-white/45 px-4 py-6 text-center text-sm text-strumf-muted">
-          Adauga data nasterii pentru {babyName ?? "baby"} ca sa vezi urmatorul reper.
+          {copy.empty(babyName ?? copy.baby)}
         </p>
       )}
 
@@ -394,11 +487,11 @@ function MilestonesWidget({
                 <div>
                   <p className="font-display text-base font-semibold">{milestone.titlu}</p>
                   <p className="text-xs text-strumf-muted">
-                    {milestone.etichetaVarsta} · {formatRelativeMilestoneTime(milestone)}
+                    {milestone.etichetaVarsta} · {formatRelativeMilestoneTime(milestone, locale)}
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
-                  {formatMilestoneStatus(milestone.status)}
+                  {formatMilestoneStatus(milestone.status, locale)}
                 </span>
               </div>
             </li>
@@ -419,13 +512,33 @@ function Last7DaysChart({
   const totalMl = days.reduce((sum, day) => sum + day.totalMl, 0);
   const totalFeeds = days.reduce((sum, day) => sum + day.feedCount, 0);
   const maxMl = Math.max(...days.map((day) => day.totalMl), 1);
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        title: "Ultimele 7 zile",
+        subtitle: "Totaluri zilnice de lapte",
+        aria: (ml: number) => `Totalul de lapte pe ultimele 7 zile este ${ml} mililitri`,
+        chartTitle: (label: string, ml: number, count: number) =>
+          `${label}: ${ml} ml in ${count} ${count === 1 ? "hranire" : "hraniri"}`,
+        today: "Azi",
+        empty: "Nu exista hraniri in ultimele 7 zile.",
+      }
+    : {
+        title: "Last 7 days",
+        subtitle: "Daily milk totals",
+        aria: (ml: number) => `Milk total for the last 7 days is ${ml} milliliters`,
+        chartTitle: (label: string, ml: number, count: number) =>
+          `${label}: ${ml} ml across ${count} feed${count === 1 ? "" : "s"}`,
+        today: "Today",
+        empty: "No feedings logged in the last 7 days.",
+      };
 
   return (
     <Card>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-semibold">Last 7 days</h2>
-          <p className="text-xs text-strumf-muted">Daily milk totals</p>
+          <h2 className="font-display text-lg font-semibold">{copy.title}</h2>
+          <p className="text-xs text-strumf-muted">{copy.subtitle}</p>
         </div>
         <div className="rounded-full bg-strumf-accent-muted/60 px-3 py-1 text-right text-xs font-bold text-strumf-foreground">
           {totalMl} ml
@@ -438,7 +551,7 @@ function Last7DaysChart({
         <div
           className="rounded-3xl bg-white/45 px-3 pb-3 pt-4"
           role="img"
-          aria-label={`Milk total for the last 7 days is ${totalMl} milliliters`}
+          aria-label={copy.aria(totalMl)}
         >
           <div className="flex h-40 items-end gap-2">
             {days.map((day) => {
@@ -450,14 +563,12 @@ function Last7DaysChart({
                     <div
                       className="w-full rounded-full bg-gradient-primary shadow-card transition-smooth"
                       style={{ height: `${height}%` }}
-                      title={`${day.label}: ${day.totalMl} ml across ${day.feedCount} feed${
-                        day.feedCount === 1 ? "" : "s"
-                      }`}
+                      title={copy.chartTitle(day.label, day.totalMl, day.feedCount)}
                     />
                   </div>
                   <div className="text-center">
                     <p className="truncate text-[10px] font-bold text-strumf-muted">
-                      {day.isToday ? "Today" : day.label}
+                      {day.isToday ? copy.today : day.label}
                     </p>
                     <p className="text-[10px] text-strumf-muted">{day.totalMl} ml</p>
                   </div>
@@ -468,7 +579,7 @@ function Last7DaysChart({
         </div>
       ) : (
         <p className="rounded-3xl bg-white/45 py-8 text-center text-sm text-strumf-muted">
-          No feedings logged in the last 7 days.
+          {copy.empty}
         </p>
       )}
     </Card>
@@ -507,7 +618,7 @@ function MenuItem({
   );
 }
 
-function buildLast7DaysSeries(feedings: Feeding[]): DailyFeedingTotal[] {
+function buildLast7DaysSeries(feedings: Feeding[], locale: "ro" | "en"): DailyFeedingTotal[] {
   const start = startOfLast7Days();
   const todayKey = toDateKey(new Date());
   const days = new Map<string, DailyFeedingTotal>();
@@ -519,7 +630,7 @@ function buildLast7DaysSeries(feedings: Feeding[]): DailyFeedingTotal[] {
 
     days.set(dateKey, {
       dateKey,
-      label: formatShortDate(date),
+      label: formatShortDate(date, locale),
       totalMl: 0,
       feedCount: 0,
       isToday: dateKey === todayKey,
@@ -585,23 +696,25 @@ function StatCard({
   );
 }
 
-function formatDuration(ms: number): string {
+function formatDuration(ms: number, locale: "ro" | "en"): string {
   const totalMinutes = Math.max(1, Math.round(ms / MINUTE_MS));
   if (totalMinutes < 60) return `${totalMinutes} min`;
 
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+  return locale === "ro"
+    ? minutes ? `${hours} h ${minutes} min` : `${hours} h`
+    : minutes ? `${hours}h ${minutes}m` : `${hours}h`;
 }
 
-function formatFutureDistance(date: Date, now = new Date()): string {
+function formatFutureDistance(date: Date, locale: "ro" | "en", now = new Date()): string {
   const ms = date.getTime() - now.getTime();
-  if (ms <= 0) return "due now";
+  if (ms <= 0) return locale === "ro" ? "acum" : "due now";
 
   if (ms < HOUR_MS) {
     const minutes = Math.max(1, Math.round(ms / MINUTE_MS));
-    return `in ${minutes} min`;
+    return locale === "ro" ? `in ${minutes} min` : `in ${minutes} min`;
   }
 
-  return `in ${formatDuration(ms)}`;
+  return locale === "ro" ? `in ${formatDuration(ms, locale)}` : `in ${formatDuration(ms, locale)}`;
 }

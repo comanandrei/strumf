@@ -8,20 +8,22 @@ import { Chip } from "~/app/_components/ui/chip";
 import {
   developmentMilestoneSources,
   formatAgeInRomanian,
+  formatLocalizedDate,
   formatMilestoneCategory,
   formatMilestoneStatus,
   formatRelativeMilestoneTime,
-  formatRomanianDate,
   getBabyAgeDays,
   getDashboardMilestones,
   getMilestonesForBaby,
   type BabyMilestone,
 } from "~/app/lib/development-milestones";
+import { useI18n } from "~/app/lib/i18n-provider";
 
 import { useBabySelection } from "../_components/baby-selection-context";
 
 export default function MilestonesPage() {
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
+  const { locale } = useI18n();
   const now = useMemo(() => new Date(), []);
   const activeBaby = babies.find((baby) => baby.id === selectedBabyId);
   const ageDays = activeBaby ? getBabyAgeDays(activeBaby.birthDateTime, now) : 0;
@@ -38,6 +40,53 @@ export default function MilestonesPage() {
   const upcomingMilestones = milestones.filter((milestone) => milestone.status === "upcoming");
   const completedMilestones = milestones.filter((milestone) => milestone.status === "completed");
   const nextMilestone = focusMilestones[0];
+  const copy = locale === "ro"
+    ? {
+        eyebrow: "Repere",
+        title: "Repere 0-3 ani",
+        noBaby: "Adauga un profil de bebelus ca sa vezi datele estimate pentru fiecare reper.",
+        onboarding: "Mergi la onboarding ->",
+        intro: (name: string) => `Timeline orientativ pentru ${name}: pulseuri de crestere, dezvoltare motorie, limbaj si autonomie.`,
+        age: "varsta",
+        now: "acum",
+        upcoming: "urmeaza",
+        baby: "Bebe",
+        focus: "Focus",
+        fullTimeline: "Timeline complet",
+        allAvailable: "Toate milestone-urile din intervalul 0-3 ani sunt disponibile mai jos.",
+        medicalNote: "Nota medicala",
+        medicalNoteText: "Fiecare copil are propriul ritm. Datele sunt repere pentru observatie si discutii cu pediatrul, nu diagnostic. Daca un copil pierde abilitati, nu raspunde la sunete, nu creste conform recomandarilor sau ai orice ingrijorare, discuta cu medicul.",
+        groups: [
+          { title: "Acum", description: "Ferestre care se potrivesc cu varsta curenta." },
+          { title: "Urmeaza", description: "Repere estimate in urmatoarele luni." },
+          { title: "Trecute", description: "Repere pe care copilul le-a depasit ca varsta orientativa." },
+        ],
+        emptyGroup: "Nu exista repere in aceasta categorie pentru varsta curenta.",
+        sources: "Surse pentru date",
+      }
+    : {
+        eyebrow: "Milestones",
+        title: "Milestones 0-3 years",
+        noBaby: "Add a baby profile to see estimated dates for each milestone.",
+        onboarding: "Go to onboarding ->",
+        intro: (name: string) => `Guidance timeline for ${name}: growth spurts, motor development, language, and autonomy.`,
+        age: "age",
+        now: "now",
+        upcoming: "upcoming",
+        baby: "Baby",
+        focus: "Focus",
+        fullTimeline: "Full timeline",
+        allAvailable: "All milestones from 0-3 years are available below.",
+        medicalNote: "Medical note",
+        medicalNoteText: "Every child has their own rhythm. These dates are observation and pediatrician discussion guides, not a diagnosis. If a child loses skills, does not respond to sounds, does not grow as expected, or you have any concern, talk to a doctor.",
+        groups: [
+          { title: "Now", description: "Windows that match the current age." },
+          { title: "Upcoming", description: "Estimated milestones in the coming months." },
+          { title: "Past", description: "Milestones the child has passed by indicative age." },
+        ],
+        emptyGroup: "No milestones in this category for the current age.",
+        sources: "Data sources",
+      };
 
   if (isLoading) {
     return (
@@ -53,15 +102,15 @@ export default function MilestonesPage() {
     return (
       <div className="flex flex-col gap-5 pb-8">
         <header>
-          <p className="text-sm text-strumf-muted">Milestones</p>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Repere 0-3 ani</h1>
+          <p className="text-sm text-strumf-muted">{copy.eyebrow}</p>
+          <h1 className="font-display text-4xl font-bold tracking-tight">{copy.title}</h1>
         </header>
         <Card>
           <p className="text-sm text-strumf-muted">
-            Adauga un profil de bebelus ca sa vezi datele estimate pentru fiecare reper.
+            {copy.noBaby}
           </p>
           <Link href="/app/onboarding" className="mt-4 inline-block text-sm font-bold text-strumf-accent">
-            Mergi la onboarding →
+            {copy.onboarding}
           </Link>
         </Card>
       </div>
@@ -70,18 +119,18 @@ export default function MilestonesPage() {
 
   const groupedMilestones = [
     {
-      title: "Acum",
-      description: "Ferestre care se potrivesc cu varsta curenta.",
+      title: copy.groups[0]!.title,
+      description: copy.groups[0]!.description,
       items: currentMilestones,
     },
     {
-      title: "Urmeaza",
-      description: "Repere estimate in urmatoarele luni.",
+      title: copy.groups[1]!.title,
+      description: copy.groups[1]!.description,
       items: upcomingMilestones,
     },
     {
-      title: "Trecute",
-      description: "Repere pe care copilul le-a depasit ca varsta orientativa.",
+      title: copy.groups[2]!.title,
+      description: copy.groups[2]!.description,
       items: completedMilestones.slice().reverse(),
     },
   ];
@@ -93,19 +142,21 @@ export default function MilestonesPage() {
         <div className="absolute bottom-5 right-6 h-16 w-16 rounded-[1.5rem] bg-strumf-blue/70 blur-sm" />
         <div className="relative">
           <span className="inline-flex rounded-full bg-white/60 px-3 py-1 text-xs font-black uppercase tracking-wide text-strumf-muted shadow-card">
-            Milestones
+            {copy.eyebrow}
           </span>
           <h1 className="mt-3 font-display text-4xl font-bold leading-none tracking-tight">
-            Repere 0-3 ani
+            {copy.title}
           </h1>
           <p className="mt-2 max-w-sm text-sm text-strumf-muted">
-            Timeline orientativ pentru {activeBaby.displayName}: pulseuri de crestere,
-            dezvoltare motorie, limbaj si autonomie.
+            {copy.intro(activeBaby.displayName)}
           </p>
           <div className="mt-5 grid grid-cols-3 gap-2">
-            <MilestoneMetric value={formatAgeInRomanian(ageDays)} label="varsta" />
-            <MilestoneMetric value={`${currentMilestones.length}`} label="acum" />
-            <MilestoneMetric value={`${upcomingMilestones.length}`} label="urmeaza" />
+            <MilestoneMetric
+              value={locale === "ro" ? formatAgeInRomanian(ageDays) : formatAgeInEnglish(ageDays)}
+              label={copy.age}
+            />
+            <MilestoneMetric value={`${currentMilestones.length}`} label={copy.now} />
+            <MilestoneMetric value={`${upcomingMilestones.length}`} label={copy.upcoming} />
           </div>
         </div>
       </header>
@@ -113,7 +164,7 @@ export default function MilestonesPage() {
       {babies.length > 1 ? (
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Baby
+            {copy.baby}
           </p>
           <div className="flex flex-wrap gap-2">
             {babies.map((baby) => (
@@ -133,10 +184,10 @@ export default function MilestonesPage() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-              Focus
+              {copy.focus}
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold">
-              {nextMilestone ? nextMilestone.titlu : "Timeline complet"}
+              {nextMilestone ? nextMilestone.titlu : copy.fullTimeline}
             </h2>
           </div>
           {nextMilestone ? <StatusBadge status={nextMilestone.status} /> : null}
@@ -145,16 +196,16 @@ export default function MilestonesPage() {
         {nextMilestone ? (
           <div className="mt-4 rounded-3xl bg-gradient-primary p-4 text-white shadow-card">
             <p className="text-xs font-bold uppercase tracking-wide opacity-80">
-              {formatMilestoneCategory(nextMilestone.categorie)} · {nextMilestone.etichetaVarsta}
+              {formatMilestoneCategory(nextMilestone.categorie, locale)} · {nextMilestone.etichetaVarsta}
             </p>
             <p className="mt-2 text-sm opacity-90">{nextMilestone.rezumat}</p>
             <p className="mt-3 text-xs font-bold opacity-90">
-              {formatRelativeMilestoneTime(nextMilestone)}
+              {formatRelativeMilestoneTime(nextMilestone, locale)}
             </p>
           </div>
         ) : (
           <p className="mt-3 text-sm text-strumf-muted">
-            Toate milestone-urile din intervalul 0-3 ani sunt disponibile mai jos.
+            {copy.allAvailable}
           </p>
         )}
 
@@ -166,7 +217,7 @@ export default function MilestonesPage() {
                   <div>
                     <p className="font-display text-base font-semibold">{milestone.titlu}</p>
                     <p className="text-xs text-strumf-muted">
-                      {milestone.etichetaVarsta} · {formatRelativeMilestoneTime(milestone)}
+                      {milestone.etichetaVarsta} · {formatRelativeMilestoneTime(milestone, locale)}
                     </p>
                   </div>
                   <StatusBadge status={milestone.status} />
@@ -179,12 +230,10 @@ export default function MilestonesPage() {
 
       <Card className="bg-strumf-accent-muted/45">
         <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-          Nota medicala
+          {copy.medicalNote}
         </p>
         <p className="mt-2 text-sm text-strumf-foreground/80">
-          Fiecare copil are propriul ritm. Datele sunt repere pentru observatie si discutii cu
-          pediatrul, nu diagnostic. Daca un copil pierde abilitati, nu raspunde la sunete, nu
-          creste conform recomandarilor sau ai orice ingrijorare, discuta cu medicul.
+          {copy.medicalNoteText}
         </p>
       </Card>
 
@@ -210,14 +259,14 @@ export default function MilestonesPage() {
             </ul>
           ) : (
             <p className="rounded-3xl bg-white/55 px-4 py-6 text-center text-sm text-strumf-muted">
-              Nu exista repere in aceasta categorie pentru varsta curenta.
+              {copy.emptyGroup}
             </p>
           )}
         </section>
       ))}
 
       <Card>
-        <h2 className="font-display text-lg font-semibold">Surse pentru date</h2>
+        <h2 className="font-display text-lg font-semibold">{copy.sources}</h2>
         <ul className="mt-3 space-y-2">
           {developmentMilestoneSources.map((source) => (
             <li key={source.url} className="rounded-2xl bg-white/55 px-4 py-3">
@@ -249,13 +298,28 @@ function MilestoneMetric({ value, label }: { value: string; label: string }) {
   );
 }
 
+function formatAgeInEnglish(ageDays: number) {
+  if (ageDays < 14) return `${ageDays} day${ageDays === 1 ? "" : "s"}`;
+  const weeks = Math.floor(ageDays / 7);
+  if (weeks < 12) return `${weeks} week${weeks === 1 ? "" : "s"}`;
+  const months = Math.floor(ageDays / 30.4375);
+  if (months < 24) return `${months} month${months === 1 ? "" : "s"}`;
+  const years = Math.floor(months / 12);
+  return `${years} year${years === 1 ? "" : "s"}`;
+}
+
 function MilestoneCard({ milestone }: { milestone: BabyMilestone }) {
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? { start: "start", target: "tinta", observe: "Ce poti observa", support: "Cum poti sprijini" }
+    : { start: "start", target: "target", observe: "What you may notice", support: "How to support" };
+
   return (
     <Card className="bg-white/72">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            {formatMilestoneCategory(milestone.categorie)} · {milestone.etichetaVarsta}
+            {formatMilestoneCategory(milestone.categorie, locale)} · {milestone.etichetaVarsta}
           </p>
           <h3 className="mt-1 font-display text-xl font-bold leading-tight">{milestone.titlu}</h3>
         </div>
@@ -263,16 +327,17 @@ function MilestoneCard({ milestone }: { milestone: BabyMilestone }) {
       </div>
       <p className="mt-3 text-sm text-strumf-foreground/80">{milestone.rezumat}</p>
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        <DatePill label="start" value={formatRomanianDate(milestone.startDate)} />
-        <DatePill label="tinta" value={formatRomanianDate(milestone.targetDate)} />
+        <DatePill label={copy.start} value={formatLocalizedDate(milestone.startDate, locale)} />
+        <DatePill label={copy.target} value={formatLocalizedDate(milestone.targetDate, locale)} />
       </div>
-      <MilestoneDetails title="Ce poti observa" items={milestone.cePotiObserva} />
-      <MilestoneDetails title="Cum poti sprijini" items={milestone.sprijin} />
+      <MilestoneDetails title={copy.observe} items={milestone.cePotiObserva} />
+      <MilestoneDetails title={copy.support} items={milestone.sprijin} />
     </Card>
   );
 }
 
 function StatusBadge({ status }: { status: BabyMilestone["status"] }) {
+  const { locale } = useI18n();
   const className = {
     current: "bg-gradient-primary text-white",
     upcoming: "bg-gradient-blue text-strumf-foreground",
@@ -281,7 +346,7 @@ function StatusBadge({ status }: { status: BabyMilestone["status"] }) {
 
   return (
     <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold shadow-card ${className}`}>
-      {formatMilestoneStatus(status)}
+      {formatMilestoneStatus(status, locale)}
     </span>
   );
 }

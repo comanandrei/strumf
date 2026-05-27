@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "~/app/_components/ui/button";
 import { Card } from "~/app/_components/ui/card";
+import { localeToIntl, type Locale } from "~/app/lib/i18n";
+import { useI18n } from "~/app/lib/i18n-provider";
 
 type LoadState = "idle" | "locating" | "loading" | "ready" | "error";
 
@@ -64,6 +66,7 @@ const COORDINATES_STORAGE_KEY = "strumf.goOutside.coordinates";
 const WEATHER_STORAGE_KEY = "strumf.goOutside.weather";
 
 export default function GoOutsidePage() {
+  const { locale } = useI18n();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -72,14 +75,53 @@ export default function GoOutsidePage() {
   const isBusy = loadState === "locating" || loadState === "loading";
 
   const statusText = useMemo(() => {
-    if (loadState === "locating") return "Waiting for browser location permission...";
-    if (loadState === "loading") return "Loading your local forecast...";
+    if (loadState === "locating") return locale === "ro" ? "Asteptam permisiunea pentru locatie..." : "Waiting for browser location permission...";
+    if (loadState === "loading") return locale === "ro" ? "Incarcam prognoza locala..." : "Loading your local forecast...";
     if (loadState === "ready" && weather) {
-      return `Updated for ${weather.locationName}`;
+      return locale === "ro" ? `Actualizat pentru ${weather.locationName}` : `Updated for ${weather.locationName}`;
     }
     if (loadState === "error" && error) return error;
-    return "Use your current location for today's local weather.";
-  }, [error, loadState, weather]);
+    return locale === "ro" ? "Foloseste locatia curenta pentru vremea locala de azi." : "Use your current location for today's local weather.";
+  }, [error, loadState, locale, weather]);
+  const copy = locale === "ro"
+    ? {
+        section: "Iesi afara",
+        title: "Azi afara",
+        current: "Vreme curenta",
+        permission: "Permite locatia ca sa vezi temperatura, umiditatea si vantul din apropiere.",
+        temperature: "Temperatura",
+        humidity: "Umiditate",
+        wind: "Vant",
+        checking: "Verificam vremea...",
+        refresh: "Actualizeaza vremea locatiei",
+        useLocation: "Foloseste locatia mea",
+        hourly: "Prognoza orara",
+        fromNow: "De acum",
+        hours: (count: number) => `${count} ore`,
+        weatherBy: "Date meteo de la Open-Meteo.com",
+        weatherError: "Nu am putut incarca vremea.",
+        noLocation: "Acest browser nu suporta accesul la locatie.",
+        https: "Accesul la locatie necesita o conexiune HTTPS securizata.",
+      }
+    : {
+        section: "Go outside",
+        title: "Today outside",
+        current: "Current weather",
+        permission: "Give location permission to see temperature, humidity, and wind near you.",
+        temperature: "Temperature",
+        humidity: "Humidity",
+        wind: "Wind",
+        checking: "Checking weather...",
+        refresh: "Refresh location weather",
+        useLocation: "Use my location",
+        hourly: "Hourly forecast",
+        fromNow: "From now",
+        hours: (count: number) => `${count} hours`,
+        weatherBy: "Weather data by Open-Meteo.com",
+        weatherError: "Could not load the weather.",
+        noLocation: "This browser does not support location access.",
+        https: "Location access requires a secure HTTPS connection.",
+      };
 
   const loadWeatherForCoordinates = useCallback(
     async (coordinates: StoredCoordinates, requestId?: number) => {
@@ -87,7 +129,7 @@ export default function GoOutsidePage() {
       setLoadState("loading");
       setError(null);
       try {
-        const forecast = await fetchWeather(coordinates.latitude, coordinates.longitude);
+        const forecast = await fetchWeather(coordinates.latitude, coordinates.longitude, locale);
         if (activeRequestId !== requestIdRef.current) return;
         setWeather(forecast);
         storeWeather(forecast);
@@ -96,10 +138,10 @@ export default function GoOutsidePage() {
       } catch (err) {
         if (activeRequestId !== requestIdRef.current) return;
         setLoadState("error");
-        setError(err instanceof Error ? err.message : "Could not load the weather.");
+        setError(err instanceof Error ? err.message : copy.weatherError);
       }
     },
-    [],
+    [copy.weatherError, locale],
   );
 
   const requestWeather = useCallback(() => {
@@ -109,13 +151,13 @@ export default function GoOutsidePage() {
 
     if (!("geolocation" in navigator)) {
       setLoadState("error");
-      setError("This browser does not support location access.");
+      setError(copy.noLocation);
       return;
     }
 
     if (!window.isSecureContext) {
       setLoadState("error");
-      setError("Location access requires a secure HTTPS connection.");
+      setError(copy.https);
       return;
     }
 
@@ -135,7 +177,7 @@ export default function GoOutsidePage() {
       (geoError) => {
         if (requestId !== requestIdRef.current) return;
         setLoadState("error");
-        setError(locationErrorMessage(geoError));
+        setError(locationErrorMessage(geoError, locale));
       },
       {
         enableHighAccuracy: false,
@@ -143,7 +185,7 @@ export default function GoOutsidePage() {
         timeout: 12_000,
       },
     );
-  }, [loadWeatherForCoordinates]);
+  }, [copy.https, copy.noLocation, loadWeatherForCoordinates, locale]);
 
   useEffect(() => {
     const storedWeather = readStoredWeather();
@@ -162,8 +204,8 @@ export default function GoOutsidePage() {
   return (
     <div className="flex flex-col gap-6 pb-8">
       <header>
-        <p className="text-sm text-strumf-muted">Go outside</p>
-        <h1 className="font-display text-4xl font-bold tracking-tight">Today outside</h1>
+        <p className="text-sm text-strumf-muted">{copy.section}</p>
+        <h1 className="font-display text-4xl font-bold tracking-tight">{copy.title}</h1>
         <p className="mt-2 text-sm text-strumf-muted" aria-live="polite">
           {statusText}
         </p>
@@ -173,7 +215,7 @@ export default function GoOutsidePage() {
         <div className="flex flex-col gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-              Current weather
+              {copy.current}
             </p>
             {weather ? (
               <div className="mt-2">
@@ -186,7 +228,7 @@ export default function GoOutsidePage() {
               </div>
             ) : (
               <p className="mt-3 text-sm text-strumf-muted">
-                Give location permission to see temperature, humidity, and wind near you.
+                {copy.permission}
               </p>
             )}
           </div>
@@ -194,7 +236,7 @@ export default function GoOutsidePage() {
           {weather ? (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-[2rem] bg-gradient-primary p-5 text-white shadow-card">
-                <p className="text-xs font-bold uppercase tracking-wide opacity-80">Temperature</p>
+                <p className="text-xs font-bold uppercase tracking-wide opacity-80">{copy.temperature}</p>
                 <p className="font-display text-6xl font-bold leading-none">
                   {Math.round(weather.current.temperature)}
                   <span className="text-3xl">{weather.units.temperature}</span>
@@ -202,11 +244,11 @@ export default function GoOutsidePage() {
               </div>
               <div className="grid gap-3">
                 <WeatherMetric
-                  label="Humidity"
+                  label={copy.humidity}
                   value={`${Math.round(weather.current.humidity)}${weather.units.humidity}`}
                 />
                 <WeatherMetric
-                  label="Wind"
+                  label={copy.wind}
                   value={`${Math.round(weather.current.windSpeed)} ${weather.units.windSpeed}`}
                 />
               </div>
@@ -229,7 +271,7 @@ export default function GoOutsidePage() {
             disabled={isBusy}
             onClick={requestWeather}
           >
-            {isBusy ? "Checking weather..." : weather ? "Refresh location weather" : "Use my location"}
+            {isBusy ? copy.checking : weather ? copy.refresh : copy.useLocation}
           </Button>
         </div>
       </Card>
@@ -239,12 +281,12 @@ export default function GoOutsidePage() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-                Hourly forecast
+                {copy.hourly}
               </p>
-              <h2 className="font-display text-lg font-semibold">From now</h2>
+              <h2 className="font-display text-lg font-semibold">{copy.fromNow}</h2>
             </div>
             <span className="rounded-full bg-white/60 px-3 py-1 text-xs font-bold text-strumf-muted">
-              {weather.hours.length} hours
+              {copy.hours(weather.hours.length)}
             </span>
           </div>
 
@@ -254,7 +296,7 @@ export default function GoOutsidePage() {
                 key={hour.time}
                 className="grid grid-cols-[3.75rem_1fr_1fr_1fr] items-center gap-2 rounded-2xl bg-white/45 px-3 py-2 text-sm"
               >
-                <span className="font-display text-sm font-semibold">{formatHour(hour.time)}</span>
+                <span className="font-display text-sm font-semibold">{formatHour(hour.time, locale)}</span>
                 <span className="font-bold">
                   {Math.round(hour.temperature)}
                   {weather.units.temperature}
@@ -271,7 +313,7 @@ export default function GoOutsidePage() {
           </ul>
 
           <p className="mt-4 text-center text-xs text-strumf-muted">
-            Weather data by Open-Meteo.com
+            {copy.weatherBy}
           </p>
         </Card>
       ) : null}
@@ -279,21 +321,26 @@ export default function GoOutsidePage() {
   );
 }
 
-async function fetchWeather(latitude: number, longitude: number): Promise<WeatherData> {
+async function fetchWeather(latitude: number, longitude: number, locale: Locale): Promise<WeatherData> {
   const [weatherData, locationName] = await Promise.all([
-    fetchWeatherForecast(latitude, longitude),
-    fetchLocationName(latitude, longitude),
+    fetchWeatherForecast(latitude, longitude, locale),
+    fetchLocationName(latitude, longitude, locale),
   ]);
 
   return {
     ...weatherData,
-    locationName: locationName ?? weatherData.timezoneAbbreviation ?? weatherData.timezone ?? "Your location",
+    locationName:
+      locationName ??
+      weatherData.timezoneAbbreviation ??
+      weatherData.timezone ??
+      (locale === "ro" ? "Locatia ta" : "Your location"),
   };
 }
 
 async function fetchWeatherForecast(
   latitude: number,
   longitude: number,
+  locale: Locale,
 ): Promise<Omit<WeatherData, "locationName">> {
   const params = new URLSearchParams({
     latitude: latitude.toString(),
@@ -306,7 +353,11 @@ async function fetchWeatherForecast(
 
   const response = await fetch(`${WEATHER_ENDPOINT}?${params.toString()}`);
   if (!response.ok) {
-    throw new Error("The weather service did not respond. Try again in a moment.");
+    throw new Error(
+      locale === "ro"
+        ? "Serviciul meteo nu a raspuns. Incearca din nou intr-un moment."
+        : "The weather service did not respond. Try again in a moment.",
+    );
   }
 
   const data = (await response.json()) as OpenMeteoResponse;
@@ -315,7 +366,11 @@ async function fetchWeatherForecast(
     return hourTime >= Date.now() - 30 * 60 * 1000;
   });
   if (!hours.length) {
-    throw new Error("There are no more hourly forecasts for today.");
+    throw new Error(
+      locale === "ro"
+        ? "Nu mai exista prognoze orare pentru azi."
+        : "There are no more hourly forecasts for today.",
+    );
   }
 
   const nearestHour = findNearestHour(hours);
@@ -339,12 +394,12 @@ async function fetchWeatherForecast(
   };
 }
 
-async function fetchLocationName(latitude: number, longitude: number) {
+async function fetchLocationName(latitude: number, longitude: number, locale: Locale) {
   try {
     const params = new URLSearchParams({
       latitude: latitude.toString(),
       longitude: longitude.toString(),
-      localityLanguage: "en",
+      localityLanguage: locale,
     });
     const response = await fetch(`${REVERSE_GEOCODE_ENDPOINT}?${params.toString()}`);
     if (!response.ok) return null;
@@ -394,23 +449,29 @@ function findNearestHour(hours: WeatherHour[]) {
   }, hours[0]!);
 }
 
-function formatHour(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
+function formatHour(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(localeToIntl(locale), {
     hour: "numeric",
   }).format(new Date(value));
 }
 
-function locationErrorMessage(error: GeolocationPositionError) {
+function locationErrorMessage(error: GeolocationPositionError, locale: Locale) {
   if (error.code === error.PERMISSION_DENIED) {
-    return "Location permission was denied. Allow location access to load nearby weather.";
+    return locale === "ro"
+      ? "Permisiunea pentru locatie a fost refuzata. Permite locatia ca sa incarci vremea din apropiere."
+      : "Location permission was denied. Allow location access to load nearby weather.";
   }
   if (error.code === error.POSITION_UNAVAILABLE) {
-    return "Your current location is unavailable. Try again when the device has a location fix.";
+    return locale === "ro"
+      ? "Locatia curenta nu este disponibila. Incearca din nou cand dispozitivul are o locatie."
+      : "Your current location is unavailable. Try again when the device has a location fix.";
   }
   if (error.code === error.TIMEOUT) {
-    return "Location lookup timed out. Try again in a moment.";
+    return locale === "ro"
+      ? "Cautarea locatiei a expirat. Incearca din nou intr-un moment."
+      : "Location lookup timed out. Try again in a moment.";
   }
-  return "Could not read your location.";
+  return locale === "ro" ? "Nu am putut citi locatia." : "Could not read your location.";
 }
 
 function readStoredCoordinates(): StoredCoordinates | null {
