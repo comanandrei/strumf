@@ -35,7 +35,13 @@ export default function NearbyPage() {
       {status.state === "error" ? (
         <SectionBanner
           tone={coords ? "warn" : "error"}
-          title={coords ? "Using last known location" : "Location unavailable"}
+          title={
+            coords
+              ? "Using last known location"
+              : status.permissionDenied
+                ? "Location blocked"
+                : "Location unavailable"
+          }
           description={status.message}
           action={
             <button

@@ -17,18 +17,14 @@ const listInput = z.object({
 export const nearbyRouter = createTRPCRouter({
   config: protectedProcedure.query(() => {
     return {
-      placesEnabled: !!env.GEOAPIFY_API_KEY,
+      placesEnabled: true,
+      placesProvider: env.GEOAPIFY_API_KEY
+        ? ("geoapify" as const)
+        : ("openstreetmap" as const),
     };
   }),
 
   list: protectedProcedure.input(listInput).query(async ({ input }) => {
-    if (!env.GEOAPIFY_API_KEY) {
-      throw new TRPCError({
-        code: "PRECONDITION_FAILED",
-        message:
-          "Nearby places provider is not configured. Set GEOAPIFY_API_KEY in your .env to enable this feature.",
-      });
-    }
     try {
       return await findNearbyPlaces({
         lat: input.lat,

@@ -19,6 +19,7 @@ This project is scaffolded with [Create T3 App](https://create.t3.gg/) and confi
      - `DATABASE_URL`: pooled Neon connection string.
      - `DIRECT_URL`: direct Neon connection string for Prisma migrations.
    - Set `AUTH_SECRET` (generate with `npx auth secret`).
+   - Optional: set `GEOAPIFY_API_KEY` for Nearby routing. Without it, Nearby uses OpenStreetMap/Overpass with estimated travel times.
 
 3. Apply schema to Neon (migrations include domain tables + `migration_lock.toml`):
 

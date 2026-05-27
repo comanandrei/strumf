@@ -8,21 +8,27 @@ export type LocationStatus =
   | { state: "idle" }
   | { state: "requesting" }
   | { state: "ready"; coords: Coords; updatedAt: number }
-  | { state: "error"; coords: Coords | null; message: string };
+  | {
+      state: "error";
+      coords: Coords | null;
+      message: string;
+      permissionDenied?: boolean;
+    };
 
 const STORAGE_KEY = "strumf.nearby.coords";
 
 export function useSharedLocation() {
   const [status, setStatus] = useState<LocationStatus>({ state: "idle" });
 
-  const request = useCallback(() => {
+  const request = useCallback(async () => {
     if (typeof window === "undefined") return;
 
-    const failWithCachedCoords = (message: string) => {
+    const failWithCachedCoords = (message: string, permissionDenied = false) => {
       setStatus({
         state: "error",
         coords: readStoredCoords(),
         message,
+        permissionDenied,
       });
     };
 
@@ -32,6 +38,10 @@ export function useSharedLocation() {
     }
     if (!window.isSecureContext) {
       failWithCachedCoords("Location access requires a secure HTTPS connection.");
+      return;
+    }
+    if ((await readPermissionState()) === "denied") {
+      failWithCachedCoords(blockedLocationMessage(), true);
       return;
     }
 
@@ -51,6 +61,7 @@ export function useSharedLocation() {
           state: "error",
           coords: cached,
           message: locationErrorMessage(error),
+          permissionDenied: error.code === error.PERMISSION_DENIED,
         });
       },
       { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 12_000 },
@@ -62,6 +73,15 @@ export function useSharedLocation() {
     if (cached) {
       setStatus({ state: "ready", coords: cached, updatedAt: 0 });
     }
+    void readPermissionState().then((permission) => {
+      if (permission !== "denied") return;
+      setStatus({
+        state: "error",
+        coords: cached,
+        message: blockedLocationMessage(),
+        permissionDenied: true,
+      });
+    });
   }, []);
 
   return { status, request };
@@ -97,10 +117,28 @@ function storeCoords(coords: Coords) {
   }
 }
 
+async function readPermissionState(): Promise<PermissionState | null> {
+  if (typeof navigator === "undefined" || !navigator.permissions?.query) {
+    return null;
+  }
+  try {
+    const permission = await navigator.permissions.query({
+      name: "geolocation" as PermissionName,
+    });
+    return permission.state;
+  } catch {
+    return null;
+  }
+}
+
+function blockedLocationMessage(): string {
+  return "Location is blocked for this site. Tap the site controls in the address bar, allow Location, then try again.";
+}
+
 function locationErrorMessage(error: GeolocationPositionError): string {
   switch (error.code) {
     case error.PERMISSION_DENIED:
-      return "Location permission denied. Allow access to see weather and nearby places.";
+      return blockedLocationMessage();
     case error.POSITION_UNAVAILABLE:
       return "Could not determine your location right now.";
     case error.TIMEOUT:
