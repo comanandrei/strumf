@@ -7,12 +7,14 @@ import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
 import { localeToIntl, type Locale } from "~/app/lib/i18n";
 import { useI18n } from "~/app/lib/i18n-provider";
+import { formatSleepDuration, sleepDurationMs } from "~/app/lib/sleep-rhythm";
 import { formatClock, formatTimeAgo, milkTypeLabel } from "~/app/lib/time-ago";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 import { useBabySelection } from "../_components/baby-selection-context";
 
 type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
+type Sleep = RouterOutputs["sleep"]["listByBaby"][number];
 type Consultation = RouterOutputs["consultation"]["listByBaby"][number];
 type Appointment = RouterOutputs["appointment"]["listByBaby"][number];
 
@@ -51,16 +53,36 @@ export default function CalendarPage() {
   );
   const { data: consultations, isLoading: loadingConsultations } =
     api.consultation.listByBaby.useQuery(
-      { babyId: selectedBabyId ?? "" },
+      {
+        babyId: selectedBabyId ?? "",
+        from: monthRange.from,
+        to: monthRange.to,
+        limit: 200,
+      },
       { enabled: !!selectedBabyId },
     );
   const { data: appointments, isLoading: loadingAppointments } =
     api.appointment.listByBaby.useQuery(
-      { babyId: selectedBabyId ?? "" },
+      {
+        babyId: selectedBabyId ?? "",
+        from: monthRange.from,
+        to: monthRange.to,
+        limit: 200,
+      },
       { enabled: !!selectedBabyId },
     );
+  const { data: sleeps, isLoading: loadingSleeps } = api.sleep.listByBaby.useQuery(
+    {
+      babyId: selectedBabyId ?? "",
+      from: monthRange.from,
+      to: monthRange.to,
+      limit: 200,
+    },
+    { enabled: !!selectedBabyId },
+  );
 
   const feedingsByDay = useMemo(() => groupFeedingsByDay(feedings ?? []), [feedings]);
+  const sleepsByDay = useMemo(() => groupSleepsByDay(sleeps ?? []), [sleeps]);
   const consultationsByDay = useMemo(
     () => groupConsultationsByDay(consultations ?? []),
     [consultations],
@@ -74,21 +96,26 @@ export default function CalendarPage() {
     ? (consultationsByDay.get(selectedDay.key) ?? [])
     : [];
   const selectedAppointments = selectedDay ? (appointmentsByDay.get(selectedDay.key) ?? []) : [];
+  const selectedSleeps = selectedDay ? (sleepsByDay.get(selectedDay.key) ?? []) : [];
   const selectedSummary = useMemo(() => summarizeFeedings(selectedFeedings), [selectedFeedings]);
+  const selectedSleepSummary = useMemo(() => summarizeSleeps(selectedSleeps), [selectedSleeps]);
   const inputDayCount = countInputDays(feedingsByDay);
+  const sleepDayCount = countSleepDays(sleepsByDay);
   const medicalEventDays = useMemo(
     () => countMedicalEventDays(consultationsByDay, appointmentsByDay),
     [consultationsByDay, appointmentsByDay],
   );
-  const isLoadingCalendarItems = loadingFeedings || loadingConsultations || loadingAppointments;
+  const isLoadingCalendarItems =
+    loadingFeedings || loadingConsultations || loadingAppointments || loadingSleeps;
   const copy = locale === "ro"
     ? {
         calendar: "Calendar",
         rhythm: "Ritm zilnic",
-        emptyBaby: "Adauga mai intai un profil de bebe, apoi hranirile zilnice vor aparea aici.",
-        intro: (name: string) => `Atinge o zi din calendar ca sa vezi hranirile si tiparele pentru ${name}.`,
+        emptyBaby: "Adauga mai intai un profil de bebe, apoi hranirile si somnul vor aparea aici.",
+        intro: (name: string) => `Atinge o zi din calendar ca sa vezi hranirile, somnul si ingrijirea pentru ${name}.`,
         yourBaby: "bebelusul tau",
         inputDays: "zile cu date",
+        sleepDays: "zile cu somn",
         inputs: "intrari",
         careDays: "zile ingrijire",
         baby: "Bebe",
@@ -97,20 +124,24 @@ export default function CalendarPage() {
         previousMonth: "Luna precedenta",
         nextMonth: "Luna urmatoare",
         loading: "Se incarca calendarul",
-        summary: (inputCount: number, careCount: number) => `${inputCount} intrari · ${careCount} zile ingrijire`,
+        summary: (inputCount: number, sleepCount: number, careCount: number) =>
+          `${inputCount} intrari · ${sleepCount} somnuri · ${careCount} zile ingrijire`,
         dayInput: (count: number) => `${count} ${count === 1 ? "intrare" : "intrari"}`,
+        daySleep: (count: number) => `${count} ${count === 1 ? "somn" : "somnuri"}`,
         medicalEvents: (count: number) => `${count} evenimente medicale`,
         feedingLogged: "Hranire notata",
+        sleepLogged: "Somn notat",
         medicalCare: "Ingrijire medicala",
         today: "Azi",
       }
     : {
         calendar: "Calendar",
         rhythm: "Daily rhythm",
-        emptyBaby: "Add a baby profile first, then your daily feeding inputs will appear here.",
-        intro: (name: string) => `Tap a square day to review feeds and spot patterns for ${name}.`,
+        emptyBaby: "Add a baby profile first, then your daily feeding and sleep inputs will appear here.",
+        intro: (name: string) => `Tap a square day to review feeds, sleep, and care patterns for ${name}.`,
         yourBaby: "your baby",
         inputDays: "input days",
+        sleepDays: "sleep days",
         inputs: "inputs",
         careDays: "care days",
         baby: "Baby",
@@ -119,10 +150,13 @@ export default function CalendarPage() {
         previousMonth: "Previous month",
         nextMonth: "Next month",
         loading: "Loading calendar",
-        summary: (inputCount: number, careCount: number) => `${inputCount} inputs · ${careCount} care days`,
+        summary: (inputCount: number, sleepCount: number, careCount: number) =>
+          `${inputCount} inputs · ${sleepCount} sleeps · ${careCount} care days`,
         dayInput: (count: number) => `${count} inputs`,
+        daySleep: (count: number) => `${count} sleep events`,
         medicalEvents: (count: number) => `${count} medical events`,
         feedingLogged: "Feeding logged",
+        sleepLogged: "Sleep logged",
         medicalCare: "Medical care",
         today: "Today",
       };
@@ -187,7 +221,7 @@ export default function CalendarPage() {
           </p>
           <div className="mt-5 grid grid-cols-3 gap-2">
             <CalendarMetric value={`${inputDayCount}`} label={copy.inputDays} />
-            <CalendarMetric value={`${feedings?.length ?? 0}`} label={copy.inputs} />
+            <CalendarMetric value={`${sleepDayCount}`} label={copy.sleepDays} />
             <CalendarMetric value={`${medicalEventDays}`} label={copy.careDays} />
           </div>
         </div>
@@ -229,7 +263,7 @@ export default function CalendarPage() {
               <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
                 {isLoadingCalendarItems
                   ? copy.loading
-                  : copy.summary(feedings?.length ?? 0, medicalEventDays)}
+                  : copy.summary(feedings?.length ?? 0, sleeps?.length ?? 0, medicalEventDays)}
               </p>
             </div>
             <Button
@@ -256,9 +290,11 @@ export default function CalendarPage() {
 
           {days.map((day) => {
             const dayFeedings = feedingsByDay.get(day.key) ?? [];
+            const daySleeps = sleepsByDay.get(day.key) ?? [];
             const dayConsultations = consultationsByDay.get(day.key) ?? [];
             const dayAppointments = appointmentsByDay.get(day.key) ?? [];
             const hasInput = dayFeedings.length > 0;
+            const hasSleep = daySleeps.length > 0;
             const medicalCount = dayConsultations.length + dayAppointments.length;
             const hasMedical = medicalCount > 0;
             return (
@@ -272,15 +308,18 @@ export default function CalendarPage() {
                     : "border-transparent bg-white/25 text-strumf-muted/55",
                   day.isToday ? "ring-2 ring-strumf-accent/60 ring-offset-2 ring-offset-white" : "",
                   hasInput ? "border-strumf-accent/35 bg-strumf-accent-muted/55" : "",
-                  hasMedical && !hasInput ? "border-strumf-accent/20 bg-strumf-blue/70" : "",
-                  hasInput || hasMedical
+                  hasSleep && !hasInput ? "border-strumf-accent/20 bg-strumf-blue/55" : "",
+                  hasMedical && !hasInput && !hasSleep
+                    ? "border-strumf-accent/20 bg-strumf-blue/70"
+                    : "",
+                  hasInput || hasSleep || hasMedical
                     ? "shadow-card"
                     : "hover:border-strumf-accent/25 hover:bg-white/90",
                 ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => setSelectedDay(day)}
-                aria-label={`${formatDayFull(day.date, locale)}${hasInput ? `, ${copy.dayInput(dayFeedings.length)}` : ""}${hasMedical ? `, ${copy.medicalEvents(medicalCount)}` : ""}`}
+                aria-label={`${formatDayFull(day.date, locale)}${hasInput ? `, ${copy.dayInput(dayFeedings.length)}` : ""}${hasSleep ? `, ${copy.daySleep(daySleeps.length)}` : ""}${hasMedical ? `, ${copy.medicalEvents(medicalCount)}` : ""}`}
               >
                 <span className="flex h-full items-center justify-center font-display text-base font-bold">
                   {day.dayNumber}
@@ -295,6 +334,11 @@ export default function CalendarPage() {
                     {dayFeedings.length}
                   </span>
                 ) : null}
+                {hasSleep ? (
+                  <span className="absolute bottom-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-warm px-1 text-[9px] font-black leading-none text-strumf-foreground shadow-card">
+                    {daySleeps.length}
+                  </span>
+                ) : null}
               </button>
             );
           })}
@@ -304,6 +348,10 @@ export default function CalendarPage() {
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-strumf-accent" />
             {copy.feedingLogged}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-strumf-warm ring-1 ring-strumf-accent/30" />
+            {copy.sleepLogged}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-strumf-blue ring-1 ring-strumf-accent/30" />
@@ -320,9 +368,11 @@ export default function CalendarPage() {
         <DayDashboardModal
           day={selectedDay}
           feedings={selectedFeedings}
+          sleeps={selectedSleeps}
           consultations={selectedConsultations}
           appointments={selectedAppointments}
           summary={selectedSummary}
+          sleepSummary={selectedSleepSummary}
           onClose={() => setSelectedDay(null)}
         />
       ) : null}
@@ -344,16 +394,20 @@ function CalendarMetric({ value, label }: { value: string; label: string }) {
 function DayDashboardModal({
   day,
   feedings,
+  sleeps,
   consultations,
   appointments,
   summary,
+  sleepSummary,
   onClose,
 }: {
   day: CalendarDay;
   feedings: Feeding[];
+  sleeps: Sleep[];
   consultations: Consultation[];
   appointments: Appointment[];
   summary: ReturnType<typeof summarizeFeedings>;
+  sleepSummary: ReturnType<typeof summarizeSleeps>;
   onClose: () => void;
 }) {
   const medicalCount = consultations.length + appointments.length;
@@ -371,6 +425,12 @@ function DayDashboardModal({
         noInput: "fara intrari",
         inputs: "Intrari",
         emptyInputs: "Nu exista hraniri notate pentru aceasta zi.",
+        totalSleep: "Total somn",
+        sleeps: (count: number) => `${count} ${count === 1 ? "somn" : "somnuri"}`,
+        lastWake: "Ultima trezire",
+        noSleep: "fara somn",
+        sleep: "Somn",
+        emptySleep: "Nu exista somn notat pentru aceasta zi.",
         medicalCare: "Ingrijire medicala",
         appointments: "Programari",
         planned: "Planificat",
@@ -390,6 +450,12 @@ function DayDashboardModal({
         noInput: "no input",
         inputs: "Inputs",
         emptyInputs: "No feeding inputs logged for this day yet.",
+        totalSleep: "Total sleep",
+        sleeps: (count: number) => `${count} sleep${count === 1 ? "" : "s"}`,
+        lastWake: "Last wake",
+        noSleep: "no sleep",
+        sleep: "Sleep",
+        emptySleep: "No sleep logged for this day yet.",
         medicalCare: "Medical care",
         appointments: "Appointments",
         planned: "Planned",
@@ -447,6 +513,18 @@ function DayDashboardModal({
             value={summary.lastFeed ? formatClock(summary.lastFeed.startedAt, locale) : "-"}
             sub={summary.lastFeed ? formatTimeAgo(summary.lastFeed.startedAt, locale) : copy.noInput}
           />
+          <DailyStatCard
+            tone="blue"
+            label={copy.totalSleep}
+            value={sleepSummary.totalMs ? formatSleepDuration(sleepSummary.totalMs) : "-"}
+            sub={copy.sleeps(sleepSummary.sleepCount)}
+          />
+          <DailyStatCard
+            tone="warm"
+            label={copy.lastWake}
+            value={sleepSummary.lastSleep ? formatClock(sleepSummary.lastSleep.endedAt, locale) : "-"}
+            sub={sleepSummary.lastSleep ? formatTimeAgo(sleepSummary.lastSleep.endedAt, locale) : copy.noSleep}
+          />
         </div>
 
         <div className="mt-5">
@@ -480,6 +558,43 @@ function DayDashboardModal({
           ) : (
             <p className="rounded-2xl bg-white/60 px-4 py-6 text-center text-sm text-strumf-muted">
               {copy.emptyInputs}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-display text-lg font-semibold">{copy.sleep}</h3>
+            <span className="rounded-full bg-gradient-warm px-3 py-1 text-xs font-bold text-strumf-foreground">
+              {sleeps.length}
+            </span>
+          </div>
+
+          {sleeps.length ? (
+            <ul className="space-y-2">
+              {sleeps.map((sleep) => (
+                <li
+                  key={sleep.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl bg-white/60 px-4 py-3"
+                >
+                  <div>
+                    <p className="font-display text-lg font-semibold">
+                      {formatSleepDuration(sleepDurationMs(sleep))}
+                    </p>
+                    <p className="text-xs text-strumf-muted">
+                      {formatClock(sleep.startedAt, locale)}-{formatClock(sleep.endedAt, locale)}
+                      {sleep.notes ? ` · ${sleep.notes}` : ""}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-gradient-warm px-3 py-1 text-xs font-bold text-strumf-foreground">
+                    {copy.sleep}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-2xl bg-white/60 px-4 py-6 text-center text-sm text-strumf-muted">
+              {copy.emptySleep}
             </p>
           )}
         </div>
@@ -663,6 +778,23 @@ function groupFeedingsByDay(feedings: Feeding[]) {
   return grouped;
 }
 
+function groupSleepsByDay(sleeps: Sleep[]) {
+  const grouped = new Map<string, Sleep[]>();
+
+  for (const sleep of sleeps) {
+    const key = toDateKey(sleep.startedAt);
+    const daySleeps = grouped.get(key) ?? [];
+    daySleeps.push(sleep);
+    grouped.set(key, daySleeps);
+  }
+
+  for (const daySleeps of grouped.values()) {
+    daySleeps.sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
+  }
+
+  return grouped;
+}
+
 function groupConsultationsByDay(consultations: Consultation[]) {
   const grouped = new Map<string, Consultation[]>();
 
@@ -713,8 +845,22 @@ function summarizeFeedings(feedings: Feeding[]) {
   };
 }
 
+function summarizeSleeps(sleeps: Sleep[]) {
+  const totalMs = sleeps.reduce((sum, sleep) => sum + sleepDurationMs(sleep), 0);
+  return {
+    totalMs,
+    sleepCount: sleeps.length,
+    firstSleep: sleeps[0],
+    lastSleep: sleeps[sleeps.length - 1],
+  };
+}
+
 function countInputDays(feedingsByDay: Map<string, Feeding[]>) {
   return Array.from(feedingsByDay.values()).filter((feedings) => feedings.length > 0).length;
+}
+
+function countSleepDays(sleepsByDay: Map<string, Sleep[]>) {
+  return Array.from(sleepsByDay.values()).filter((sleeps) => sleeps.length > 0).length;
 }
 
 function countMedicalEventDays(

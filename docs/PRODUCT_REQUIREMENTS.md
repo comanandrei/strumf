@@ -62,18 +62,30 @@ A trustworthy app to log **bottle feeds (ml)**, **baby identity & birth data**, 
 - Fields: datetime, location, purpose/title, optional reminder (phase 1b if push/email not ready).
 - List per baby; optional calendar export later.
 
-### 4.6 Optional logs (later phases, schema-friendly)
+### 4.6 Sleep Rhythm (competitor-gap feature)
 
-- Sleep, diaper, stool — **not required for MVP**; keep event model extensible (`type` + JSON payload pattern acceptable).
+- Track completed **Sleep** windows (`startedAt`, `endedAt`, optional notes,
+  logged by caregiver) for the selected baby.
+- Surface sleep total for the last 24 hours and the most recent sleep in the
+  dashboard.
+- Show a deterministic next-nap guide using age-based wake windows and the last
+  completed Sleep event. This is guidance only, not clinical advice or sleep
+  training.
+- Include Sleep in the daily Calendar review alongside feedings and medical
+  care.
 
-### 4.7 Dashboard (MVP)
+### 4.7 Optional logs (later phases, schema-friendly)
+
+- Diaper, stool, medication — **not required for MVP**; keep event model extensible (`type` + JSON payload pattern acceptable).
+
+### 4.8 Dashboard (MVP)
 
 - **Today**: total ml bottle-fed for selected baby.
 - **Last 7 days**: daily totals (bar or line chart).
 - **Intervals**: time between consecutive bottle feeds for selected baby (table or sparkline).
 - **Next feed estimate**: show window + confidence; **server-side cache** with invalidation on new feed or TTL (document in §6).
 
-### 4.8 AI (after MVP baseline)
+### 4.9 AI (after MVP baseline)
 
 - v1 prediction: **deterministic** (e.g. median interval, clamped bounds).
 - v2: optional LLM for **explanation** only; never sole safety-critical signal; versioned prompts + stored output in `PredictionCache`.
@@ -119,7 +131,7 @@ A trustworthy app to log **bottle feeds (ml)**, **baby identity & birth data**, 
 |-------|--------|
 | **P0** | Auth + household + membership + baby CRUD + role checks in tRPC. |
 | **P1** | Invites (email flow or magic link) + accept + revoke. |
-| **P2** | Bottle feeding log + list/timeline + dashboard (today / 7d / intervals / cached next-feed). |
+| **P2** | Bottle feeding log + list/timeline + dashboard (today / 7d / intervals / cached next-feed) + Sleep Rhythm logging and nap guide. |
 | **P3** | Consultations + appointments CRUD + lists. |
 | **P4** | Charts polish, exports, reminders; then optional AI explainer. |
 

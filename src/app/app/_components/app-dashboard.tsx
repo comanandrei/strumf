@@ -22,12 +22,14 @@ import {
   type BabyMilestone,
 } from "~/app/lib/development-milestones";
 import { useI18n } from "~/app/lib/i18n-provider";
+import { buildWakeWindowGuide, formatSleepDuration, sleepDurationMs } from "~/app/lib/sleep-rhythm";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
 
 type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
+type Sleep = RouterOutputs["sleep"]["listByBaby"][number];
 type DailyFeedingTotal = {
   dateKey: string;
   label: string;
@@ -43,6 +45,7 @@ export function AppDashboard() {
   const router = useRouter();
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
   const { locale } = useI18n();
+  const now = useMemo(() => new Date(), []);
   const copy = locale === "ro"
     ? {
         settingUp: "Se configureaza...",
@@ -80,6 +83,10 @@ export function AppDashboard() {
         viewAll: "Vezi toate ->",
         noRecentFeeds: "Nu exista hraniri in ultimele 24h.",
         logFeeding: "Noteaza o hranire",
+        sleepLast24h: "Somn in ultimele 24h",
+        sleeps: (count: number) => `${count} ${count === 1 ? "somn" : "somnuri"}`,
+        nextNapGuide: "Ghid urmatorul somn",
+        logOneSleep: "noteaza un somn",
       }
     : {
         settingUp: "Setting up...",
@@ -117,6 +124,10 @@ export function AppDashboard() {
         viewAll: "View all ->",
         noRecentFeeds: "No feedings logged in the last 24h.",
         logFeeding: "Log a feeding",
+        sleepLast24h: "Sleep last 24h",
+        sleeps: (count: number) => `${count} sleep${count === 1 ? "" : "s"}`,
+        nextNapGuide: "Next nap guide",
+        logOneSleep: "log one sleep",
       };
   const since24h = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000), []);
   const since7d = useMemo(() => startOfLast7Days(), []);
@@ -127,15 +138,24 @@ export function AppDashboard() {
   );
   const { data: appointments, isLoading: loadingAppointments } =
     api.appointment.listByBaby.useQuery(
-      { babyId: selectedBabyId ?? "" },
+      { babyId: selectedBabyId ?? "", from: now, limit: 5 },
       { enabled: !!selectedBabyId },
     );
+  const { data: sleepsInRange, isLoading: loadingSleeps } = api.sleep.listByBaby.useQuery(
+    { babyId: selectedBabyId ?? "", from: since7d, limit: 200 },
+    { enabled: !!selectedBabyId },
+  );
 
   const recentFeeds = useMemo(() => {
     const feeds = feedingsInRange ?? [];
     return feeds.filter((feed) => feed.startedAt >= since24h);
   }, [feedingsInRange, since24h]);
+  const recentSleeps = useMemo(() => {
+    const sleeps = sleepsInRange ?? [];
+    return sleeps.filter((sleep) => sleep.endedAt >= since24h || sleep.startedAt >= since24h);
+  }, [sleepsInRange, since24h]);
   const last = feedingsInRange?.[0];
+  const lastSleep = sleepsInRange?.[0];
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
   const milestoneHighlights = useMemo(
     () => (activeBaby ? getDashboardMilestones(activeBaby.birthDateTime, new Date(), 2) : []),
@@ -146,10 +166,25 @@ export function AppDashboard() {
     [feedingsInRange, locale],
   );
   const upcomingAppointments = useMemo(() => {
-    const now = Date.now();
-    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
-  }, [appointments]);
+    const nowMs = now.getTime();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= nowMs);
+  }, [appointments, now]);
   const nextAppointment = upcomingAppointments[0];
+  const sleepSummary = useMemo(() => {
+    const totalMs = recentSleeps.reduce(
+      (sum, sleep) => sum + sleepOverlapMs(sleep, since24h, new Date()),
+      0,
+    );
+    return {
+      totalMs,
+      sleepCount: recentSleeps.length,
+      lastSleepDurationMs: lastSleep ? sleepDurationMs(lastSleep) : null,
+    };
+  }, [lastSleep, recentSleeps, since24h]);
+  const sleepGuide = useMemo(
+    () => (activeBaby ? buildWakeWindowGuide(activeBaby.birthDateTime, lastSleep, new Date()) : null),
+    [activeBaby, lastSleep],
+  );
 
   const summary = useMemo(() => {
     const feeds = recentFeeds ?? [];
@@ -295,9 +330,30 @@ export function AppDashboard() {
             summary.nextFeedAt ? formatFutureDistance(summary.nextFeedAt, locale) : copy.need2Feeds
           }
         />
+        <StatCard
+          tone="warm"
+          icon="☾"
+          label={copy.sleepLast24h}
+          value={sleepSummary.totalMs ? formatSleepDuration(sleepSummary.totalMs) : "—"}
+          sub={copy.sleeps(sleepSummary.sleepCount)}
+        />
+        <StatCard
+          tone="blue"
+          icon="☁"
+          label={copy.nextNapGuide}
+          value={sleepGuide ? formatClock(sleepGuide.windowStart, locale) : "—"}
+          sub={sleepGuide ? formatWakeWindowState(sleepGuide.state, locale, sleepGuide.windowEnd.getTime() < Date.now()) : copy.logOneSleep}
+        />
       </section>
 
       <Last7DaysChart days={last7Days} isLoading={loadingFeeds} />
+
+      <SleepRhythmCard
+        isLoading={loadingSleeps}
+        lastSleep={lastSleep}
+        sleepGuide={sleepGuide}
+        totalSleepMs={sleepSummary.totalMs}
+      />
 
       <MilestonesWidget milestones={milestoneHighlights} babyName={activeBaby?.displayName} />
 
@@ -586,6 +642,111 @@ function Last7DaysChart({
   );
 }
 
+function SleepRhythmCard({
+  isLoading,
+  lastSleep,
+  sleepGuide,
+  totalSleepMs,
+}: {
+  isLoading: boolean;
+  lastSleep?: Sleep;
+  sleepGuide: ReturnType<typeof buildWakeWindowGuide>;
+  totalSleepMs: number;
+}) {
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        title: "Ritm de somn",
+        subtitle: "Ghid pentru somnuri inspirat de aplicatii dedicate",
+        logSleep: "Noteaza somn ->",
+        nextNapGuide: "Ghid urmatorul somn",
+        windowCloses: "Fereastra se inchide",
+        lastSleep: "Ultimul somn",
+        ended: "S-a terminat",
+        total24h: "Total 24h",
+        completedOnly: "doar somnuri finalizate",
+        empty: "Noteaza un somn finalizat ca sa activezi ghidul urmatorului somn.",
+      }
+    : {
+        title: "Sleep Rhythm",
+        subtitle: "Competitor-inspired nap guidance",
+        logSleep: "Log sleep ->",
+        nextNapGuide: "Next nap guide",
+        windowCloses: "Window closes",
+        lastSleep: "Last sleep",
+        ended: "Ended",
+        total24h: "24h total",
+        completedOnly: "completed sleep only",
+        empty: "Log one completed sleep to unlock the next nap guide.",
+      };
+
+  return (
+    <Card>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold">{copy.title}</h2>
+          <p className="text-xs text-strumf-muted">{copy.subtitle}</p>
+        </div>
+        <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
+          {copy.logSleep}
+        </Link>
+      </div>
+
+      {isLoading ? (
+        <div className="h-32 w-full animate-pulse rounded-3xl bg-white/60" />
+      ) : lastSleep && sleepGuide ? (
+        <div className="space-y-3">
+          <div className="rounded-3xl bg-gradient-blue p-4 shadow-card">
+            <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+              {copy.nextNapGuide}
+            </p>
+            <div className="mt-2 flex items-end justify-between gap-3">
+              <div>
+                <p className="font-display text-3xl font-bold leading-none">
+                  {formatClock(sleepGuide.windowStart, locale)}
+                </p>
+                <p className="mt-1 text-xs text-strumf-muted">
+                  {copy.windowCloses} {formatClock(sleepGuide.windowEnd, locale)}
+                </p>
+              </div>
+              <span className="rounded-full bg-white/65 px-3 py-1 text-xs font-bold shadow-card">
+                {formatWakeWindowState(
+                  sleepGuide.state,
+                  locale,
+                  sleepGuide.windowEnd.getTime() < Date.now(),
+                )}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white/55 px-4 py-3">
+              <p className="text-xs text-strumf-muted">{copy.lastSleep}</p>
+              <p className="font-display text-lg font-semibold">
+                {formatSleepDuration(sleepDurationMs(lastSleep))}
+              </p>
+              <p className="text-[11px] text-strumf-muted">
+                {copy.ended} {formatTimeAgo(lastSleep.endedAt, locale)}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/55 px-4 py-3">
+              <p className="text-xs text-strumf-muted">{copy.total24h}</p>
+              <p className="font-display text-lg font-semibold">
+                {totalSleepMs ? formatSleepDuration(totalSleepMs) : "-"}
+              </p>
+              <p className="text-[11px] text-strumf-muted">{copy.completedOnly}</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="rounded-3xl bg-white/45 px-4 py-6 text-center text-sm text-strumf-muted">
+          {copy.empty}
+        </p>
+      )}
+    </Card>
+  );
+}
+
 function MenuItem({
   href,
   icon,
@@ -664,6 +825,12 @@ function toDateKey(value: Date) {
   return `${year}-${month}-${day}`;
 }
 
+function sleepOverlapMs(sleep: Sleep, from: Date, to: Date) {
+  const start = Math.max(sleep.startedAt.getTime(), from.getTime());
+  const end = Math.min(sleep.endedAt.getTime(), to.getTime());
+  return Math.max(0, end - start);
+}
+
 function StatCard({
   tone,
   icon,
@@ -717,4 +884,16 @@ function formatFutureDistance(date: Date, locale: "ro" | "en", now = new Date())
   }
 
   return locale === "ro" ? `in ${formatDuration(ms, locale)}` : `in ${formatDuration(ms, locale)}`;
+}
+
+function formatWakeWindowState(state: "ready" | "soon" | "later", locale: "ro" | "en", isOver: boolean) {
+  if (locale === "ro") {
+    if (state === "ready") return isOver ? "Fereastra de veghe depasita" : "Fereastra de somn deschisa";
+    if (state === "soon") return "Pregateste somnul in curand";
+    return "Inca in fereastra de veghe";
+  }
+
+  if (state === "ready") return isOver ? "Over wake window" : "Nap window open";
+  if (state === "soon") return "Prep for sleep soon";
+  return "Still in wake window";
 }
