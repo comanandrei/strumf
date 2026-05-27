@@ -21,12 +21,14 @@ import {
   getDashboardMilestones,
   type BabyMilestone,
 } from "~/app/lib/development-milestones";
+import { buildWakeWindowGuide, formatSleepDuration, sleepDurationMs } from "~/app/lib/sleep-rhythm";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
 
 type Feeding = RouterOutputs["feeding"]["listByBaby"][number];
+type Sleep = RouterOutputs["sleep"]["listByBaby"][number];
 type DailyFeedingTotal = {
   dateKey: string;
   label: string;
@@ -53,12 +55,21 @@ export function AppDashboard() {
       { babyId: selectedBabyId ?? "" },
       { enabled: !!selectedBabyId },
     );
+  const { data: sleepsInRange, isLoading: loadingSleeps } = api.sleep.listByBaby.useQuery(
+    { babyId: selectedBabyId ?? "", from: since7d, limit: 200 },
+    { enabled: !!selectedBabyId },
+  );
 
   const recentFeeds = useMemo(() => {
     const feeds = feedingsInRange ?? [];
     return feeds.filter((feed) => feed.startedAt >= since24h);
   }, [feedingsInRange, since24h]);
+  const recentSleeps = useMemo(() => {
+    const sleeps = sleepsInRange ?? [];
+    return sleeps.filter((sleep) => sleep.endedAt >= since24h || sleep.startedAt >= since24h);
+  }, [sleepsInRange, since24h]);
   const last = feedingsInRange?.[0];
+  const lastSleep = sleepsInRange?.[0];
   const activeBaby = babies.find((b) => b.id === selectedBabyId);
   const milestoneHighlights = useMemo(
     () => (activeBaby ? getDashboardMilestones(activeBaby.birthDateTime, new Date(), 2) : []),
@@ -73,6 +84,21 @@ export function AppDashboard() {
     return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
   }, [appointments]);
   const nextAppointment = upcomingAppointments[0];
+  const sleepSummary = useMemo(() => {
+    const totalMs = recentSleeps.reduce(
+      (sum, sleep) => sum + sleepOverlapMs(sleep, since24h, new Date()),
+      0,
+    );
+    return {
+      totalMs,
+      sleepCount: recentSleeps.length,
+      lastSleepDurationMs: lastSleep ? sleepDurationMs(lastSleep) : null,
+    };
+  }, [lastSleep, recentSleeps, since24h]);
+  const sleepGuide = useMemo(
+    () => (activeBaby ? buildWakeWindowGuide(activeBaby.birthDateTime, lastSleep, new Date()) : null),
+    [activeBaby, lastSleep],
+  );
 
   const summary = useMemo(() => {
     const feeds = recentFeeds ?? [];
@@ -218,9 +244,30 @@ export function AppDashboard() {
             summary.nextFeedAt ? formatFutureDistance(summary.nextFeedAt) : "need 2 feeds"
           }
         />
+        <StatCard
+          tone="warm"
+          icon="☾"
+          label="Sleep last 24h"
+          value={sleepSummary.totalMs ? formatSleepDuration(sleepSummary.totalMs) : "—"}
+          sub={`${sleepSummary.sleepCount} sleep${sleepSummary.sleepCount === 1 ? "" : "s"}`}
+        />
+        <StatCard
+          tone="blue"
+          icon="☁"
+          label="Next nap guide"
+          value={sleepGuide ? formatClock(sleepGuide.windowStart) : "—"}
+          sub={sleepGuide ? sleepGuide.stateLabel : "log one sleep"}
+        />
       </section>
 
       <Last7DaysChart days={last7Days} isLoading={loadingFeeds} />
+
+      <SleepRhythmCard
+        isLoading={loadingSleeps}
+        lastSleep={lastSleep}
+        sleepGuide={sleepGuide}
+        totalSleepMs={sleepSummary.totalMs}
+      />
 
       <MilestonesWidget milestones={milestoneHighlights} babyName={activeBaby?.displayName} />
 
@@ -475,6 +522,80 @@ function Last7DaysChart({
   );
 }
 
+function SleepRhythmCard({
+  isLoading,
+  lastSleep,
+  sleepGuide,
+  totalSleepMs,
+}: {
+  isLoading: boolean;
+  lastSleep?: Sleep;
+  sleepGuide: ReturnType<typeof buildWakeWindowGuide>;
+  totalSleepMs: number;
+}) {
+  return (
+    <Card>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold">Sleep Rhythm</h2>
+          <p className="text-xs text-strumf-muted">Competitor-inspired nap guidance</p>
+        </div>
+        <Link href="/app/log" className="text-xs font-bold text-strumf-accent">
+          Log sleep →
+        </Link>
+      </div>
+
+      {isLoading ? (
+        <div className="h-32 w-full animate-pulse rounded-3xl bg-white/60" />
+      ) : lastSleep && sleepGuide ? (
+        <div className="space-y-3">
+          <div className="rounded-3xl bg-gradient-blue p-4 shadow-card">
+            <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
+              Next nap guide
+            </p>
+            <div className="mt-2 flex items-end justify-between gap-3">
+              <div>
+                <p className="font-display text-3xl font-bold leading-none">
+                  {formatClock(sleepGuide.windowStart)}
+                </p>
+                <p className="mt-1 text-xs text-strumf-muted">
+                  Window closes {formatClock(sleepGuide.windowEnd)}
+                </p>
+              </div>
+              <span className="rounded-full bg-white/65 px-3 py-1 text-xs font-bold shadow-card">
+                {sleepGuide.stateLabel}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white/55 px-4 py-3">
+              <p className="text-xs text-strumf-muted">Last sleep</p>
+              <p className="font-display text-lg font-semibold">
+                {formatSleepDuration(sleepDurationMs(lastSleep))}
+              </p>
+              <p className="text-[11px] text-strumf-muted">
+                Ended {formatTimeAgo(lastSleep.endedAt)}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/55 px-4 py-3">
+              <p className="text-xs text-strumf-muted">24h total</p>
+              <p className="font-display text-lg font-semibold">
+                {totalSleepMs ? formatSleepDuration(totalSleepMs) : "-"}
+              </p>
+              <p className="text-[11px] text-strumf-muted">completed sleep only</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="rounded-3xl bg-white/45 px-4 py-6 text-center text-sm text-strumf-muted">
+          Log one completed sleep to unlock the next nap guide.
+        </p>
+      )}
+    </Card>
+  );
+}
+
 function MenuItem({
   href,
   icon,
@@ -551,6 +672,12 @@ function toDateKey(value: Date) {
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function sleepOverlapMs(sleep: Sleep, from: Date, to: Date) {
+  const start = Math.max(sleep.startedAt.getTime(), from.getTime());
+  const end = Math.min(sleep.endedAt.getTime(), to.getTime());
+  return Math.max(0, end - start);
 }
 
 function StatCard({
