@@ -45,12 +45,22 @@ export default function CalendarPage() {
   );
   const { data: consultations, isLoading: loadingConsultations } =
     api.consultation.listByBaby.useQuery(
-      { babyId: selectedBabyId ?? "" },
+      {
+        babyId: selectedBabyId ?? "",
+        from: monthRange.from,
+        to: monthRange.to,
+        limit: 200,
+      },
       { enabled: !!selectedBabyId },
     );
   const { data: appointments, isLoading: loadingAppointments } =
     api.appointment.listByBaby.useQuery(
-      { babyId: selectedBabyId ?? "" },
+      {
+        babyId: selectedBabyId ?? "",
+        from: monthRange.from,
+        to: monthRange.to,
+        limit: 200,
+      },
       { enabled: !!selectedBabyId },
     );
 
