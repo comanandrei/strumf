@@ -15,21 +15,24 @@ export default function NearbyPage() {
     <div className="flex flex-col gap-5 pb-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm text-strumf-muted">Outside</p>
+          <p className="text-sm text-strumf-muted">Nearby</p>
           <h1 className="font-display text-4xl font-bold tracking-tight">Nearby</h1>
           <p className="mt-1 text-sm text-strumf-muted">
             Today&apos;s weather and the closest parks and malls.
           </p>
         </div>
-        {status.state === "ready" || status.state === "error" ? (
-          <Button
-            variant="ghost"
-            onClick={request}
-            className="shrink-0 text-xs"
-          >
-            Refresh location
-          </Button>
-        ) : null}
+        <Button
+          variant={status.state === "idle" ? "accent" : "ghost"}
+          onClick={request}
+          disabled={status.state === "requesting"}
+          className="shrink-0 text-xs"
+        >
+          {status.state === "requesting"
+            ? "Locating..."
+            : status.state === "idle"
+              ? "Use my location"
+              : "Refresh location"}
+        </Button>
       </header>
 
       {status.state === "error" ? (
@@ -70,7 +73,7 @@ export default function NearbyPage() {
                 onClick={request}
                 className="text-xs font-bold underline"
               >
-                Allow
+                Use location
               </button>
             ) : null
           }

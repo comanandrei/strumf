@@ -109,7 +109,7 @@ export function WeatherSection({ coords }: { coords: Coords | null }) {
               {weather.locationName}
             </h2>
           ) : (
-            <h2 className="font-display text-lg font-semibold">Outside</h2>
+            <h2 className="font-display text-lg font-semibold">Local weather</h2>
           )}
         </div>
         {updatedLabel ? (

@@ -36,6 +36,8 @@ export const env = createEnv({
     OPENAI_API_KEY: z.string().optional(),
     /** Optional override for the GPT model used by daily summaries. */
     OPENAI_MODEL: z.string().optional(),
+    /** Optional shared secret for the appointment reminder cron endpoint. */
+    APPOINTMENT_REMINDER_CRON_SECRET: z.string().optional(),
   },
 
   /**
@@ -62,6 +64,7 @@ export const env = createEnv({
     GEOAPIFY_API_KEY: process.env.GEOAPIFY_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
+    APPOINTMENT_REMINDER_CRON_SECRET: process.env.APPOINTMENT_REMINDER_CRON_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

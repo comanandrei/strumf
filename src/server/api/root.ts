@@ -6,6 +6,7 @@ import { feedingRouter } from "~/server/api/routers/feeding";
 import { householdRouter } from "~/server/api/routers/household";
 import { inviteRouter } from "~/server/api/routers/invite";
 import { nearbyRouter } from "~/server/api/routers/nearby";
+import { sleepRouter } from "~/server/api/routers/sleep";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   appointment: appointmentRouter,
   dailySummary: dailySummaryRouter,
   nearby: nearbyRouter,
+  sleep: sleepRouter,
 });
 
 // export type definition of API
