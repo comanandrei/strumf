@@ -67,6 +67,7 @@ export default function BabyProfilePage() {
   const params = useParams<{ babyId: string }>();
   const babyId = Array.isArray(params.babyId) ? params.babyId[0] : params.babyId;
   const utils = api.useUtils();
+  const now = useMemo(() => new Date(), []);
   const { babies, selectedBabyId, setSelectedBabyId, isLoading: loadingBabies } =
     useBabySelection();
   const since24h = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000), []);
@@ -87,9 +88,15 @@ export default function BabyProfilePage() {
       { enabled: !!babyId },
     );
   const { data: consultations, isLoading: loadingConsultations } =
-    api.consultation.listByBaby.useQuery({ babyId: babyId ?? "" }, { enabled: !!babyId });
+    api.consultation.listByBaby.useQuery(
+      { babyId: babyId ?? "", limit: 5 },
+      { enabled: !!babyId },
+    );
   const { data: appointments, isLoading: loadingAppointments } =
-    api.appointment.listByBaby.useQuery({ babyId: babyId ?? "" }, { enabled: !!babyId });
+    api.appointment.listByBaby.useQuery(
+      { babyId: babyId ?? "", from: now, limit: 5 },
+      { enabled: !!babyId },
+    );
   const updateBaby = api.baby.update.useMutation({
     onSuccess: async (updatedBaby) => {
       setFormError(null);
@@ -107,9 +114,9 @@ export default function BabyProfilePage() {
   });
 
   const upcomingAppointments = useMemo(() => {
-    const now = Date.now();
-    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= now);
-  }, [appointments]);
+    const nowMs = now.getTime();
+    return (appointments ?? []).filter((appointment) => appointment.startsAt.getTime() >= nowMs);
+  }, [appointments, now]);
   const careSummary = useMemo(
     () => buildCareSummary(recentFeedings ?? []),
     [recentFeedings],
@@ -622,6 +629,13 @@ function AppointmentSummary({
           </div>
           {appointment.location ? (
             <p className="mt-2 text-xs text-strumf-muted">{appointment.location}</p>
+          ) : null}
+          {appointment.reminderAt ? (
+            <p className="mt-2 text-xs font-bold text-strumf-accent">
+              Reminder: {formatShortDate(appointment.reminderAt)} at{" "}
+              {formatClock(appointment.reminderAt)}
+              {appointment.reminderSentAt ? " · sent" : ""}
+            </p>
           ) : null}
           {appointment.notes ? (
             <p className="mt-2 whitespace-pre-wrap text-sm text-strumf-muted">

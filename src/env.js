@@ -32,6 +32,8 @@ export const env = createEnv({
     SKIP_EMAIL_VERIFICATION: z.enum(["true", "false"]).optional(),
     /** Geoapify free-tier API key for the Nearby feature (server-side only). */
     GEOAPIFY_API_KEY: z.string().optional(),
+    /** Optional shared secret for the appointment reminder cron endpoint. */
+    APPOINTMENT_REMINDER_CRON_SECRET: z.string().optional(),
   },
 
   /**
@@ -56,6 +58,7 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     SKIP_EMAIL_VERIFICATION: process.env.SKIP_EMAIL_VERIFICATION,
     GEOAPIFY_API_KEY: process.env.GEOAPIFY_API_KEY,
+    APPOINTMENT_REMINDER_CRON_SECRET: process.env.APPOINTMENT_REMINDER_CRON_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

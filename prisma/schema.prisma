@@ -92,6 +92,7 @@ model Baby {
 
     household         Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
     feedingEvents     FeedingEvent[]
+    sleepEvents       SleepEvent[]
     consultations     Consultation[]
     appointments      Appointment[]
     predictionCaches  PredictionCache[]
@@ -118,6 +119,24 @@ model FeedingEvent {
     @@index([loggedByUserId])
 }
 
+model SleepEvent {
+    id             String   @id @default(cuid())
+    babyId         String
+    loggedByUserId String
+    startedAt      DateTime
+    endedAt        DateTime
+    notes          String?
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+
+    baby     Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+    loggedBy User @relation(fields: [loggedByUserId], references: [id], onDelete: Cascade)
+
+    @@index([babyId, startedAt])
+    @@index([babyId, endedAt])
+    @@index([loggedByUserId])
+}
+
 model Consultation {
     id             String    @id @default(cuid())
     babyId         String
@@ -138,19 +157,22 @@ model Consultation {
 }
 
 model Appointment {
-    id        String    @id @default(cuid())
-    babyId    String
-    title     String
-    startsAt  DateTime
-    endsAt    DateTime?
-    location  String?
-    notes     String?   @db.Text
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
+    id             String    @id @default(cuid())
+    babyId         String
+    title          String
+    startsAt       DateTime
+    endsAt         DateTime?
+    location       String?
+    notes          String?   @db.Text
+    reminderAt     DateTime?
+    reminderSentAt DateTime?
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
 
     baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
 
     @@index([babyId, startsAt])
+    @@index([reminderAt, reminderSentAt])
 }
 
 model PredictionCache {
@@ -212,6 +234,7 @@ model User {
     invitesSent         CaregiverInvite[]      @relation("InvitesSent")
     invitesAccepted     CaregiverInvite[]      @relation("InvitesAccepted")
     feedingEventsLogged FeedingEvent[]
+    sleepEventsLogged   SleepEvent[]
     consultationsRecorded Consultation[]
 }
 

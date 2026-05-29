@@ -36,12 +36,27 @@ export const consultationRouter = createTRPCRouter({
     }),
 
   listByBaby: protectedProcedure
-    .input(z.object({ babyId: z.string().cuid() }))
+    .input(
+      z.object({
+        babyId: z.string().cuid(),
+        from: z.coerce.date().optional(),
+        to: z.coerce.date().optional(),
+        limit: z.number().int().min(1).max(200).optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       await requireBabyAccess(ctx.db, ctx.session.user.id, input.babyId);
+      const occurredAt: { gte?: Date; lte?: Date } = {};
+      if (input.from) occurredAt.gte = input.from;
+      if (input.to) occurredAt.lte = input.to;
+
       return ctx.db.consultation.findMany({
-        where: { babyId: input.babyId },
+        where: {
+          babyId: input.babyId,
+          ...(Object.keys(occurredAt).length > 0 ? { occurredAt } : {}),
+        },
         orderBy: { occurredAt: "desc" },
+        ...(input.limit ? { take: input.limit } : {}),
       });
     }),
 });

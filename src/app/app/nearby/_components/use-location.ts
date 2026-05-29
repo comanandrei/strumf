@@ -16,11 +16,12 @@ export type LocationStatus =
     };
 
 const STORAGE_KEY = "strumf.nearby.coords";
+const LEGACY_GO_OUTSIDE_STORAGE_KEY = "strumf.goOutside.coordinates";
 
 export function useSharedLocation() {
   const [status, setStatus] = useState<LocationStatus>({ state: "idle" });
 
-  const request = useCallback(async () => {
+  const request = useCallback(() => {
     if (typeof window === "undefined") return;
 
     const failWithCachedCoords = (message: string, permissionDenied = false) => {
@@ -38,10 +39,6 @@ export function useSharedLocation() {
     }
     if (!window.isSecureContext) {
       failWithCachedCoords("Location access requires a secure HTTPS connection.");
-      return;
-    }
-    if ((await readPermissionState()) === "denied") {
-      failWithCachedCoords(blockedLocationMessage(), true);
       return;
     }
 
@@ -95,17 +92,28 @@ export function effectiveCoords(status: LocationStatus): Coords | null {
 
 function readStoredCoords(): Coords | null {
   if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<Coords>;
-    if (typeof parsed.latitude !== "number" || typeof parsed.longitude !== "number") {
-      return null;
+
+  for (const key of [STORAGE_KEY, LEGACY_GO_OUTSIDE_STORAGE_KEY]) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) continue;
+
+      const parsed = JSON.parse(raw) as Partial<Coords>;
+      if (typeof parsed.latitude !== "number" || typeof parsed.longitude !== "number") {
+        continue;
+      }
+
+      const coords = { latitude: parsed.latitude, longitude: parsed.longitude };
+      if (key !== STORAGE_KEY) {
+        storeCoords(coords);
+      }
+      return coords;
+    } catch {
+      continue;
     }
-    return { latitude: parsed.latitude, longitude: parsed.longitude };
-  } catch {
-    return null;
   }
+
+  return null;
 }
 
 function storeCoords(coords: Coords) {
