@@ -1,5 +1,7 @@
 import rawMilestoneData from "~/data/development-milestones.json";
 
+import { defaultLocale, localeToIntl, type Locale } from "./i18n";
+
 const DAY_MS = 86_400_000;
 const AVG_MONTH_DAYS = 30.4375;
 
@@ -90,35 +92,66 @@ export function getDashboardMilestones(
   return milestones.slice(-limit).reverse();
 }
 
-export function formatMilestoneCategory(category: MilestoneCategory) {
-  if (category === "pulseu_de_crestere") return "Pulseu de crestere";
-  return "Dezvoltare";
+export function formatMilestoneCategory(
+  category: MilestoneCategory,
+  locale: Locale = defaultLocale,
+) {
+  if (category === "pulseu_de_crestere") {
+    return locale === "ro" ? "Pulseu de crestere" : "Growth spurt";
+  }
+  return locale === "ro" ? "Dezvoltare" : "Development";
 }
 
-export function formatMilestoneStatus(status: MilestoneStatus) {
+export function formatMilestoneStatus(status: MilestoneStatus, locale: Locale = defaultLocale) {
   switch (status) {
     case "current":
-      return "Acum";
+      return locale === "ro" ? "Acum" : "Now";
     case "completed":
-      return "Trecut";
+      return locale === "ro" ? "Trecut" : "Past";
     case "upcoming":
-      return "Urmeaza";
+      return locale === "ro" ? "Urmeaza" : "Upcoming";
   }
 }
 
-export function formatRelativeMilestoneTime(milestone: BabyMilestone) {
+export function formatRelativeMilestoneTime(
+  milestone: BabyMilestone,
+  locale: Locale = defaultLocale,
+) {
   if (milestone.status === "current") {
-    return `fereastra activa pana pe ${formatRomanianDate(milestone.endDate)}`;
+    return locale === "ro"
+      ? `fereastra activa pana pe ${formatLocalizedDate(milestone.endDate, locale)}`
+      : `active window until ${formatLocalizedDate(milestone.endDate, locale)}`;
   }
 
   if (milestone.status === "completed") {
-    return `a fost in jur de ${formatRomanianDate(milestone.targetDate)}`;
+    return locale === "ro"
+      ? `a fost in jur de ${formatLocalizedDate(milestone.targetDate, locale)}`
+      : `was around ${formatLocalizedDate(milestone.targetDate, locale)}`;
   }
 
-  return formatDaysFromNow(milestone.daysUntilStart);
+  return formatDaysFromNow(milestone.daysUntilStart, locale);
 }
 
-export function formatDaysFromNow(days: number) {
+export function formatDaysFromNow(days: number, locale: Locale = defaultLocale) {
+  if (locale === "en") {
+    if (days <= 0) return "now";
+    if (days === 1) return "tomorrow";
+    if (days < 14) return `in ${days} day${days === 1 ? "" : "s"}`;
+
+    const weeks = Math.round(days / 7);
+    if (weeks < 9) return `in ${weeks} week${weeks === 1 ? "" : "s"}`;
+
+    const months = Math.round(days / AVG_MONTH_DAYS);
+    if (months < 24) return `in ${months} month${months === 1 ? "" : "s"}`;
+
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    if (!remainingMonths) return `in ${years} year${years === 1 ? "" : "s"}`;
+    return `in ${years} year${years === 1 ? "" : "s"} and ${remainingMonths} month${
+      remainingMonths === 1 ? "" : "s"
+    }`;
+  }
+
   if (days <= 0) return "acum";
   if (days === 1) return "maine";
   if (days < 14) return `in ${days} ${plural(days, "zi", "zile")}`;
@@ -159,7 +192,11 @@ export function formatAgeInRomanian(ageDays: number) {
 }
 
 export function formatRomanianDate(date: Date) {
-  return new Intl.DateTimeFormat("ro-RO", {
+  return formatLocalizedDate(date, "ro");
+}
+
+export function formatLocalizedDate(date: Date, locale: Locale = defaultLocale) {
+  return new Intl.DateTimeFormat(localeToIntl(locale), {
     day: "numeric",
     month: "short",
     year: "numeric",

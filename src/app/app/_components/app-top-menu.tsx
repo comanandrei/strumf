@@ -12,9 +12,9 @@ const menuItems = [
   { href: "/app/log", label: "Log feeding", match: (path: string) => path.startsWith("/app/log") },
   { href: "/app/calendar", label: "Calendar", match: (path: string) => path.startsWith("/app/calendar") },
   {
-    href: "/app/go-outside",
-    label: "Go outside",
-    match: (path: string) => path.startsWith("/app/go-outside"),
+    href: "/app/nearby",
+    label: "Nearby",
+    match: (path: string) => path.startsWith("/app/nearby"),
   },
   { href: "/app/baby", label: "Baby profile", match: (path: string) => path.startsWith("/app/baby") },
   { href: "/app/you", label: "Account", match: (path: string) => path.startsWith("/app/you") },

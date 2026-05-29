@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { useI18n } from "~/app/lib/i18n-provider";
+
 import { CalendarColorIcon } from "./app-icons";
 import { useBabySelection } from "./baby-selection-context";
 
@@ -17,26 +19,46 @@ type NavTab = {
 export function AppBottomNav() {
   const pathname = usePathname();
   const { selectedBabyId } = useBabySelection();
+  const { locale } = useI18n();
   const babyHref = selectedBabyId ? `/app/baby/${selectedBabyId}` : "/app/onboarding";
+  const labels = locale === "ro"
+    ? {
+        main: "Principal",
+        dashboard: "Acasa",
+        log: "Jurnal",
+        calendar: "Calendar",
+        baby: "Bebe",
+        nearby: "Aproape",
+        you: "Tu",
+      }
+    : {
+        main: "Main",
+        dashboard: "Dashboard",
+        log: "Log",
+        calendar: "Calendar",
+        baby: "Baby",
+        nearby: "Nearby",
+        you: "You",
+      };
   const tabs: NavTab[] = [
-    { href: "/app", label: "Dashboard", icon: "✦", match: (p: string) => p === "/app" },
-    { href: "/app/log", label: "Log", icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
+    { href: "/app", label: labels.dashboard, icon: "✦", match: (p: string) => p === "/app" },
+    { href: "/app/log", label: labels.log, icon: "🍼", match: (p: string) => p.startsWith("/app/log") },
     {
       href: "/app/calendar",
-      label: "Calendar",
+      label: labels.calendar,
       icon: <CalendarColorIcon className="h-5 w-5" />,
       match: (p: string) => p.startsWith("/app/calendar"),
     },
-    { href: babyHref, label: "Baby", icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
+    { href: babyHref, label: labels.baby, icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
     {
       href: "/app/nearby",
-      label: "Nearby",
+      label: labels.nearby,
       icon: "🌳",
       match: (p: string) => p.startsWith("/app/nearby"),
     },
     {
       href: "/app/you",
-      label: "You",
+      label: labels.you,
       icon: "♡",
       match: (p: string) => p.startsWith("/app/you") || p.startsWith("/app/onboarding"),
     },
@@ -45,7 +67,7 @@ export function AppBottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-strumf-border bg-strumf-surface/90 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-soft backdrop-blur-md"
-      aria-label="Main"
+      aria-label={labels.main}
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-around px-2">
         {tabs.map((tab) => {

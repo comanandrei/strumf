@@ -7,6 +7,7 @@ import { Button } from "~/app/_components/ui/button";
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
 import { formatClock, formatShortDate, formatTimeAgo, milkTypeLabel } from "~/app/lib/time-ago";
+import { useI18n } from "~/app/lib/i18n-provider";
 import { api } from "~/trpc/react";
 
 import { useBabySelection } from "./baby-selection-context";
@@ -14,10 +15,10 @@ import { useBabySelection } from "./baby-selection-context";
 const AMOUNT_PRESETS = [30, 60, 90, 120, 150] as const;
 
 const MILK_OPTIONS = [
-  { value: "FORMULA" as const, label: "Formula" },
-  { value: "BREAST_MILK" as const, label: "Breast" },
-  { value: "MIXED" as const, label: "Mixed" },
-  { value: "UNKNOWN" as const, label: "Any" },
+  { value: "FORMULA" as const, labels: { ro: "Formula", en: "Formula" } },
+  { value: "BREAST_MILK" as const, labels: { ro: "Matern", en: "Breast" } },
+  { value: "MIXED" as const, labels: { ro: "Mixt", en: "Mixed" } },
+  { value: "UNKNOWN" as const, labels: { ro: "Oricare", en: "Any" } },
 ];
 
 const TIME_OPTIONS = [
@@ -28,6 +29,46 @@ const TIME_OPTIONS = [
 
 export function QuickLogForm() {
   const { babies, selectedBabyId, setSelectedBabyId, isLoading } = useBabySelection();
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        addBabyFirst: "Adauga mai intai un bebelus in familie.",
+        onboarding: "Mergi la onboarding",
+        title: "Noteaza momente",
+        subtitle: "Tinte mari · valori implicite intai",
+        baby: "Bebe",
+        sameAsLast: "La fel ca ultima",
+        tapToFill: "Atinge pentru completare",
+        amount: "Cantitate (ml)",
+        started: "Inceput",
+        timeNow: "Acum",
+        milkType: "Tip lapte",
+        saved: "Salvat.",
+        undo: "Anuleaza",
+        saving: "Se salveaza...",
+        saveFeed: "Salveaza hranirea",
+        allFeedings: "Toate hranirile",
+        deleteFeeding: "Sterge hranirea",
+      }
+    : {
+        addBabyFirst: "Add a baby to your household first.",
+        onboarding: "Go to onboarding",
+        title: "Log moments",
+        subtitle: "Big targets · defaults first",
+        baby: "Baby",
+        sameAsLast: "Same as last",
+        tapToFill: "Tap to fill",
+        amount: "Amount (ml)",
+        started: "Started",
+        timeNow: "Now",
+        milkType: "Milk type",
+        saved: "Saved.",
+        undo: "Undo",
+        saving: "Saving...",
+        saveFeed: "Save feed",
+        allFeedings: "All feedings",
+        deleteFeeding: "Delete feeding",
+      };
   const [amountMl, setAmountMl] = useState(90);
   const [milkType, setMilkType] = useState<(typeof MILK_OPTIONS)[number]["value"]>("FORMULA");
   const [offsetMin, setOffsetMin] = useState<(typeof TIME_OPTIONS)[number]["min"]>(0);
@@ -79,9 +120,9 @@ export function QuickLogForm() {
   if (babies.length === 0) {
     return (
       <Card>
-        <p className="text-strumf-muted">Add a baby to your household first.</p>
+        <p className="text-strumf-muted">{copy.addBabyFirst}</p>
         <Link href="/app/onboarding" className="mt-4 inline-block text-strumf-accent underline">
-          Go to onboarding
+          {copy.onboarding}
         </Link>
       </Card>
     );
@@ -106,14 +147,14 @@ export function QuickLogForm() {
   return (
     <div className="flex flex-col gap-5 pb-6">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Log moments</h1>
-        <p className="mt-1 text-sm text-strumf-muted">Big targets · defaults first</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">{copy.title}</h1>
+        <p className="mt-1 text-sm text-strumf-muted">{copy.subtitle}</p>
       </header>
 
       {babies.length > 1 ? (
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Baby
+            {copy.baby}
           </p>
           <div className="flex flex-wrap gap-2">
             {babies.map((b) => (
@@ -137,14 +178,14 @@ export function QuickLogForm() {
         >
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wide text-strumf-muted">
-              Same as last
+              {copy.sameAsLast}
             </p>
             <p className="font-display text-lg font-bold">
-              {last.amountMl} ml · {milkTypeLabel(last.milkType)}
+              {last.amountMl} ml · {milkTypeLabel(last.milkType, locale)}
             </p>
           </div>
           <div className="rounded-full bg-white/65 px-3 py-1 text-xs font-bold">
-            Tap to fill
+            {copy.tapToFill}
           </div>
         </button>
       ) : null}
@@ -152,7 +193,7 @@ export function QuickLogForm() {
       <Card className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <label className="space-y-1.5 text-sm font-bold">
-            <span>Amount (ml)</span>
+            <span>{copy.amount}</span>
             <input
               type="number"
               min={1}
@@ -163,7 +204,7 @@ export function QuickLogForm() {
             />
           </label>
           <div className="space-y-1.5">
-            <p className="text-sm font-bold">Started</p>
+            <p className="text-sm font-bold">{copy.started}</p>
             <div className="flex rounded-xl bg-white/60 p-1">
               {TIME_OPTIONS.map((opt) => (
                 <button
@@ -174,7 +215,7 @@ export function QuickLogForm() {
                     offsetMin === opt.min ? "bg-strumf-card shadow-card" : "text-strumf-muted"
                   }`}
                 >
-                  {opt.label}
+                  {opt.min === 0 ? copy.timeNow : opt.label}
                 </button>
               ))}
             </div>
@@ -191,7 +232,7 @@ export function QuickLogForm() {
 
       <Card>
         <p className="mb-3 text-xs font-bold uppercase tracking-wide text-strumf-muted">
-          Milk type
+          {copy.milkType}
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {MILK_OPTIONS.map((opt) => (
@@ -201,7 +242,7 @@ export function QuickLogForm() {
               onClick={() => setMilkType(opt.value)}
               className="!min-h-12"
             >
-              {opt.label}
+              {opt.labels[locale]}
             </Chip>
           ))}
         </div>
@@ -211,7 +252,7 @@ export function QuickLogForm() {
 
       {undoId ? (
         <Card className="flex flex-col gap-3 border-strumf-accent/40 bg-strumf-accent/15 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-medium text-strumf-accent">Saved.</p>
+          <p className="font-medium text-strumf-accent">{copy.saved}</p>
           <Button
             type="button"
             variant="ghost"
@@ -219,7 +260,7 @@ export function QuickLogForm() {
             disabled={remove.isPending}
             onClick={() => remove.mutate({ feedingEventId: undoId })}
           >
-            Undo
+            {copy.undo}
           </Button>
         </Card>
       ) : null}
@@ -231,12 +272,12 @@ export function QuickLogForm() {
         disabled={create.isPending || !selectedBabyId || amountMl < 1}
         onClick={submit}
       >
-        {create.isPending ? "Saving…" : "Save feed"}
+        {create.isPending ? copy.saving : copy.saveFeed}
       </Button>
 
       {recentFeeds?.length ? (
         <section className="space-y-2">
-          <h2 className="font-display text-lg font-semibold">All feedings</h2>
+          <h2 className="font-display text-lg font-semibold">{copy.allFeedings}</h2>
           <ul className="space-y-2">
             {recentFeeds.map((feed) => (
               <li
@@ -251,12 +292,12 @@ export function QuickLogForm() {
                     <p className="font-display text-base font-semibold">
                       {feed.amountMl} ml
                       <span className="ml-2 text-xs font-normal text-strumf-muted">
-                        {milkTypeLabel(feed.milkType)}
+                        {milkTypeLabel(feed.milkType, locale)}
                       </span>
                     </p>
                     <p className="text-xs text-strumf-muted">
-                      {formatShortDate(feed.startedAt)} · {formatClock(feed.startedAt)} ·{" "}
-                      {formatTimeAgo(feed.startedAt)}
+                      {formatShortDate(feed.startedAt, locale)} · {formatClock(feed.startedAt, locale)} ·{" "}
+                      {formatTimeAgo(feed.startedAt, locale)}
                     </p>
                   </div>
                 </div>
@@ -264,7 +305,7 @@ export function QuickLogForm() {
                   type="button"
                   onClick={() => remove.mutate({ feedingEventId: feed.id })}
                   className="transition-smooth text-strumf-muted hover:text-strumf-danger"
-                  aria-label="Delete feeding"
+                  aria-label={copy.deleteFeeding}
                 >
                   ×
                 </button>

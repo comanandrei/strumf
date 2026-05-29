@@ -39,6 +39,11 @@ export type Baby = $Result.DefaultSelection<Prisma.$BabyPayload>
  */
 export type FeedingEvent = $Result.DefaultSelection<Prisma.$FeedingEventPayload>
 /**
+ * Model SleepEvent
+ * 
+ */
+export type SleepEvent = $Result.DefaultSelection<Prisma.$SleepEventPayload>
+/**
  * Model Consultation
  * 
  */
@@ -286,6 +291,16 @@ export class PrismaClient<
     * ```
     */
   get feedingEvent(): Prisma.FeedingEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.sleepEvent`: Exposes CRUD operations for the **SleepEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SleepEvents
+    * const sleepEvents = await prisma.sleepEvent.findMany()
+    * ```
+    */
+  get sleepEvent(): Prisma.SleepEventDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.consultation`: Exposes CRUD operations for the **Consultation** model.
@@ -802,6 +817,7 @@ export namespace Prisma {
     CaregiverInvite: 'CaregiverInvite',
     Baby: 'Baby',
     FeedingEvent: 'FeedingEvent',
+    SleepEvent: 'SleepEvent',
     Consultation: 'Consultation',
     Appointment: 'Appointment',
     PredictionCache: 'PredictionCache',
@@ -827,7 +843,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "household" | "householdMembership" | "caregiverInvite" | "baby" | "feedingEvent" | "consultation" | "appointment" | "predictionCache" | "account" | "session" | "user" | "verificationToken"
+      modelProps: "household" | "householdMembership" | "caregiverInvite" | "baby" | "feedingEvent" | "sleepEvent" | "consultation" | "appointment" | "predictionCache" | "account" | "session" | "user" | "verificationToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1198,6 +1214,80 @@ export namespace Prisma {
           count: {
             args: Prisma.FeedingEventCountArgs<ExtArgs>
             result: $Utils.Optional<FeedingEventCountAggregateOutputType> | number
+          }
+        }
+      }
+      SleepEvent: {
+        payload: Prisma.$SleepEventPayload<ExtArgs>
+        fields: Prisma.SleepEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SleepEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SleepEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>
+          }
+          findFirst: {
+            args: Prisma.SleepEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SleepEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>
+          }
+          findMany: {
+            args: Prisma.SleepEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>[]
+          }
+          create: {
+            args: Prisma.SleepEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>
+          }
+          createMany: {
+            args: Prisma.SleepEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SleepEventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>[]
+          }
+          delete: {
+            args: Prisma.SleepEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>
+          }
+          update: {
+            args: Prisma.SleepEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.SleepEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SleepEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SleepEventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>[]
+          }
+          upsert: {
+            args: Prisma.SleepEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SleepEventPayload>
+          }
+          aggregate: {
+            args: Prisma.SleepEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSleepEvent>
+          }
+          groupBy: {
+            args: Prisma.SleepEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SleepEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SleepEventCountArgs<ExtArgs>
+            result: $Utils.Optional<SleepEventCountAggregateOutputType> | number
           }
         }
       }
@@ -1820,6 +1910,7 @@ export namespace Prisma {
     caregiverInvite?: CaregiverInviteOmit
     baby?: BabyOmit
     feedingEvent?: FeedingEventOmit
+    sleepEvent?: SleepEventOmit
     consultation?: ConsultationOmit
     appointment?: AppointmentOmit
     predictionCache?: PredictionCacheOmit
@@ -1957,6 +2048,7 @@ export namespace Prisma {
 
   export type BabyCountOutputType = {
     feedingEvents: number
+    sleepEvents: number
     consultations: number
     appointments: number
     predictionCaches: number
@@ -1964,6 +2056,7 @@ export namespace Prisma {
 
   export type BabyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     feedingEvents?: boolean | BabyCountOutputTypeCountFeedingEventsArgs
+    sleepEvents?: boolean | BabyCountOutputTypeCountSleepEventsArgs
     consultations?: boolean | BabyCountOutputTypeCountConsultationsArgs
     appointments?: boolean | BabyCountOutputTypeCountAppointmentsArgs
     predictionCaches?: boolean | BabyCountOutputTypeCountPredictionCachesArgs
@@ -1985,6 +2078,13 @@ export namespace Prisma {
    */
   export type BabyCountOutputTypeCountFeedingEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FeedingEventWhereInput
+  }
+
+  /**
+   * BabyCountOutputType without action
+   */
+  export type BabyCountOutputTypeCountSleepEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SleepEventWhereInput
   }
 
   /**
@@ -2020,6 +2120,7 @@ export namespace Prisma {
     invitesSent: number
     invitesAccepted: number
     feedingEventsLogged: number
+    sleepEventsLogged: number
     consultationsRecorded: number
   }
 
@@ -2030,6 +2131,7 @@ export namespace Prisma {
     invitesSent?: boolean | UserCountOutputTypeCountInvitesSentArgs
     invitesAccepted?: boolean | UserCountOutputTypeCountInvitesAcceptedArgs
     feedingEventsLogged?: boolean | UserCountOutputTypeCountFeedingEventsLoggedArgs
+    sleepEventsLogged?: boolean | UserCountOutputTypeCountSleepEventsLoggedArgs
     consultationsRecorded?: boolean | UserCountOutputTypeCountConsultationsRecordedArgs
   }
 
@@ -2084,6 +2186,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountFeedingEventsLoggedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FeedingEventWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSleepEventsLoggedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SleepEventWhereInput
   }
 
   /**
@@ -5712,6 +5821,7 @@ export namespace Prisma {
     updatedAt?: boolean
     household?: boolean | HouseholdDefaultArgs<ExtArgs>
     feedingEvents?: boolean | Baby$feedingEventsArgs<ExtArgs>
+    sleepEvents?: boolean | Baby$sleepEventsArgs<ExtArgs>
     consultations?: boolean | Baby$consultationsArgs<ExtArgs>
     appointments?: boolean | Baby$appointmentsArgs<ExtArgs>
     predictionCaches?: boolean | Baby$predictionCachesArgs<ExtArgs>
@@ -5769,6 +5879,7 @@ export namespace Prisma {
   export type BabyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     household?: boolean | HouseholdDefaultArgs<ExtArgs>
     feedingEvents?: boolean | Baby$feedingEventsArgs<ExtArgs>
+    sleepEvents?: boolean | Baby$sleepEventsArgs<ExtArgs>
     consultations?: boolean | Baby$consultationsArgs<ExtArgs>
     appointments?: boolean | Baby$appointmentsArgs<ExtArgs>
     predictionCaches?: boolean | Baby$predictionCachesArgs<ExtArgs>
@@ -5786,6 +5897,7 @@ export namespace Prisma {
     objects: {
       household: Prisma.$HouseholdPayload<ExtArgs>
       feedingEvents: Prisma.$FeedingEventPayload<ExtArgs>[]
+      sleepEvents: Prisma.$SleepEventPayload<ExtArgs>[]
       consultations: Prisma.$ConsultationPayload<ExtArgs>[]
       appointments: Prisma.$AppointmentPayload<ExtArgs>[]
       predictionCaches: Prisma.$PredictionCachePayload<ExtArgs>[]
@@ -6199,6 +6311,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     household<T extends HouseholdDefaultArgs<ExtArgs> = {}>(args?: Subset<T, HouseholdDefaultArgs<ExtArgs>>): Prisma__HouseholdClient<$Result.GetResult<Prisma.$HouseholdPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     feedingEvents<T extends Baby$feedingEventsArgs<ExtArgs> = {}>(args?: Subset<T, Baby$feedingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FeedingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sleepEvents<T extends Baby$sleepEventsArgs<ExtArgs> = {}>(args?: Subset<T, Baby$sleepEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     consultations<T extends Baby$consultationsArgs<ExtArgs> = {}>(args?: Subset<T, Baby$consultationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConsultationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     appointments<T extends Baby$appointmentsArgs<ExtArgs> = {}>(args?: Subset<T, Baby$appointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     predictionCaches<T extends Baby$predictionCachesArgs<ExtArgs> = {}>(args?: Subset<T, Baby$predictionCachesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PredictionCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6660,6 +6773,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FeedingEventScalarFieldEnum | FeedingEventScalarFieldEnum[]
+  }
+
+  /**
+   * Baby.sleepEvents
+   */
+  export type Baby$sleepEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    where?: SleepEventWhereInput
+    orderBy?: SleepEventOrderByWithRelationInput | SleepEventOrderByWithRelationInput[]
+    cursor?: SleepEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SleepEventScalarFieldEnum | SleepEventScalarFieldEnum[]
   }
 
   /**
@@ -7915,6 +8052,1111 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: FeedingEventInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SleepEvent
+   */
+
+  export type AggregateSleepEvent = {
+    _count: SleepEventCountAggregateOutputType | null
+    _min: SleepEventMinAggregateOutputType | null
+    _max: SleepEventMaxAggregateOutputType | null
+  }
+
+  export type SleepEventMinAggregateOutputType = {
+    id: string | null
+    babyId: string | null
+    loggedByUserId: string | null
+    startedAt: Date | null
+    endedAt: Date | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SleepEventMaxAggregateOutputType = {
+    id: string | null
+    babyId: string | null
+    loggedByUserId: string | null
+    startedAt: Date | null
+    endedAt: Date | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SleepEventCountAggregateOutputType = {
+    id: number
+    babyId: number
+    loggedByUserId: number
+    startedAt: number
+    endedAt: number
+    notes: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SleepEventMinAggregateInputType = {
+    id?: true
+    babyId?: true
+    loggedByUserId?: true
+    startedAt?: true
+    endedAt?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SleepEventMaxAggregateInputType = {
+    id?: true
+    babyId?: true
+    loggedByUserId?: true
+    startedAt?: true
+    endedAt?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SleepEventCountAggregateInputType = {
+    id?: true
+    babyId?: true
+    loggedByUserId?: true
+    startedAt?: true
+    endedAt?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SleepEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SleepEvent to aggregate.
+     */
+    where?: SleepEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SleepEvents to fetch.
+     */
+    orderBy?: SleepEventOrderByWithRelationInput | SleepEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SleepEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SleepEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SleepEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SleepEvents
+    **/
+    _count?: true | SleepEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SleepEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SleepEventMaxAggregateInputType
+  }
+
+  export type GetSleepEventAggregateType<T extends SleepEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateSleepEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSleepEvent[P]>
+      : GetScalarType<T[P], AggregateSleepEvent[P]>
+  }
+
+
+
+
+  export type SleepEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SleepEventWhereInput
+    orderBy?: SleepEventOrderByWithAggregationInput | SleepEventOrderByWithAggregationInput[]
+    by: SleepEventScalarFieldEnum[] | SleepEventScalarFieldEnum
+    having?: SleepEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SleepEventCountAggregateInputType | true
+    _min?: SleepEventMinAggregateInputType
+    _max?: SleepEventMaxAggregateInputType
+  }
+
+  export type SleepEventGroupByOutputType = {
+    id: string
+    babyId: string
+    loggedByUserId: string
+    startedAt: Date
+    endedAt: Date
+    notes: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SleepEventCountAggregateOutputType | null
+    _min: SleepEventMinAggregateOutputType | null
+    _max: SleepEventMaxAggregateOutputType | null
+  }
+
+  type GetSleepEventGroupByPayload<T extends SleepEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SleepEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SleepEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SleepEventGroupByOutputType[P]>
+            : GetScalarType<T[P], SleepEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SleepEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    babyId?: boolean
+    loggedByUserId?: boolean
+    startedAt?: boolean
+    endedAt?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    baby?: boolean | BabyDefaultArgs<ExtArgs>
+    loggedBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["sleepEvent"]>
+
+  export type SleepEventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    babyId?: boolean
+    loggedByUserId?: boolean
+    startedAt?: boolean
+    endedAt?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    baby?: boolean | BabyDefaultArgs<ExtArgs>
+    loggedBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["sleepEvent"]>
+
+  export type SleepEventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    babyId?: boolean
+    loggedByUserId?: boolean
+    startedAt?: boolean
+    endedAt?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    baby?: boolean | BabyDefaultArgs<ExtArgs>
+    loggedBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["sleepEvent"]>
+
+  export type SleepEventSelectScalar = {
+    id?: boolean
+    babyId?: boolean
+    loggedByUserId?: boolean
+    startedAt?: boolean
+    endedAt?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SleepEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "babyId" | "loggedByUserId" | "startedAt" | "endedAt" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["sleepEvent"]>
+  export type SleepEventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    baby?: boolean | BabyDefaultArgs<ExtArgs>
+    loggedBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SleepEventIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    baby?: boolean | BabyDefaultArgs<ExtArgs>
+    loggedBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SleepEventIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    baby?: boolean | BabyDefaultArgs<ExtArgs>
+    loggedBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $SleepEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SleepEvent"
+    objects: {
+      baby: Prisma.$BabyPayload<ExtArgs>
+      loggedBy: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      babyId: string
+      loggedByUserId: string
+      startedAt: Date
+      endedAt: Date
+      notes: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["sleepEvent"]>
+    composites: {}
+  }
+
+  type SleepEventGetPayload<S extends boolean | null | undefined | SleepEventDefaultArgs> = $Result.GetResult<Prisma.$SleepEventPayload, S>
+
+  type SleepEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SleepEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SleepEventCountAggregateInputType | true
+    }
+
+  export interface SleepEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SleepEvent'], meta: { name: 'SleepEvent' } }
+    /**
+     * Find zero or one SleepEvent that matches the filter.
+     * @param {SleepEventFindUniqueArgs} args - Arguments to find a SleepEvent
+     * @example
+     * // Get one SleepEvent
+     * const sleepEvent = await prisma.sleepEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SleepEventFindUniqueArgs>(args: SelectSubset<T, SleepEventFindUniqueArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SleepEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SleepEventFindUniqueOrThrowArgs} args - Arguments to find a SleepEvent
+     * @example
+     * // Get one SleepEvent
+     * const sleepEvent = await prisma.sleepEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SleepEventFindUniqueOrThrowArgs>(args: SelectSubset<T, SleepEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SleepEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventFindFirstArgs} args - Arguments to find a SleepEvent
+     * @example
+     * // Get one SleepEvent
+     * const sleepEvent = await prisma.sleepEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SleepEventFindFirstArgs>(args?: SelectSubset<T, SleepEventFindFirstArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SleepEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventFindFirstOrThrowArgs} args - Arguments to find a SleepEvent
+     * @example
+     * // Get one SleepEvent
+     * const sleepEvent = await prisma.sleepEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SleepEventFindFirstOrThrowArgs>(args?: SelectSubset<T, SleepEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SleepEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SleepEvents
+     * const sleepEvents = await prisma.sleepEvent.findMany()
+     * 
+     * // Get first 10 SleepEvents
+     * const sleepEvents = await prisma.sleepEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sleepEventWithIdOnly = await prisma.sleepEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SleepEventFindManyArgs>(args?: SelectSubset<T, SleepEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SleepEvent.
+     * @param {SleepEventCreateArgs} args - Arguments to create a SleepEvent.
+     * @example
+     * // Create one SleepEvent
+     * const SleepEvent = await prisma.sleepEvent.create({
+     *   data: {
+     *     // ... data to create a SleepEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends SleepEventCreateArgs>(args: SelectSubset<T, SleepEventCreateArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SleepEvents.
+     * @param {SleepEventCreateManyArgs} args - Arguments to create many SleepEvents.
+     * @example
+     * // Create many SleepEvents
+     * const sleepEvent = await prisma.sleepEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SleepEventCreateManyArgs>(args?: SelectSubset<T, SleepEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SleepEvents and returns the data saved in the database.
+     * @param {SleepEventCreateManyAndReturnArgs} args - Arguments to create many SleepEvents.
+     * @example
+     * // Create many SleepEvents
+     * const sleepEvent = await prisma.sleepEvent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SleepEvents and only return the `id`
+     * const sleepEventWithIdOnly = await prisma.sleepEvent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SleepEventCreateManyAndReturnArgs>(args?: SelectSubset<T, SleepEventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SleepEvent.
+     * @param {SleepEventDeleteArgs} args - Arguments to delete one SleepEvent.
+     * @example
+     * // Delete one SleepEvent
+     * const SleepEvent = await prisma.sleepEvent.delete({
+     *   where: {
+     *     // ... filter to delete one SleepEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SleepEventDeleteArgs>(args: SelectSubset<T, SleepEventDeleteArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SleepEvent.
+     * @param {SleepEventUpdateArgs} args - Arguments to update one SleepEvent.
+     * @example
+     * // Update one SleepEvent
+     * const sleepEvent = await prisma.sleepEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SleepEventUpdateArgs>(args: SelectSubset<T, SleepEventUpdateArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SleepEvents.
+     * @param {SleepEventDeleteManyArgs} args - Arguments to filter SleepEvents to delete.
+     * @example
+     * // Delete a few SleepEvents
+     * const { count } = await prisma.sleepEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SleepEventDeleteManyArgs>(args?: SelectSubset<T, SleepEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SleepEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SleepEvents
+     * const sleepEvent = await prisma.sleepEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SleepEventUpdateManyArgs>(args: SelectSubset<T, SleepEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SleepEvents and returns the data updated in the database.
+     * @param {SleepEventUpdateManyAndReturnArgs} args - Arguments to update many SleepEvents.
+     * @example
+     * // Update many SleepEvents
+     * const sleepEvent = await prisma.sleepEvent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SleepEvents and only return the `id`
+     * const sleepEventWithIdOnly = await prisma.sleepEvent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SleepEventUpdateManyAndReturnArgs>(args: SelectSubset<T, SleepEventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SleepEvent.
+     * @param {SleepEventUpsertArgs} args - Arguments to update or create a SleepEvent.
+     * @example
+     * // Update or create a SleepEvent
+     * const sleepEvent = await prisma.sleepEvent.upsert({
+     *   create: {
+     *     // ... data to create a SleepEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SleepEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SleepEventUpsertArgs>(args: SelectSubset<T, SleepEventUpsertArgs<ExtArgs>>): Prisma__SleepEventClient<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SleepEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventCountArgs} args - Arguments to filter SleepEvents to count.
+     * @example
+     * // Count the number of SleepEvents
+     * const count = await prisma.sleepEvent.count({
+     *   where: {
+     *     // ... the filter for the SleepEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends SleepEventCountArgs>(
+      args?: Subset<T, SleepEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SleepEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SleepEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SleepEventAggregateArgs>(args: Subset<T, SleepEventAggregateArgs>): Prisma.PrismaPromise<GetSleepEventAggregateType<T>>
+
+    /**
+     * Group by SleepEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SleepEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SleepEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SleepEventGroupByArgs['orderBy'] }
+        : { orderBy?: SleepEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SleepEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSleepEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SleepEvent model
+   */
+  readonly fields: SleepEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SleepEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SleepEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    baby<T extends BabyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BabyDefaultArgs<ExtArgs>>): Prisma__BabyClient<$Result.GetResult<Prisma.$BabyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    loggedBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SleepEvent model
+   */
+  interface SleepEventFieldRefs {
+    readonly id: FieldRef<"SleepEvent", 'String'>
+    readonly babyId: FieldRef<"SleepEvent", 'String'>
+    readonly loggedByUserId: FieldRef<"SleepEvent", 'String'>
+    readonly startedAt: FieldRef<"SleepEvent", 'DateTime'>
+    readonly endedAt: FieldRef<"SleepEvent", 'DateTime'>
+    readonly notes: FieldRef<"SleepEvent", 'String'>
+    readonly createdAt: FieldRef<"SleepEvent", 'DateTime'>
+    readonly updatedAt: FieldRef<"SleepEvent", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SleepEvent findUnique
+   */
+  export type SleepEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SleepEvent to fetch.
+     */
+    where: SleepEventWhereUniqueInput
+  }
+
+  /**
+   * SleepEvent findUniqueOrThrow
+   */
+  export type SleepEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SleepEvent to fetch.
+     */
+    where: SleepEventWhereUniqueInput
+  }
+
+  /**
+   * SleepEvent findFirst
+   */
+  export type SleepEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SleepEvent to fetch.
+     */
+    where?: SleepEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SleepEvents to fetch.
+     */
+    orderBy?: SleepEventOrderByWithRelationInput | SleepEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SleepEvents.
+     */
+    cursor?: SleepEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SleepEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SleepEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SleepEvents.
+     */
+    distinct?: SleepEventScalarFieldEnum | SleepEventScalarFieldEnum[]
+  }
+
+  /**
+   * SleepEvent findFirstOrThrow
+   */
+  export type SleepEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SleepEvent to fetch.
+     */
+    where?: SleepEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SleepEvents to fetch.
+     */
+    orderBy?: SleepEventOrderByWithRelationInput | SleepEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SleepEvents.
+     */
+    cursor?: SleepEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SleepEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SleepEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SleepEvents.
+     */
+    distinct?: SleepEventScalarFieldEnum | SleepEventScalarFieldEnum[]
+  }
+
+  /**
+   * SleepEvent findMany
+   */
+  export type SleepEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SleepEvents to fetch.
+     */
+    where?: SleepEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SleepEvents to fetch.
+     */
+    orderBy?: SleepEventOrderByWithRelationInput | SleepEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SleepEvents.
+     */
+    cursor?: SleepEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SleepEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SleepEvents.
+     */
+    skip?: number
+    distinct?: SleepEventScalarFieldEnum | SleepEventScalarFieldEnum[]
+  }
+
+  /**
+   * SleepEvent create
+   */
+  export type SleepEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SleepEvent.
+     */
+    data: XOR<SleepEventCreateInput, SleepEventUncheckedCreateInput>
+  }
+
+  /**
+   * SleepEvent createMany
+   */
+  export type SleepEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SleepEvents.
+     */
+    data: SleepEventCreateManyInput | SleepEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SleepEvent createManyAndReturn
+   */
+  export type SleepEventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * The data used to create many SleepEvents.
+     */
+    data: SleepEventCreateManyInput | SleepEventCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SleepEvent update
+   */
+  export type SleepEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SleepEvent.
+     */
+    data: XOR<SleepEventUpdateInput, SleepEventUncheckedUpdateInput>
+    /**
+     * Choose, which SleepEvent to update.
+     */
+    where: SleepEventWhereUniqueInput
+  }
+
+  /**
+   * SleepEvent updateMany
+   */
+  export type SleepEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SleepEvents.
+     */
+    data: XOR<SleepEventUpdateManyMutationInput, SleepEventUncheckedUpdateManyInput>
+    /**
+     * Filter which SleepEvents to update
+     */
+    where?: SleepEventWhereInput
+    /**
+     * Limit how many SleepEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SleepEvent updateManyAndReturn
+   */
+  export type SleepEventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * The data used to update SleepEvents.
+     */
+    data: XOR<SleepEventUpdateManyMutationInput, SleepEventUncheckedUpdateManyInput>
+    /**
+     * Filter which SleepEvents to update
+     */
+    where?: SleepEventWhereInput
+    /**
+     * Limit how many SleepEvents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SleepEvent upsert
+   */
+  export type SleepEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SleepEvent to update in case it exists.
+     */
+    where: SleepEventWhereUniqueInput
+    /**
+     * In case the SleepEvent found by the `where` argument doesn't exist, create a new SleepEvent with this data.
+     */
+    create: XOR<SleepEventCreateInput, SleepEventUncheckedCreateInput>
+    /**
+     * In case the SleepEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SleepEventUpdateInput, SleepEventUncheckedUpdateInput>
+  }
+
+  /**
+   * SleepEvent delete
+   */
+  export type SleepEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    /**
+     * Filter which SleepEvent to delete.
+     */
+    where: SleepEventWhereUniqueInput
+  }
+
+  /**
+   * SleepEvent deleteMany
+   */
+  export type SleepEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SleepEvents to delete
+     */
+    where?: SleepEventWhereInput
+    /**
+     * Limit how many SleepEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SleepEvent without action
+   */
+  export type SleepEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
   }
 
 
@@ -13715,6 +14957,7 @@ export namespace Prisma {
     invitesSent?: boolean | User$invitesSentArgs<ExtArgs>
     invitesAccepted?: boolean | User$invitesAcceptedArgs<ExtArgs>
     feedingEventsLogged?: boolean | User$feedingEventsLoggedArgs<ExtArgs>
+    sleepEventsLogged?: boolean | User$sleepEventsLoggedArgs<ExtArgs>
     consultationsRecorded?: boolean | User$consultationsRecordedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -13757,6 +15000,7 @@ export namespace Prisma {
     invitesSent?: boolean | User$invitesSentArgs<ExtArgs>
     invitesAccepted?: boolean | User$invitesAcceptedArgs<ExtArgs>
     feedingEventsLogged?: boolean | User$feedingEventsLoggedArgs<ExtArgs>
+    sleepEventsLogged?: boolean | User$sleepEventsLoggedArgs<ExtArgs>
     consultationsRecorded?: boolean | User$consultationsRecordedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -13772,6 +15016,7 @@ export namespace Prisma {
       invitesSent: Prisma.$CaregiverInvitePayload<ExtArgs>[]
       invitesAccepted: Prisma.$CaregiverInvitePayload<ExtArgs>[]
       feedingEventsLogged: Prisma.$FeedingEventPayload<ExtArgs>[]
+      sleepEventsLogged: Prisma.$SleepEventPayload<ExtArgs>[]
       consultationsRecorded: Prisma.$ConsultationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -14182,6 +15427,7 @@ export namespace Prisma {
     invitesSent<T extends User$invitesSentArgs<ExtArgs> = {}>(args?: Subset<T, User$invitesSentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CaregiverInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invitesAccepted<T extends User$invitesAcceptedArgs<ExtArgs> = {}>(args?: Subset<T, User$invitesAcceptedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CaregiverInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     feedingEventsLogged<T extends User$feedingEventsLoggedArgs<ExtArgs> = {}>(args?: Subset<T, User$feedingEventsLoggedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FeedingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sleepEventsLogged<T extends User$sleepEventsLoggedArgs<ExtArgs> = {}>(args?: Subset<T, User$sleepEventsLoggedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SleepEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     consultationsRecorded<T extends User$consultationsRecordedArgs<ExtArgs> = {}>(args?: Subset<T, User$consultationsRecordedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConsultationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -14748,6 +15994,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FeedingEventScalarFieldEnum | FeedingEventScalarFieldEnum[]
+  }
+
+  /**
+   * User.sleepEventsLogged
+   */
+  export type User$sleepEventsLoggedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SleepEvent
+     */
+    select?: SleepEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SleepEvent
+     */
+    omit?: SleepEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SleepEventInclude<ExtArgs> | null
+    where?: SleepEventWhereInput
+    orderBy?: SleepEventOrderByWithRelationInput | SleepEventOrderByWithRelationInput[]
+    cursor?: SleepEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SleepEventScalarFieldEnum | SleepEventScalarFieldEnum[]
   }
 
   /**
@@ -15848,6 +17118,20 @@ export namespace Prisma {
   export type FeedingEventScalarFieldEnum = (typeof FeedingEventScalarFieldEnum)[keyof typeof FeedingEventScalarFieldEnum]
 
 
+  export const SleepEventScalarFieldEnum: {
+    id: 'id',
+    babyId: 'babyId',
+    loggedByUserId: 'loggedByUserId',
+    startedAt: 'startedAt',
+    endedAt: 'endedAt',
+    notes: 'notes',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SleepEventScalarFieldEnum = (typeof SleepEventScalarFieldEnum)[keyof typeof SleepEventScalarFieldEnum]
+
+
   export const ConsultationScalarFieldEnum: {
     id: 'id',
     babyId: 'babyId',
@@ -16336,6 +17620,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Baby"> | Date | string
     household?: XOR<HouseholdScalarRelationFilter, HouseholdWhereInput>
     feedingEvents?: FeedingEventListRelationFilter
+    sleepEvents?: SleepEventListRelationFilter
     consultations?: ConsultationListRelationFilter
     appointments?: AppointmentListRelationFilter
     predictionCaches?: PredictionCacheListRelationFilter
@@ -16356,6 +17641,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     household?: HouseholdOrderByWithRelationInput
     feedingEvents?: FeedingEventOrderByRelationAggregateInput
+    sleepEvents?: SleepEventOrderByRelationAggregateInput
     consultations?: ConsultationOrderByRelationAggregateInput
     appointments?: AppointmentOrderByRelationAggregateInput
     predictionCaches?: PredictionCacheOrderByRelationAggregateInput
@@ -16379,6 +17665,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Baby"> | Date | string
     household?: XOR<HouseholdScalarRelationFilter, HouseholdWhereInput>
     feedingEvents?: FeedingEventListRelationFilter
+    sleepEvents?: SleepEventListRelationFilter
     consultations?: ConsultationListRelationFilter
     appointments?: AppointmentListRelationFilter
     predictionCaches?: PredictionCacheListRelationFilter
@@ -16505,6 +17792,79 @@ export namespace Prisma {
     notes?: StringNullableWithAggregatesFilter<"FeedingEvent"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FeedingEvent"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FeedingEvent"> | Date | string
+  }
+
+  export type SleepEventWhereInput = {
+    AND?: SleepEventWhereInput | SleepEventWhereInput[]
+    OR?: SleepEventWhereInput[]
+    NOT?: SleepEventWhereInput | SleepEventWhereInput[]
+    id?: StringFilter<"SleepEvent"> | string
+    babyId?: StringFilter<"SleepEvent"> | string
+    loggedByUserId?: StringFilter<"SleepEvent"> | string
+    startedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    endedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    notes?: StringNullableFilter<"SleepEvent"> | string | null
+    createdAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    updatedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    baby?: XOR<BabyScalarRelationFilter, BabyWhereInput>
+    loggedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type SleepEventOrderByWithRelationInput = {
+    id?: SortOrder
+    babyId?: SortOrder
+    loggedByUserId?: SortOrder
+    startedAt?: SortOrder
+    endedAt?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    baby?: BabyOrderByWithRelationInput
+    loggedBy?: UserOrderByWithRelationInput
+  }
+
+  export type SleepEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SleepEventWhereInput | SleepEventWhereInput[]
+    OR?: SleepEventWhereInput[]
+    NOT?: SleepEventWhereInput | SleepEventWhereInput[]
+    babyId?: StringFilter<"SleepEvent"> | string
+    loggedByUserId?: StringFilter<"SleepEvent"> | string
+    startedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    endedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    notes?: StringNullableFilter<"SleepEvent"> | string | null
+    createdAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    updatedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    baby?: XOR<BabyScalarRelationFilter, BabyWhereInput>
+    loggedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type SleepEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    babyId?: SortOrder
+    loggedByUserId?: SortOrder
+    startedAt?: SortOrder
+    endedAt?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SleepEventCountOrderByAggregateInput
+    _max?: SleepEventMaxOrderByAggregateInput
+    _min?: SleepEventMinOrderByAggregateInput
+  }
+
+  export type SleepEventScalarWhereWithAggregatesInput = {
+    AND?: SleepEventScalarWhereWithAggregatesInput | SleepEventScalarWhereWithAggregatesInput[]
+    OR?: SleepEventScalarWhereWithAggregatesInput[]
+    NOT?: SleepEventScalarWhereWithAggregatesInput | SleepEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SleepEvent"> | string
+    babyId?: StringWithAggregatesFilter<"SleepEvent"> | string
+    loggedByUserId?: StringWithAggregatesFilter<"SleepEvent"> | string
+    startedAt?: DateTimeWithAggregatesFilter<"SleepEvent"> | Date | string
+    endedAt?: DateTimeWithAggregatesFilter<"SleepEvent"> | Date | string
+    notes?: StringNullableWithAggregatesFilter<"SleepEvent"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"SleepEvent"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SleepEvent"> | Date | string
   }
 
   export type ConsultationWhereInput = {
@@ -16905,6 +18265,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteListRelationFilter
     invitesAccepted?: CaregiverInviteListRelationFilter
     feedingEventsLogged?: FeedingEventListRelationFilter
+    sleepEventsLogged?: SleepEventListRelationFilter
     consultationsRecorded?: ConsultationListRelationFilter
   }
 
@@ -16922,6 +18283,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteOrderByRelationAggregateInput
     invitesAccepted?: CaregiverInviteOrderByRelationAggregateInput
     feedingEventsLogged?: FeedingEventOrderByRelationAggregateInput
+    sleepEventsLogged?: SleepEventOrderByRelationAggregateInput
     consultationsRecorded?: ConsultationOrderByRelationAggregateInput
   }
 
@@ -16942,6 +18304,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteListRelationFilter
     invitesAccepted?: CaregiverInviteListRelationFilter
     feedingEventsLogged?: FeedingEventListRelationFilter
+    sleepEventsLogged?: SleepEventListRelationFilter
     consultationsRecorded?: ConsultationListRelationFilter
   }, "id" | "email">
 
@@ -17238,6 +18601,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     household: HouseholdCreateNestedOneWithoutBabiesInput
     feedingEvents?: FeedingEventCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventCreateNestedManyWithoutBabyInput
     consultations?: ConsultationCreateNestedManyWithoutBabyInput
     appointments?: AppointmentCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheCreateNestedManyWithoutBabyInput
@@ -17257,6 +18621,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     feedingEvents?: FeedingEventUncheckedCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventUncheckedCreateNestedManyWithoutBabyInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutBabyInput
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheUncheckedCreateNestedManyWithoutBabyInput
@@ -17276,6 +18641,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     household?: HouseholdUpdateOneRequiredWithoutBabiesNestedInput
     feedingEvents?: FeedingEventUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUpdateManyWithoutBabyNestedInput
@@ -17295,6 +18661,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     feedingEvents?: FeedingEventUncheckedUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUncheckedUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUncheckedUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUncheckedUpdateManyWithoutBabyNestedInput
@@ -17428,6 +18795,81 @@ export namespace Prisma {
     endedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     amountMl?: IntFieldUpdateOperationsInput | number
     milkType?: EnumMilkTypeFieldUpdateOperationsInput | $Enums.MilkType
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventCreateInput = {
+    id?: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    baby: BabyCreateNestedOneWithoutSleepEventsInput
+    loggedBy: UserCreateNestedOneWithoutSleepEventsLoggedInput
+  }
+
+  export type SleepEventUncheckedCreateInput = {
+    id?: string
+    babyId: string
+    loggedByUserId: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SleepEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    baby?: BabyUpdateOneRequiredWithoutSleepEventsNestedInput
+    loggedBy?: UserUpdateOneRequiredWithoutSleepEventsLoggedNestedInput
+  }
+
+  export type SleepEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    babyId?: StringFieldUpdateOperationsInput | string
+    loggedByUserId?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventCreateManyInput = {
+    id?: string
+    babyId: string
+    loggedByUserId: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SleepEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    babyId?: StringFieldUpdateOperationsInput | string
+    loggedByUserId?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17861,6 +19303,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -17878,6 +19321,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -17895,6 +19339,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -17912,6 +19357,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -18286,6 +19732,12 @@ export namespace Prisma {
     none?: FeedingEventWhereInput
   }
 
+  export type SleepEventListRelationFilter = {
+    every?: SleepEventWhereInput
+    some?: SleepEventWhereInput
+    none?: SleepEventWhereInput
+  }
+
   export type ConsultationListRelationFilter = {
     every?: ConsultationWhereInput
     some?: ConsultationWhereInput
@@ -18305,6 +19757,10 @@ export namespace Prisma {
   }
 
   export type FeedingEventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SleepEventOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -18497,6 +19953,39 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumMilkTypeFilter<$PrismaModel>
     _max?: NestedEnumMilkTypeFilter<$PrismaModel>
+  }
+
+  export type SleepEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    babyId?: SortOrder
+    loggedByUserId?: SortOrder
+    startedAt?: SortOrder
+    endedAt?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SleepEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    babyId?: SortOrder
+    loggedByUserId?: SortOrder
+    startedAt?: SortOrder
+    endedAt?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SleepEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    babyId?: SortOrder
+    loggedByUserId?: SortOrder
+    startedAt?: SortOrder
+    endedAt?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type ConsultationCountOrderByAggregateInput = {
@@ -19058,6 +20547,13 @@ export namespace Prisma {
     connect?: FeedingEventWhereUniqueInput | FeedingEventWhereUniqueInput[]
   }
 
+  export type SleepEventCreateNestedManyWithoutBabyInput = {
+    create?: XOR<SleepEventCreateWithoutBabyInput, SleepEventUncheckedCreateWithoutBabyInput> | SleepEventCreateWithoutBabyInput[] | SleepEventUncheckedCreateWithoutBabyInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutBabyInput | SleepEventCreateOrConnectWithoutBabyInput[]
+    createMany?: SleepEventCreateManyBabyInputEnvelope
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+  }
+
   export type ConsultationCreateNestedManyWithoutBabyInput = {
     create?: XOR<ConsultationCreateWithoutBabyInput, ConsultationUncheckedCreateWithoutBabyInput> | ConsultationCreateWithoutBabyInput[] | ConsultationUncheckedCreateWithoutBabyInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutBabyInput | ConsultationCreateOrConnectWithoutBabyInput[]
@@ -19084,6 +20580,13 @@ export namespace Prisma {
     connectOrCreate?: FeedingEventCreateOrConnectWithoutBabyInput | FeedingEventCreateOrConnectWithoutBabyInput[]
     createMany?: FeedingEventCreateManyBabyInputEnvelope
     connect?: FeedingEventWhereUniqueInput | FeedingEventWhereUniqueInput[]
+  }
+
+  export type SleepEventUncheckedCreateNestedManyWithoutBabyInput = {
+    create?: XOR<SleepEventCreateWithoutBabyInput, SleepEventUncheckedCreateWithoutBabyInput> | SleepEventCreateWithoutBabyInput[] | SleepEventUncheckedCreateWithoutBabyInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutBabyInput | SleepEventCreateOrConnectWithoutBabyInput[]
+    createMany?: SleepEventCreateManyBabyInputEnvelope
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
   }
 
   export type ConsultationUncheckedCreateNestedManyWithoutBabyInput = {
@@ -19141,6 +20644,20 @@ export namespace Prisma {
     deleteMany?: FeedingEventScalarWhereInput | FeedingEventScalarWhereInput[]
   }
 
+  export type SleepEventUpdateManyWithoutBabyNestedInput = {
+    create?: XOR<SleepEventCreateWithoutBabyInput, SleepEventUncheckedCreateWithoutBabyInput> | SleepEventCreateWithoutBabyInput[] | SleepEventUncheckedCreateWithoutBabyInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutBabyInput | SleepEventCreateOrConnectWithoutBabyInput[]
+    upsert?: SleepEventUpsertWithWhereUniqueWithoutBabyInput | SleepEventUpsertWithWhereUniqueWithoutBabyInput[]
+    createMany?: SleepEventCreateManyBabyInputEnvelope
+    set?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    disconnect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    delete?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    update?: SleepEventUpdateWithWhereUniqueWithoutBabyInput | SleepEventUpdateWithWhereUniqueWithoutBabyInput[]
+    updateMany?: SleepEventUpdateManyWithWhereWithoutBabyInput | SleepEventUpdateManyWithWhereWithoutBabyInput[]
+    deleteMany?: SleepEventScalarWhereInput | SleepEventScalarWhereInput[]
+  }
+
   export type ConsultationUpdateManyWithoutBabyNestedInput = {
     create?: XOR<ConsultationCreateWithoutBabyInput, ConsultationUncheckedCreateWithoutBabyInput> | ConsultationCreateWithoutBabyInput[] | ConsultationUncheckedCreateWithoutBabyInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutBabyInput | ConsultationCreateOrConnectWithoutBabyInput[]
@@ -19195,6 +20712,20 @@ export namespace Prisma {
     update?: FeedingEventUpdateWithWhereUniqueWithoutBabyInput | FeedingEventUpdateWithWhereUniqueWithoutBabyInput[]
     updateMany?: FeedingEventUpdateManyWithWhereWithoutBabyInput | FeedingEventUpdateManyWithWhereWithoutBabyInput[]
     deleteMany?: FeedingEventScalarWhereInput | FeedingEventScalarWhereInput[]
+  }
+
+  export type SleepEventUncheckedUpdateManyWithoutBabyNestedInput = {
+    create?: XOR<SleepEventCreateWithoutBabyInput, SleepEventUncheckedCreateWithoutBabyInput> | SleepEventCreateWithoutBabyInput[] | SleepEventUncheckedCreateWithoutBabyInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutBabyInput | SleepEventCreateOrConnectWithoutBabyInput[]
+    upsert?: SleepEventUpsertWithWhereUniqueWithoutBabyInput | SleepEventUpsertWithWhereUniqueWithoutBabyInput[]
+    createMany?: SleepEventCreateManyBabyInputEnvelope
+    set?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    disconnect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    delete?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    update?: SleepEventUpdateWithWhereUniqueWithoutBabyInput | SleepEventUpdateWithWhereUniqueWithoutBabyInput[]
+    updateMany?: SleepEventUpdateManyWithWhereWithoutBabyInput | SleepEventUpdateManyWithWhereWithoutBabyInput[]
+    deleteMany?: SleepEventScalarWhereInput | SleepEventScalarWhereInput[]
   }
 
   export type ConsultationUncheckedUpdateManyWithoutBabyNestedInput = {
@@ -19277,6 +20808,34 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutFeedingEventsLoggedInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFeedingEventsLoggedInput, UserUpdateWithoutFeedingEventsLoggedInput>, UserUncheckedUpdateWithoutFeedingEventsLoggedInput>
+  }
+
+  export type BabyCreateNestedOneWithoutSleepEventsInput = {
+    create?: XOR<BabyCreateWithoutSleepEventsInput, BabyUncheckedCreateWithoutSleepEventsInput>
+    connectOrCreate?: BabyCreateOrConnectWithoutSleepEventsInput
+    connect?: BabyWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutSleepEventsLoggedInput = {
+    create?: XOR<UserCreateWithoutSleepEventsLoggedInput, UserUncheckedCreateWithoutSleepEventsLoggedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSleepEventsLoggedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type BabyUpdateOneRequiredWithoutSleepEventsNestedInput = {
+    create?: XOR<BabyCreateWithoutSleepEventsInput, BabyUncheckedCreateWithoutSleepEventsInput>
+    connectOrCreate?: BabyCreateOrConnectWithoutSleepEventsInput
+    upsert?: BabyUpsertWithoutSleepEventsInput
+    connect?: BabyWhereUniqueInput
+    update?: XOR<XOR<BabyUpdateToOneWithWhereWithoutSleepEventsInput, BabyUpdateWithoutSleepEventsInput>, BabyUncheckedUpdateWithoutSleepEventsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutSleepEventsLoggedNestedInput = {
+    create?: XOR<UserCreateWithoutSleepEventsLoggedInput, UserUncheckedCreateWithoutSleepEventsLoggedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSleepEventsLoggedInput
+    upsert?: UserUpsertWithoutSleepEventsLoggedInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSleepEventsLoggedInput, UserUpdateWithoutSleepEventsLoggedInput>, UserUncheckedUpdateWithoutSleepEventsLoggedInput>
   }
 
   export type BabyCreateNestedOneWithoutConsultationsInput = {
@@ -19407,6 +20966,13 @@ export namespace Prisma {
     connect?: FeedingEventWhereUniqueInput | FeedingEventWhereUniqueInput[]
   }
 
+  export type SleepEventCreateNestedManyWithoutLoggedByInput = {
+    create?: XOR<SleepEventCreateWithoutLoggedByInput, SleepEventUncheckedCreateWithoutLoggedByInput> | SleepEventCreateWithoutLoggedByInput[] | SleepEventUncheckedCreateWithoutLoggedByInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutLoggedByInput | SleepEventCreateOrConnectWithoutLoggedByInput[]
+    createMany?: SleepEventCreateManyLoggedByInputEnvelope
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+  }
+
   export type ConsultationCreateNestedManyWithoutRecordedByInput = {
     create?: XOR<ConsultationCreateWithoutRecordedByInput, ConsultationUncheckedCreateWithoutRecordedByInput> | ConsultationCreateWithoutRecordedByInput[] | ConsultationUncheckedCreateWithoutRecordedByInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutRecordedByInput | ConsultationCreateOrConnectWithoutRecordedByInput[]
@@ -19454,6 +21020,13 @@ export namespace Prisma {
     connectOrCreate?: FeedingEventCreateOrConnectWithoutLoggedByInput | FeedingEventCreateOrConnectWithoutLoggedByInput[]
     createMany?: FeedingEventCreateManyLoggedByInputEnvelope
     connect?: FeedingEventWhereUniqueInput | FeedingEventWhereUniqueInput[]
+  }
+
+  export type SleepEventUncheckedCreateNestedManyWithoutLoggedByInput = {
+    create?: XOR<SleepEventCreateWithoutLoggedByInput, SleepEventUncheckedCreateWithoutLoggedByInput> | SleepEventCreateWithoutLoggedByInput[] | SleepEventUncheckedCreateWithoutLoggedByInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutLoggedByInput | SleepEventCreateOrConnectWithoutLoggedByInput[]
+    createMany?: SleepEventCreateManyLoggedByInputEnvelope
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
   }
 
   export type ConsultationUncheckedCreateNestedManyWithoutRecordedByInput = {
@@ -19549,6 +21122,20 @@ export namespace Prisma {
     update?: FeedingEventUpdateWithWhereUniqueWithoutLoggedByInput | FeedingEventUpdateWithWhereUniqueWithoutLoggedByInput[]
     updateMany?: FeedingEventUpdateManyWithWhereWithoutLoggedByInput | FeedingEventUpdateManyWithWhereWithoutLoggedByInput[]
     deleteMany?: FeedingEventScalarWhereInput | FeedingEventScalarWhereInput[]
+  }
+
+  export type SleepEventUpdateManyWithoutLoggedByNestedInput = {
+    create?: XOR<SleepEventCreateWithoutLoggedByInput, SleepEventUncheckedCreateWithoutLoggedByInput> | SleepEventCreateWithoutLoggedByInput[] | SleepEventUncheckedCreateWithoutLoggedByInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutLoggedByInput | SleepEventCreateOrConnectWithoutLoggedByInput[]
+    upsert?: SleepEventUpsertWithWhereUniqueWithoutLoggedByInput | SleepEventUpsertWithWhereUniqueWithoutLoggedByInput[]
+    createMany?: SleepEventCreateManyLoggedByInputEnvelope
+    set?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    disconnect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    delete?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    update?: SleepEventUpdateWithWhereUniqueWithoutLoggedByInput | SleepEventUpdateWithWhereUniqueWithoutLoggedByInput[]
+    updateMany?: SleepEventUpdateManyWithWhereWithoutLoggedByInput | SleepEventUpdateManyWithWhereWithoutLoggedByInput[]
+    deleteMany?: SleepEventScalarWhereInput | SleepEventScalarWhereInput[]
   }
 
   export type ConsultationUpdateManyWithoutRecordedByNestedInput = {
@@ -19647,6 +21234,20 @@ export namespace Prisma {
     update?: FeedingEventUpdateWithWhereUniqueWithoutLoggedByInput | FeedingEventUpdateWithWhereUniqueWithoutLoggedByInput[]
     updateMany?: FeedingEventUpdateManyWithWhereWithoutLoggedByInput | FeedingEventUpdateManyWithWhereWithoutLoggedByInput[]
     deleteMany?: FeedingEventScalarWhereInput | FeedingEventScalarWhereInput[]
+  }
+
+  export type SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput = {
+    create?: XOR<SleepEventCreateWithoutLoggedByInput, SleepEventUncheckedCreateWithoutLoggedByInput> | SleepEventCreateWithoutLoggedByInput[] | SleepEventUncheckedCreateWithoutLoggedByInput[]
+    connectOrCreate?: SleepEventCreateOrConnectWithoutLoggedByInput | SleepEventCreateOrConnectWithoutLoggedByInput[]
+    upsert?: SleepEventUpsertWithWhereUniqueWithoutLoggedByInput | SleepEventUpsertWithWhereUniqueWithoutLoggedByInput[]
+    createMany?: SleepEventCreateManyLoggedByInputEnvelope
+    set?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    disconnect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    delete?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    connect?: SleepEventWhereUniqueInput | SleepEventWhereUniqueInput[]
+    update?: SleepEventUpdateWithWhereUniqueWithoutLoggedByInput | SleepEventUpdateWithWhereUniqueWithoutLoggedByInput[]
+    updateMany?: SleepEventUpdateManyWithWhereWithoutLoggedByInput | SleepEventUpdateManyWithWhereWithoutLoggedByInput[]
+    deleteMany?: SleepEventScalarWhereInput | SleepEventScalarWhereInput[]
   }
 
   export type ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput = {
@@ -19979,6 +21580,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     feedingEvents?: FeedingEventCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventCreateNestedManyWithoutBabyInput
     consultations?: ConsultationCreateNestedManyWithoutBabyInput
     appointments?: AppointmentCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheCreateNestedManyWithoutBabyInput
@@ -19997,6 +21599,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     feedingEvents?: FeedingEventUncheckedCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventUncheckedCreateNestedManyWithoutBabyInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutBabyInput
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheUncheckedCreateNestedManyWithoutBabyInput
@@ -20151,6 +21754,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20167,6 +21771,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20222,6 +21827,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20238,6 +21844,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20306,6 +21913,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipCreateNestedManyWithoutUserInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20322,6 +21930,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUncheckedCreateNestedManyWithoutUserInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20343,6 +21952,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipCreateNestedManyWithoutUserInput
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20359,6 +21969,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUncheckedCreateNestedManyWithoutUserInput
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20420,6 +22031,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUpdateManyWithoutUserNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20436,6 +22048,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUncheckedUpdateManyWithoutUserNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20463,6 +22076,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUpdateManyWithoutUserNestedInput
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20479,6 +22093,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUncheckedUpdateManyWithoutUserNestedInput
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20536,6 +22151,36 @@ export namespace Prisma {
 
   export type FeedingEventCreateManyBabyInputEnvelope = {
     data: FeedingEventCreateManyBabyInput | FeedingEventCreateManyBabyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SleepEventCreateWithoutBabyInput = {
+    id?: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    loggedBy: UserCreateNestedOneWithoutSleepEventsLoggedInput
+  }
+
+  export type SleepEventUncheckedCreateWithoutBabyInput = {
+    id?: string
+    loggedByUserId: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SleepEventCreateOrConnectWithoutBabyInput = {
+    where: SleepEventWhereUniqueInput
+    create: XOR<SleepEventCreateWithoutBabyInput, SleepEventUncheckedCreateWithoutBabyInput>
+  }
+
+  export type SleepEventCreateManyBabyInputEnvelope = {
+    data: SleepEventCreateManyBabyInput | SleepEventCreateManyBabyInput[]
     skipDuplicates?: boolean
   }
 
@@ -20698,6 +22343,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"FeedingEvent"> | Date | string
   }
 
+  export type SleepEventUpsertWithWhereUniqueWithoutBabyInput = {
+    where: SleepEventWhereUniqueInput
+    update: XOR<SleepEventUpdateWithoutBabyInput, SleepEventUncheckedUpdateWithoutBabyInput>
+    create: XOR<SleepEventCreateWithoutBabyInput, SleepEventUncheckedCreateWithoutBabyInput>
+  }
+
+  export type SleepEventUpdateWithWhereUniqueWithoutBabyInput = {
+    where: SleepEventWhereUniqueInput
+    data: XOR<SleepEventUpdateWithoutBabyInput, SleepEventUncheckedUpdateWithoutBabyInput>
+  }
+
+  export type SleepEventUpdateManyWithWhereWithoutBabyInput = {
+    where: SleepEventScalarWhereInput
+    data: XOR<SleepEventUpdateManyMutationInput, SleepEventUncheckedUpdateManyWithoutBabyInput>
+  }
+
+  export type SleepEventScalarWhereInput = {
+    AND?: SleepEventScalarWhereInput | SleepEventScalarWhereInput[]
+    OR?: SleepEventScalarWhereInput[]
+    NOT?: SleepEventScalarWhereInput | SleepEventScalarWhereInput[]
+    id?: StringFilter<"SleepEvent"> | string
+    babyId?: StringFilter<"SleepEvent"> | string
+    loggedByUserId?: StringFilter<"SleepEvent"> | string
+    startedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    endedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    notes?: StringNullableFilter<"SleepEvent"> | string | null
+    createdAt?: DateTimeFilter<"SleepEvent"> | Date | string
+    updatedAt?: DateTimeFilter<"SleepEvent"> | Date | string
+  }
+
   export type ConsultationUpsertWithWhereUniqueWithoutBabyInput = {
     where: ConsultationWhereUniqueInput
     update: XOR<ConsultationUpdateWithoutBabyInput, ConsultationUncheckedUpdateWithoutBabyInput>
@@ -20805,6 +22480,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     household: HouseholdCreateNestedOneWithoutBabiesInput
+    sleepEvents?: SleepEventCreateNestedManyWithoutBabyInput
     consultations?: ConsultationCreateNestedManyWithoutBabyInput
     appointments?: AppointmentCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheCreateNestedManyWithoutBabyInput
@@ -20823,6 +22499,7 @@ export namespace Prisma {
     timezone?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    sleepEvents?: SleepEventUncheckedCreateNestedManyWithoutBabyInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutBabyInput
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheUncheckedCreateNestedManyWithoutBabyInput
@@ -20846,6 +22523,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipCreateNestedManyWithoutUserInput
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20862,6 +22540,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUncheckedCreateNestedManyWithoutUserInput
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -20894,6 +22573,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     household?: HouseholdUpdateOneRequiredWithoutBabiesNestedInput
+    sleepEvents?: SleepEventUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUpdateManyWithoutBabyNestedInput
@@ -20912,6 +22592,7 @@ export namespace Prisma {
     timezone?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sleepEvents?: SleepEventUncheckedUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUncheckedUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUncheckedUpdateManyWithoutBabyNestedInput
@@ -20941,6 +22622,7 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUpdateManyWithoutUserNestedInput
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20957,6 +22639,183 @@ export namespace Prisma {
     householdMemberships?: HouseholdMembershipUncheckedUpdateManyWithoutUserNestedInput
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
+  }
+
+  export type BabyCreateWithoutSleepEventsInput = {
+    id?: string
+    displayName: string
+    birthDateTime: Date | string
+    birthWeightGrams?: number | null
+    birthLengthCm?: number | null
+    headCircumferenceCm?: number | null
+    sex?: $Enums.BabySex
+    notes?: string | null
+    timezone?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    household: HouseholdCreateNestedOneWithoutBabiesInput
+    feedingEvents?: FeedingEventCreateNestedManyWithoutBabyInput
+    consultations?: ConsultationCreateNestedManyWithoutBabyInput
+    appointments?: AppointmentCreateNestedManyWithoutBabyInput
+    predictionCaches?: PredictionCacheCreateNestedManyWithoutBabyInput
+  }
+
+  export type BabyUncheckedCreateWithoutSleepEventsInput = {
+    id?: string
+    householdId: string
+    displayName: string
+    birthDateTime: Date | string
+    birthWeightGrams?: number | null
+    birthLengthCm?: number | null
+    headCircumferenceCm?: number | null
+    sex?: $Enums.BabySex
+    notes?: string | null
+    timezone?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    feedingEvents?: FeedingEventUncheckedCreateNestedManyWithoutBabyInput
+    consultations?: ConsultationUncheckedCreateNestedManyWithoutBabyInput
+    appointments?: AppointmentUncheckedCreateNestedManyWithoutBabyInput
+    predictionCaches?: PredictionCacheUncheckedCreateNestedManyWithoutBabyInput
+  }
+
+  export type BabyCreateOrConnectWithoutSleepEventsInput = {
+    where: BabyWhereUniqueInput
+    create: XOR<BabyCreateWithoutSleepEventsInput, BabyUncheckedCreateWithoutSleepEventsInput>
+  }
+
+  export type UserCreateWithoutSleepEventsLoggedInput = {
+    id?: string
+    name?: string | null
+    email?: string | null
+    emailVerified?: Date | string | null
+    image?: string | null
+    passwordHash?: string | null
+    isActive?: boolean
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    householdMemberships?: HouseholdMembershipCreateNestedManyWithoutUserInput
+    invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
+    invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
+    feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
+  }
+
+  export type UserUncheckedCreateWithoutSleepEventsLoggedInput = {
+    id?: string
+    name?: string | null
+    email?: string | null
+    emailVerified?: Date | string | null
+    image?: string | null
+    passwordHash?: string | null
+    isActive?: boolean
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    householdMemberships?: HouseholdMembershipUncheckedCreateNestedManyWithoutUserInput
+    invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
+    invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+    feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
+  }
+
+  export type UserCreateOrConnectWithoutSleepEventsLoggedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutSleepEventsLoggedInput, UserUncheckedCreateWithoutSleepEventsLoggedInput>
+  }
+
+  export type BabyUpsertWithoutSleepEventsInput = {
+    update: XOR<BabyUpdateWithoutSleepEventsInput, BabyUncheckedUpdateWithoutSleepEventsInput>
+    create: XOR<BabyCreateWithoutSleepEventsInput, BabyUncheckedCreateWithoutSleepEventsInput>
+    where?: BabyWhereInput
+  }
+
+  export type BabyUpdateToOneWithWhereWithoutSleepEventsInput = {
+    where?: BabyWhereInput
+    data: XOR<BabyUpdateWithoutSleepEventsInput, BabyUncheckedUpdateWithoutSleepEventsInput>
+  }
+
+  export type BabyUpdateWithoutSleepEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    displayName?: StringFieldUpdateOperationsInput | string
+    birthDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthWeightGrams?: NullableIntFieldUpdateOperationsInput | number | null
+    birthLengthCm?: NullableIntFieldUpdateOperationsInput | number | null
+    headCircumferenceCm?: NullableIntFieldUpdateOperationsInput | number | null
+    sex?: EnumBabySexFieldUpdateOperationsInput | $Enums.BabySex
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    household?: HouseholdUpdateOneRequiredWithoutBabiesNestedInput
+    feedingEvents?: FeedingEventUpdateManyWithoutBabyNestedInput
+    consultations?: ConsultationUpdateManyWithoutBabyNestedInput
+    appointments?: AppointmentUpdateManyWithoutBabyNestedInput
+    predictionCaches?: PredictionCacheUpdateManyWithoutBabyNestedInput
+  }
+
+  export type BabyUncheckedUpdateWithoutSleepEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    householdId?: StringFieldUpdateOperationsInput | string
+    displayName?: StringFieldUpdateOperationsInput | string
+    birthDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthWeightGrams?: NullableIntFieldUpdateOperationsInput | number | null
+    birthLengthCm?: NullableIntFieldUpdateOperationsInput | number | null
+    headCircumferenceCm?: NullableIntFieldUpdateOperationsInput | number | null
+    sex?: EnumBabySexFieldUpdateOperationsInput | $Enums.BabySex
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    feedingEvents?: FeedingEventUncheckedUpdateManyWithoutBabyNestedInput
+    consultations?: ConsultationUncheckedUpdateManyWithoutBabyNestedInput
+    appointments?: AppointmentUncheckedUpdateManyWithoutBabyNestedInput
+    predictionCaches?: PredictionCacheUncheckedUpdateManyWithoutBabyNestedInput
+  }
+
+  export type UserUpsertWithoutSleepEventsLoggedInput = {
+    update: XOR<UserUpdateWithoutSleepEventsLoggedInput, UserUncheckedUpdateWithoutSleepEventsLoggedInput>
+    create: XOR<UserCreateWithoutSleepEventsLoggedInput, UserUncheckedCreateWithoutSleepEventsLoggedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutSleepEventsLoggedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSleepEventsLoggedInput, UserUncheckedUpdateWithoutSleepEventsLoggedInput>
+  }
+
+  export type UserUpdateWithoutSleepEventsLoggedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    householdMemberships?: HouseholdMembershipUpdateManyWithoutUserNestedInput
+    invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
+    invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
+    feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutSleepEventsLoggedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    householdMemberships?: HouseholdMembershipUncheckedUpdateManyWithoutUserNestedInput
+    invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+    invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+    feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -20974,6 +22833,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     household: HouseholdCreateNestedOneWithoutBabiesInput
     feedingEvents?: FeedingEventCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventCreateNestedManyWithoutBabyInput
     appointments?: AppointmentCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheCreateNestedManyWithoutBabyInput
   }
@@ -20992,6 +22852,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     feedingEvents?: FeedingEventUncheckedCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventUncheckedCreateNestedManyWithoutBabyInput
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheUncheckedCreateNestedManyWithoutBabyInput
   }
@@ -21015,6 +22876,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
   }
 
   export type UserUncheckedCreateWithoutConsultationsRecordedInput = {
@@ -21031,6 +22893,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
   }
 
   export type UserCreateOrConnectWithoutConsultationsRecordedInput = {
@@ -21063,6 +22926,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     household?: HouseholdUpdateOneRequiredWithoutBabiesNestedInput
     feedingEvents?: FeedingEventUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUpdateManyWithoutBabyNestedInput
   }
@@ -21081,6 +22945,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     feedingEvents?: FeedingEventUncheckedUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUncheckedUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUncheckedUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUncheckedUpdateManyWithoutBabyNestedInput
   }
@@ -21110,6 +22975,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutConsultationsRecordedInput = {
@@ -21126,6 +22992,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
   }
 
   export type BabyCreateWithoutAppointmentsInput = {
@@ -21142,6 +23009,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     household: HouseholdCreateNestedOneWithoutBabiesInput
     feedingEvents?: FeedingEventCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventCreateNestedManyWithoutBabyInput
     consultations?: ConsultationCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheCreateNestedManyWithoutBabyInput
   }
@@ -21160,6 +23028,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     feedingEvents?: FeedingEventUncheckedCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventUncheckedCreateNestedManyWithoutBabyInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutBabyInput
     predictionCaches?: PredictionCacheUncheckedCreateNestedManyWithoutBabyInput
   }
@@ -21194,6 +23063,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     household?: HouseholdUpdateOneRequiredWithoutBabiesNestedInput
     feedingEvents?: FeedingEventUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUpdateManyWithoutBabyNestedInput
   }
@@ -21212,6 +23082,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     feedingEvents?: FeedingEventUncheckedUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUncheckedUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUncheckedUpdateManyWithoutBabyNestedInput
   }
@@ -21230,6 +23101,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     household: HouseholdCreateNestedOneWithoutBabiesInput
     feedingEvents?: FeedingEventCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventCreateNestedManyWithoutBabyInput
     consultations?: ConsultationCreateNestedManyWithoutBabyInput
     appointments?: AppointmentCreateNestedManyWithoutBabyInput
   }
@@ -21248,6 +23120,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     feedingEvents?: FeedingEventUncheckedCreateNestedManyWithoutBabyInput
+    sleepEvents?: SleepEventUncheckedCreateNestedManyWithoutBabyInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutBabyInput
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBabyInput
   }
@@ -21282,6 +23155,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     household?: HouseholdUpdateOneRequiredWithoutBabiesNestedInput
     feedingEvents?: FeedingEventUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUpdateManyWithoutBabyNestedInput
   }
@@ -21300,6 +23174,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     feedingEvents?: FeedingEventUncheckedUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUncheckedUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUncheckedUpdateManyWithoutBabyNestedInput
   }
@@ -21317,6 +23192,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -21333,6 +23209,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -21365,6 +23242,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -21381,6 +23259,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -21397,6 +23276,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationCreateNestedManyWithoutRecordedByInput
   }
 
@@ -21413,6 +23293,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedCreateNestedManyWithoutInvitedByInput
     invitesAccepted?: CaregiverInviteUncheckedCreateNestedManyWithoutAcceptedByInput
     feedingEventsLogged?: FeedingEventUncheckedCreateNestedManyWithoutLoggedByInput
+    sleepEventsLogged?: SleepEventUncheckedCreateNestedManyWithoutLoggedByInput
     consultationsRecorded?: ConsultationUncheckedCreateNestedManyWithoutRecordedByInput
   }
 
@@ -21445,6 +23326,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -21461,6 +23343,7 @@ export namespace Prisma {
     invitesSent?: CaregiverInviteUncheckedUpdateManyWithoutInvitedByNestedInput
     invitesAccepted?: CaregiverInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
     feedingEventsLogged?: FeedingEventUncheckedUpdateManyWithoutLoggedByNestedInput
+    sleepEventsLogged?: SleepEventUncheckedUpdateManyWithoutLoggedByNestedInput
     consultationsRecorded?: ConsultationUncheckedUpdateManyWithoutRecordedByNestedInput
   }
 
@@ -21652,6 +23535,36 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SleepEventCreateWithoutLoggedByInput = {
+    id?: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    baby: BabyCreateNestedOneWithoutSleepEventsInput
+  }
+
+  export type SleepEventUncheckedCreateWithoutLoggedByInput = {
+    id?: string
+    babyId: string
+    startedAt: Date | string
+    endedAt: Date | string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SleepEventCreateOrConnectWithoutLoggedByInput = {
+    where: SleepEventWhereUniqueInput
+    create: XOR<SleepEventCreateWithoutLoggedByInput, SleepEventUncheckedCreateWithoutLoggedByInput>
+  }
+
+  export type SleepEventCreateManyLoggedByInputEnvelope = {
+    data: SleepEventCreateManyLoggedByInput | SleepEventCreateManyLoggedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ConsultationCreateWithoutRecordedByInput = {
     id?: string
     occurredAt: Date | string
@@ -21813,6 +23726,22 @@ export namespace Prisma {
     data: XOR<FeedingEventUpdateManyMutationInput, FeedingEventUncheckedUpdateManyWithoutLoggedByInput>
   }
 
+  export type SleepEventUpsertWithWhereUniqueWithoutLoggedByInput = {
+    where: SleepEventWhereUniqueInput
+    update: XOR<SleepEventUpdateWithoutLoggedByInput, SleepEventUncheckedUpdateWithoutLoggedByInput>
+    create: XOR<SleepEventCreateWithoutLoggedByInput, SleepEventUncheckedCreateWithoutLoggedByInput>
+  }
+
+  export type SleepEventUpdateWithWhereUniqueWithoutLoggedByInput = {
+    where: SleepEventWhereUniqueInput
+    data: XOR<SleepEventUpdateWithoutLoggedByInput, SleepEventUncheckedUpdateWithoutLoggedByInput>
+  }
+
+  export type SleepEventUpdateManyWithWhereWithoutLoggedByInput = {
+    where: SleepEventScalarWhereInput
+    data: XOR<SleepEventUpdateManyMutationInput, SleepEventUncheckedUpdateManyWithoutLoggedByInput>
+  }
+
   export type ConsultationUpsertWithWhereUniqueWithoutRecordedByInput = {
     where: ConsultationWhereUniqueInput
     update: XOR<ConsultationUpdateWithoutRecordedByInput, ConsultationUncheckedUpdateWithoutRecordedByInput>
@@ -21903,6 +23832,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     feedingEvents?: FeedingEventUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUpdateManyWithoutBabyNestedInput
@@ -21921,6 +23851,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     feedingEvents?: FeedingEventUncheckedUpdateManyWithoutBabyNestedInput
+    sleepEvents?: SleepEventUncheckedUpdateManyWithoutBabyNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutBabyNestedInput
     appointments?: AppointmentUncheckedUpdateManyWithoutBabyNestedInput
     predictionCaches?: PredictionCacheUncheckedUpdateManyWithoutBabyNestedInput
@@ -21980,6 +23911,16 @@ export namespace Prisma {
     endedAt?: Date | string | null
     amountMl: number
     milkType?: $Enums.MilkType
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SleepEventCreateManyBabyInput = {
+    id?: string
+    loggedByUserId: string
+    startedAt: Date | string
+    endedAt: Date | string
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22050,6 +23991,36 @@ export namespace Prisma {
     endedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     amountMl?: IntFieldUpdateOperationsInput | number
     milkType?: EnumMilkTypeFieldUpdateOperationsInput | $Enums.MilkType
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventUpdateWithoutBabyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    loggedBy?: UserUpdateOneRequiredWithoutSleepEventsLoggedNestedInput
+  }
+
+  export type SleepEventUncheckedUpdateWithoutBabyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loggedByUserId?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventUncheckedUpdateManyWithoutBabyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loggedByUserId?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22216,6 +24187,16 @@ export namespace Prisma {
     endedAt?: Date | string | null
     amountMl: number
     milkType?: $Enums.MilkType
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SleepEventCreateManyLoggedByInput = {
+    id?: string
+    babyId: string
+    startedAt: Date | string
+    endedAt: Date | string
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22421,6 +24402,36 @@ export namespace Prisma {
     endedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     amountMl?: IntFieldUpdateOperationsInput | number
     milkType?: EnumMilkTypeFieldUpdateOperationsInput | $Enums.MilkType
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventUpdateWithoutLoggedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    baby?: BabyUpdateOneRequiredWithoutSleepEventsNestedInput
+  }
+
+  export type SleepEventUncheckedUpdateWithoutLoggedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    babyId?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SleepEventUncheckedUpdateManyWithoutLoggedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    babyId?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
