@@ -8,7 +8,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
   title: "Strumf",
-  description: "A cozy diary for feeding and care moments.",
+  description: "Un jurnal cald pentru hraniri si momente de ingrijire.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -26,7 +26,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${nunito.variable}`}>
+    <html lang="ro" className={`${fraunces.variable} ${nunito.variable}`}>
       <body>
         <AppProviders>
           <TRPCReactProvider>{children}</TRPCReactProvider>

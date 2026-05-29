@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Card } from "~/app/_components/ui/card";
 import { Chip } from "~/app/_components/ui/chip";
+import { useI18n } from "~/app/lib/i18n-provider";
 import { api } from "~/trpc/react";
 
 import { SectionBanner } from "./section-banner";
@@ -20,11 +21,36 @@ type NearbyPlace = {
   providerUrl: string | null;
 };
 
-const KIND_LABEL = { park: "Parks nearby", mall: "Malls nearby" } as const;
+const KIND_LABEL = {
+  ro: { park: "Parcuri aproape", mall: "Malluri aproape" },
+  en: { park: "Parks nearby", mall: "Malls nearby" },
+} as const;
 const KIND_ICON = { park: "🌳", mall: "🛍️" } as const;
 
 export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
+  const { locale } = useI18n();
   const [travelMode, setTravelMode] = useState<TravelMode>("walk");
+  const copy = locale === "ro"
+    ? {
+        around: "In jurul tau",
+        title: "Parcuri si malluri",
+        walk: "Mers",
+        drive: "Masina",
+        allow: "Permite locatia ca sa vezi parcuri si malluri aproape",
+        loadError: "Nu am putut incarca locurile din apropiere",
+        retry: "Reincearca",
+        placesBy: "Locuri de la",
+      }
+    : {
+        around: "Around you",
+        title: "Parks & malls",
+        walk: "Walk",
+        drive: "Drive",
+        allow: "Allow location to see parks and malls nearby",
+        loadError: "Could not load nearby places",
+        retry: "Retry",
+        placesBy: "Places by",
+      };
 
   const configQuery = api.nearby.config.useQuery(undefined, {
     staleTime: Infinity,
@@ -59,10 +85,10 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-strumf-muted">
-            Around you
+            {copy.around}
           </p>
           <h2 className="font-display text-lg font-semibold leading-tight">
-            Parks &amp; malls
+            {copy.title}
           </h2>
         </div>
         <div className="flex shrink-0 gap-1.5">
@@ -70,13 +96,13 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
             selected={travelMode === "walk"}
             onClick={() => setTravelMode("walk")}
           >
-            Walk
+            {copy.walk}
           </Chip>
           <Chip
             selected={travelMode === "drive"}
             onClick={() => setTravelMode("drive")}
           >
-            Drive
+            {copy.drive}
           </Chip>
         </div>
       </div>
@@ -84,12 +110,12 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
       {!coords ? (
         <SectionBanner
           tone="info"
-          title="Allow location to see parks and malls nearby"
+          title={copy.allow}
         />
       ) : placesQuery.isError ? (
         <SectionBanner
           tone="error"
-          title="Could not load nearby places"
+          title={copy.loadError}
           description={placesQuery.error.message}
           action={
             <button
@@ -97,7 +123,7 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
               onClick={() => placesQuery.refetch()}
               className="text-xs font-bold underline"
             >
-              Retry
+              {copy.retry}
             </button>
           }
         />
@@ -114,7 +140,7 @@ export function NearbyPlacesSection({ coords }: { coords: Coords | null }) {
       )}
 
       <p className="mt-3 text-center text-[10px] text-strumf-muted">
-        Places by <PlacesProviderLabel provider={placesProvider} /> ·{" "}
+        {copy.placesBy} <PlacesProviderLabel provider={placesProvider} /> ·{" "}
         <a
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
@@ -163,6 +189,17 @@ function PlaceList({
   places: NearbyPlace[];
   travelMode: TravelMode;
 }) {
+  const { locale } = useI18n();
+  const copy = locale === "ro"
+    ? {
+        travelTime: travelMode === "walk" ? "Timp de mers" : "Timp cu masina",
+        empty: "Nimic in apropiere.",
+      }
+    : {
+        travelTime: travelMode === "walk" ? "Walking time" : "Driving time",
+        empty: "Nothing nearby.",
+      };
+
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
@@ -170,15 +207,15 @@ function PlaceList({
           <span className="mr-1.5" aria-hidden>
             {KIND_ICON[kind]}
           </span>
-          {KIND_LABEL[kind]}
+          {KIND_LABEL[locale][kind]}
         </p>
         <span className="text-[10px] text-strumf-muted">
-          {travelMode === "walk" ? "Walking" : "Driving"} time
+          {copy.travelTime}
         </span>
       </div>
       {places.length === 0 ? (
         <p className="rounded-2xl bg-white/45 px-4 py-3 text-center text-sm text-strumf-muted">
-          Nothing nearby.
+          {copy.empty}
         </p>
       ) : (
         <ul className="space-y-2">

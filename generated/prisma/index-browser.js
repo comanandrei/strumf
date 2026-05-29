@@ -178,6 +178,17 @@ exports.Prisma.FeedingEventScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SleepEventScalarFieldEnum = {
+  id: 'id',
+  babyId: 'babyId',
+  loggedByUserId: 'loggedByUserId',
+  startedAt: 'startedAt',
+  endedAt: 'endedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ConsultationScalarFieldEnum = {
   id: 'id',
   babyId: 'babyId',
@@ -303,6 +314,7 @@ exports.Prisma.ModelName = {
   CaregiverInvite: 'CaregiverInvite',
   Baby: 'Baby',
   FeedingEvent: 'FeedingEvent',
+  SleepEvent: 'SleepEvent',
   Consultation: 'Consultation',
   Appointment: 'Appointment',
   PredictionCache: 'PredictionCache',

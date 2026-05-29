@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { api } from "~/trpc/react";
+import { useI18n } from "~/app/lib/i18n-provider";
 
 const STORAGE_KEY = "strumf.selectedBabyId";
 
@@ -32,13 +33,14 @@ const BabySelectionContext = createContext<BabySelectionContextValue | null>(nul
 
 export function BabySelectionProvider({ children }: { children: ReactNode }) {
   const { data: households, isLoading } = api.household.myHouseholds.useQuery();
+  const { locale } = useI18n();
   const [selectedBabyId, setSelectedBabyIdState] = useState<string | null>(null);
 
   const babies = useMemo<BabyOption[]>(() => {
     if (!households?.length) return [];
     const out: BabyOption[] = [];
     for (const h of households) {
-      const label = h.name?.trim() || "Home";
+      const label = h.name?.trim() || (locale === "ro" ? "Acasa" : "Home");
       for (const b of h.babies) {
         out.push({
           id: b.id,
@@ -49,7 +51,7 @@ export function BabySelectionProvider({ children }: { children: ReactNode }) {
       }
     }
     return out;
-  }, [households]);
+  }, [households, locale]);
 
   useEffect(() => {
     if (babies.length === 0) {
