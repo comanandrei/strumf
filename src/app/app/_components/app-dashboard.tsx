@@ -155,25 +155,17 @@ export function AppDashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-strumf-muted">Dashboard</p>
-          <h1 className="font-display text-4xl font-bold tracking-tight">
-            {activeBaby?.displayName ?? "Home"}
-          </h1>
-          {activeBaby?.birthDateTime ? (
-            <p className="mt-1 text-sm text-strumf-muted">
-              {ageLabel(activeBaby.birthDateTime)}
-            </p>
-          ) : null}
-        </div>
-        <Link
-          href="/"
-          className="shrink-0 rounded-full bg-white/60 px-3 py-1.5 text-sm font-bold text-strumf-muted shadow-card transition-smooth hover:text-strumf-foreground"
-        >
-          Exit
-        </Link>
+    <div className="flex flex-col gap-6 pb-24">
+      <header>
+        <p className="text-sm text-strumf-muted">Dashboard</p>
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          {activeBaby?.displayName ?? "Home"}
+        </h1>
+        {activeBaby?.birthDateTime ? (
+          <p className="mt-1 text-sm text-strumf-muted">
+            {ageLabel(activeBaby.birthDateTime)}
+          </p>
+        ) : null}
       </header>
 
       {babies.length > 1 ? (
@@ -382,7 +374,7 @@ export function AppDashboard() {
         )}
       </Card>
 
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-4">
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-4">
         <div className="mx-auto w-full max-w-lg">
           <Link
             href="/app/log"
