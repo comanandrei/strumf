@@ -121,7 +121,7 @@ export async function buildDailyBabySummaryPrompt(
   const context: SummaryContext = {
     baby: {
       name: baby.displayName,
-      age: ageLabel(baby.birthDateTime, now),
+      age: ageLabel(baby.birthDateTime, "en", now),
       birthDate: formatDateTime(baby.birthDateTime, baby.timezone),
       timezone: baby.timezone,
     },
