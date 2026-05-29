@@ -240,7 +240,7 @@ export function AppDashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
+    <div className="flex flex-col gap-6 pb-24">
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-strumf-muted">{copy.dashboard}</p>
@@ -310,7 +310,13 @@ export function AppDashboard() {
           icon="+"
           label={copy.nextAppointment}
           value={nextAppointment ? formatShortDate(nextAppointment.startsAt, locale) : copy.none}
-          sub={nextAppointment ? formatClock(nextAppointment.startsAt, locale) : copy.notScheduled}
+          sub={
+            nextAppointment?.reminderAt
+              ? `${locale === "ro" ? "reminder" : "reminder"} ${formatShortDate(nextAppointment.reminderAt, locale)}`
+              : nextAppointment
+                ? formatClock(nextAppointment.startsAt, locale)
+                : copy.notScheduled
+          }
         />
         <StatCard
           tone="mint"
@@ -405,6 +411,12 @@ export function AppDashboard() {
                       {formatClock(appointment.startsAt, locale)}
                       {appointment.location ? ` · ${appointment.location}` : ""}
                     </p>
+                  {appointment.reminderAt ? (
+                    <p className="mt-1 text-xs font-bold text-strumf-accent">
+                      Reminder {formatShortDate(appointment.reminderAt)} ·{" "}
+                      {formatClock(appointment.reminderAt)}
+                    </p>
+                  ) : null}
                   </div>
                   <span className="shrink-0 rounded-full bg-gradient-blue px-3 py-1 text-xs font-bold text-strumf-foreground">
                     {copy.planned}
@@ -455,7 +467,7 @@ export function AppDashboard() {
         )}
       </Card>
 
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-4">
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-4">
         <div className="mx-auto w-full max-w-lg">
           <Link
             href="/app/log"

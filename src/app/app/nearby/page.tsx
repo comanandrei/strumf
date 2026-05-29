@@ -18,6 +18,8 @@ export default function NearbyPage() {
         nearby: "Aproape",
         description: "Vremea de azi si cele mai apropiate parcuri si malluri.",
         refresh: "Actualizeaza locatia",
+        locating: "Se localizeaza...",
+        useMyLocation: "Foloseste locatia mea",
         lastKnown: "Folosim ultima locatie cunoscuta",
         blocked: "Locatia este blocata",
         unavailable: "Locatia nu este disponibila",
@@ -31,13 +33,15 @@ export default function NearbyPage() {
         nearby: "Nearby",
         description: "Today's weather and the closest parks and malls.",
         refresh: "Refresh location",
+        locating: "Locating...",
+        useMyLocation: "Use my location",
         lastKnown: "Using last known location",
         blocked: "Location blocked",
         unavailable: "Location unavailable",
         tryAgain: "Try again",
         asking: "Asking your device for location...",
         useLocation: "Use your device location",
-        allow: "Allow",
+        allow: "Use location",
       };
 
   return (
@@ -48,15 +52,18 @@ export default function NearbyPage() {
           <h1 className="font-display text-4xl font-bold tracking-tight">{copy.nearby}</h1>
           <p className="mt-1 text-sm text-strumf-muted">{copy.description}</p>
         </div>
-        {status.state === "ready" || status.state === "error" ? (
-          <Button
-            variant="ghost"
-            onClick={request}
-            className="shrink-0 text-xs"
-          >
-            {copy.refresh}
-          </Button>
-        ) : null}
+        <Button
+          variant={status.state === "idle" ? "accent" : "ghost"}
+          onClick={request}
+          disabled={status.state === "requesting"}
+          className="shrink-0 text-xs"
+        >
+          {status.state === "requesting"
+            ? copy.locating
+            : status.state === "idle"
+              ? copy.useMyLocation
+              : copy.refresh}
+        </Button>
       </header>
 
       {status.state === "error" ? (

@@ -27,7 +27,6 @@ export function AppBottomNav() {
         dashboard: "Acasa",
         log: "Jurnal",
         calendar: "Calendar",
-        outside: "Afara",
         baby: "Bebe",
         nearby: "Aproape",
         you: "Tu",
@@ -37,7 +36,6 @@ export function AppBottomNav() {
         dashboard: "Dashboard",
         log: "Log",
         calendar: "Calendar",
-        outside: "Outside",
         baby: "Baby",
         nearby: "Nearby",
         you: "You",
@@ -50,12 +48,6 @@ export function AppBottomNav() {
       label: labels.calendar,
       icon: <CalendarColorIcon className="h-5 w-5" />,
       match: (p: string) => p.startsWith("/app/calendar"),
-    },
-    {
-      href: "/app/go-outside",
-      label: labels.outside,
-      icon: "☁",
-      match: (p: string) => p.startsWith("/app/go-outside"),
     },
     { href: babyHref, label: labels.baby, icon: "👶", match: (p: string) => p.startsWith("/app/baby") },
     {

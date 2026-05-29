@@ -157,19 +157,22 @@ model Consultation {
 }
 
 model Appointment {
-    id        String    @id @default(cuid())
-    babyId    String
-    title     String
-    startsAt  DateTime
-    endsAt    DateTime?
-    location  String?
-    notes     String?   @db.Text
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
+    id             String    @id @default(cuid())
+    babyId         String
+    title          String
+    startsAt       DateTime
+    endsAt         DateTime?
+    location       String?
+    notes          String?   @db.Text
+    reminderAt     DateTime?
+    reminderSentAt DateTime?
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
 
     baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
 
     @@index([babyId, startsAt])
+    @@index([reminderAt, reminderSentAt])
 }
 
 model PredictionCache {
