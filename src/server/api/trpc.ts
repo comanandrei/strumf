@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
+import { isSudoAdminEmail } from "~/server/lib/sudo-admin";
 
 /**
  * 1. CONTEXT
@@ -131,3 +132,15 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/** Sudo bootstrap admin only — for internal tooling like Oracle. */
+export const sudoProcedure = protectedProcedure.use(({ ctx, next }) => {
+  const email = ctx.session.user.email ?? "";
+  if (!isSudoAdminEmail(email)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Oracle is restricted to sudo admins.",
+    });
+  }
+  return next({ ctx });
+});

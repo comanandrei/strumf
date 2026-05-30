@@ -25,7 +25,15 @@ export default function YouPage() {
           <p className="mt-2 break-all text-lg text-white">{session?.user?.email ?? "—"}</p>
         )}
         {session?.user && "isSudoAdmin" in session.user && session.user.isSudoAdmin ? (
-          <p className="mt-2 text-xs text-strumf-accent">Sudo admin</p>
+          <>
+            <p className="mt-2 text-xs text-strumf-accent">Sudo admin</p>
+            <Link
+              href="/app/oracle"
+              className="mt-4 inline-flex min-h-11 items-center rounded-strumf-pill border border-strumf-accent/40 bg-strumf-accent/10 px-4 text-sm font-medium text-strumf-accent no-underline transition hover:bg-strumf-accent/20"
+            >
+              Open Oracle
+            </Link>
+          </>
         ) : null}
       </Card>
 

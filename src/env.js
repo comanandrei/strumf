@@ -20,6 +20,10 @@ export const env = createEnv({
     EMAIL_FROM: z.string().optional(),
     /** Set to "true" to skip email verification (local testing only). */
     SKIP_EMAIL_VERIFICATION: z.enum(["true", "false"]).optional(),
+    /** Optional OpenAI key for Oracle natural-language SQL and other GPT features. */
+    OPENAI_API_KEY: z.string().optional(),
+    /** Optional override for the GPT model (defaults to gpt-4o-mini). */
+    OPENAI_MODEL: z.string().optional(),
   },
 
   /**
@@ -43,6 +47,8 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     SKIP_EMAIL_VERIFICATION: process.env.SKIP_EMAIL_VERIFICATION,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_MODEL: process.env.OPENAI_MODEL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

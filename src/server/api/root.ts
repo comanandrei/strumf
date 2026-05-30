@@ -4,6 +4,7 @@ import { consultationRouter } from "~/server/api/routers/consultation";
 import { feedingRouter } from "~/server/api/routers/feeding";
 import { householdRouter } from "~/server/api/routers/household";
 import { inviteRouter } from "~/server/api/routers/invite";
+import { oracleRouter } from "~/server/api/routers/oracle";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   feeding: feedingRouter,
   consultation: consultationRouter,
   appointment: appointmentRouter,
+  oracle: oracleRouter,
 });
 
 // export type definition of API
