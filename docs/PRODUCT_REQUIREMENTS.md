@@ -1,6 +1,6 @@
 # Product requirements — baby feeding & care (Strumf)
 
-This document locks **product defaults** and drives implementation. It extends the gstack-style planning output (office-hours → CEO/eng/design) into actionable requirements.
+This document locks **product defaults** and drives implementation.
 
 ---
 
@@ -136,5 +136,4 @@ A trustworthy app to log **bottle feeds (ml)**, **baby identity & birth data**, 
 
 ## 10. Traceability
 
-- Planning methodology: [gstack](https://github.com/garrytan/gstack) (`/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/autoplan`).
 - Stack: [Create T3 App](https://create.t3.gg/) (this repo).
