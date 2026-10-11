@@ -20,6 +20,8 @@ export const env = createEnv({
     EMAIL_FROM: z.string().optional(),
     /** Set to "true" to skip email verification (local testing only). */
     SKIP_EMAIL_VERIFICATION: z.enum(["true", "false"]).optional(),
+    /** Bearer token for the read-only MCP endpoint at `/api/mcp` (min 16 characters). */
+    MCP_API_SECRET: z.string().min(16).optional(),
   },
 
   /**
@@ -43,6 +45,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     SKIP_EMAIL_VERIFICATION: process.env.SKIP_EMAIL_VERIFICATION,
+    MCP_API_SECRET: process.env.MCP_API_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
