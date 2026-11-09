@@ -17,7 +17,7 @@ export default function YouPage() {
         subtitle: "Cont si familie",
         signedIn: "Autentificat",
         loading: "Se incarca...",
-        sudo: "Sudo admin",
+        sudo: "Bootstrap admin",
         newHousehold: "Familie noua",
         signOut: "Deconectare",
         home: "Pagina de prezentare",
@@ -27,7 +27,7 @@ export default function YouPage() {
         subtitle: "Account and household",
         signedIn: "Signed in",
         loading: "Loading...",
-        sudo: "Sudo admin",
+        sudo: "Bootstrap admin",
         newHousehold: "New household",
         signOut: "Sign out",
         home: "Marketing home",
@@ -49,7 +49,7 @@ export default function YouPage() {
             {session?.user?.email ?? "—"}
           </p>
         )}
-        {session?.user && "isSudoAdmin" in session.user && session.user.isSudoAdmin ? (
+        {session?.user && "isBootstrapAdmin" in session.user && session.user.isBootstrapAdmin ? (
           <p className="mt-2 text-xs text-strumf-accent">{copy.sudo}</p>
         ) : null}
       </Card>

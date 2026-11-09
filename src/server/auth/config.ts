@@ -12,13 +12,15 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 
 import { env } from "~/env";
+import { resolveAuthSecret } from "~/server/lib/auth-secret";
+import {
+  getBootstrapAdminEmail,
+  getBootstrapAdminPassword,
+  isBootstrapAdminEmail,
+  isBootstrapAdminLogin,
+} from "~/server/lib/bootstrap-admin";
 import { db } from "~/server/db";
 import { normalizeEmail } from "~/server/lib/household-access";
-import {
-  isSudoAdminEmail,
-  SUDO_ADMIN_EMAIL,
-  SUDO_ADMIN_PASSWORD,
-} from "~/server/lib/sudo-admin";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -67,7 +69,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      isSudoAdmin: boolean;
+      isBootstrapAdmin: boolean;
     } & DefaultSession["user"];
   }
 
@@ -90,11 +92,7 @@ export const authConfig = {
     signIn: "/auth",
     error: "/auth",
   },
-  // JWT cookies require a non-empty secret. Always provide a fallback so sign-in never 500s
-  // when AUTH_SECRET is unset (override with a strong secret in production).
-  secret:
-    env.AUTH_SECRET ??
-    "strumf-auth-secret-fallback-min-32-chars-set-AUTH_SECRET!",
+  secret: resolveAuthSecret(),
   // Credentials + JWT: no PrismaAdapter/DB session rows. (Adapter would also mix DB session
   // defaults with credentials in subtle ways; we only need JWT for this app today.)
   session: { strategy: "jwt" },
@@ -120,19 +118,20 @@ export const authConfig = {
         const email = normalizeEmail(parsed.data.email);
 
         try {
-          if (
-            email === SUDO_ADMIN_EMAIL &&
-            parsed.data.password === SUDO_ADMIN_PASSWORD
-          ) {
+          if (isBootstrapAdminLogin(email, parsed.data.password)) {
+            const bootstrapEmail = getBootstrapAdminEmail();
+            const bootstrapPassword = getBootstrapAdminPassword();
+            if (!bootstrapEmail || !bootstrapPassword) return null;
+
             let user = await db.user.findUnique({
-              where: { email: SUDO_ADMIN_EMAIL },
+              where: { email: bootstrapEmail },
             });
-            const passwordHash = await bcrypt.hash(SUDO_ADMIN_PASSWORD, 12);
+            const passwordHash = await bcrypt.hash(bootstrapPassword, 12);
             if (!user) {
               user = await db.user.create({
                 data: {
-                  email: SUDO_ADMIN_EMAIL,
-                  name: "Sudo Admin",
+                  email: bootstrapEmail,
+                  name: "Bootstrap Admin",
                   passwordHash,
                   emailVerified: new Date(),
                   isActive: true,
@@ -141,7 +140,7 @@ export const authConfig = {
             } else {
               const hashOk =
                 !!user.passwordHash &&
-                (await bcrypt.compare(SUDO_ADMIN_PASSWORD, user.passwordHash));
+                (await bcrypt.compare(bootstrapPassword, user.passwordHash));
               const ready = !!user.emailVerified && user.isActive;
               if (!hashOk || !ready) {
                 user = await db.user.update({
@@ -165,6 +164,7 @@ export const authConfig = {
 
           const skipVerify = env.SKIP_EMAIL_VERIFICATION === "true";
           if (!skipVerify && !user.emailVerified) return null;
+          if (!user.isActive) return null;
 
           const isValid = await bcrypt.compare(
             parsed.data.password,
@@ -234,7 +234,7 @@ export const authConfig = {
           ...session.user,
           id,
           email: email || session.user?.email,
-          isSudoAdmin: isSudoAdminEmail(email),
+          isBootstrapAdmin: isBootstrapAdminEmail(email),
         },
       };
     },

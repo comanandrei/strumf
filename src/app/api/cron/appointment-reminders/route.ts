@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { sendAppointmentReminderEmail } from "~/server/lib/send-appointment-reminder-email";
+import { secureCompare } from "~/server/lib/secure-compare";
 
 export const dynamic = "force-dynamic";
 
@@ -125,10 +126,15 @@ async function processReminderRequest(request: Request) {
 
 function isAuthorized(request: Request) {
   const secret = env.APPOINTMENT_REMINDER_CRON_SECRET;
-  if (!secret) return true;
+  if (!secret) {
+    return env.NODE_ENV !== "production";
+  }
 
   const authHeader = request.headers.get("authorization");
   const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : null;
   const headerSecret = request.headers.get("x-cron-secret");
-  return bearer === secret || headerSecret === secret;
+  return (
+    (bearer !== null && secureCompare(bearer, secret)) ||
+    (headerSecret !== null && secureCompare(headerSecret, secret))
+  );
 }

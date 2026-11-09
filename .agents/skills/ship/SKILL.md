@@ -34,7 +34,7 @@ End-to-end agent: idea → merge request. **Matt Pocock skills only.** Five phas
 | 4 | Architecture | `improve-codebase-architecture` |
 | 5 | MR | `make-mr` |
 
-All skills live under `.agents/skills/` (symlinked from `.claude/skills/`). The `review` skill lives at `~/.agents/skills/review/SKILL.md`.
+All skills live under `.agents/skills/` (symlinked from `.claude/skills/`).
 
 ## Session setup
 
@@ -110,7 +110,7 @@ Update `state.json`: `gates.implement = "passed"`.
 
 ## Phase 3: Code review
 
-**Read:** `~/.agents/skills/review/SKILL.md` — follow completely. **Do not** use any other review skill.
+**Read:** `.agents/skills/review/SKILL.md` — follow completely. **Do not** use any other review skill.
 
 Pin fixed point: merge-base with base branch. Spec: `state.json` → `spec_source` or `plan.md`.
 

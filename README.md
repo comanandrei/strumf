@@ -40,9 +40,12 @@ This project is scaffolded with [Create T3 App](https://create.t3.gg/) and confi
 ## Authentication Flow
 
 - Register via `POST /api/register` (or the UI at `/auth`).
-- New users are created with `isActive=false`.
-- A developer/admin activates accounts directly in DB by setting `User.isActive=true`.
-- After activation, users can sign in from `/auth`.
+- New users stay **inactive** until they confirm email (`/api/auth/verify-email`), then `isActive` is set.
+- Local dev can set `SKIP_EMAIL_VERIFICATION=true` (disallowed in production builds).
+- Optional **bootstrap admin**: set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` together for a first local admin (never commit real values).
+- Sign in from `/auth` after verification.
+
+See [docs/SECURITY.md](./docs/SECURITY.md) (reviewer checklist), [docs/BACKEND.md](./docs/BACKEND.md), and [docs/REVIEW.md](./docs/REVIEW.md).
 
 ## DB Health Check
 
