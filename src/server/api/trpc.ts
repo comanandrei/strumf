@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
+import { env } from "~/env";
 
 /**
  * 1. CONTEXT
@@ -96,9 +97,28 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  if (env.NODE_ENV === "development") {
+    console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  }
 
   return result;
+});
+
+const activeUserMiddleware = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.session?.user?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const user = await ctx.db.user.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { isActive: true },
+  });
+  if (!user?.isActive) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Account is not active.",
+    });
+  }
+  return next();
 });
 
 /**
@@ -130,4 +150,5 @@ export const protectedProcedure = t.procedure
         session: { ...ctx.session, user: ctx.session.user },
       },
     });
-  });
+  })
+  .use(activeUserMiddleware);

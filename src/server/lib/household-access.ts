@@ -1,3 +1,8 @@
+/**
+ * Household authorization seam — every baby/household tRPC route should call one of
+ * `requireHouseholdMember`, `requireHouseholdOwner`, or `requireBabyAccess` before Prisma.
+ * See docs/adr/0003-household-authorization-layer.md.
+ */
 import { TRPCError } from "@trpc/server";
 
 import type { HouseholdRole } from "../../../generated/prisma";

@@ -1,6 +1,8 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+import { assertEnvGuards } from "./validate-env-guards.js";
+
 // Prisma `directUrl` and our schema expect DIRECT_URL. Many hosts (e.g. Vercel) only set
 // DATABASE_URL — mirror it so builds, postinstall `prisma generate`, and runtime work.
 // Neon with a pooler can set a separate DIRECT_URL for migrations.
@@ -38,6 +40,12 @@ export const env = createEnv({
     OPENAI_MODEL: z.string().optional(),
     /** Optional shared secret for the appointment reminder cron endpoint. */
     APPOINTMENT_REMINDER_CRON_SECRET: z.string().optional(),
+    /**
+     * Optional paired bootstrap credentials for first admin (self-hosted / dev only).
+     * Both must be set together; never commit real values.
+     */
+    BOOTSTRAP_ADMIN_EMAIL: z.string().email().optional(),
+    BOOTSTRAP_ADMIN_PASSWORD: z.string().min(12).optional(),
   },
 
   /**
@@ -65,6 +73,8 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
     APPOINTMENT_REMINDER_CRON_SECRET: process.env.APPOINTMENT_REMINDER_CRON_SECRET,
+    BOOTSTRAP_ADMIN_EMAIL: process.env.BOOTSTRAP_ADMIN_EMAIL,
+    BOOTSTRAP_ADMIN_PASSWORD: process.env.BOOTSTRAP_ADMIN_PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
@@ -77,3 +87,7 @@ export const env = createEnv({
    */
   emptyStringAsUndefined: true,
 });
+
+if (!process.env.SKIP_ENV_VALIDATION) {
+  assertEnvGuards(env);
+}
