@@ -45,7 +45,7 @@ This project is scaffolded with [Create T3 App](https://create.t3.gg/) and confi
 - Optional **bootstrap admin**: set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` together for a first local admin (never commit real values).
 - Sign in from `/auth` after verification.
 
-See [docs/SECURITY.md](./docs/SECURITY.md) and [docs/BACKEND.md](./docs/BACKEND.md) for the full backend/security model.
+See [docs/SECURITY.md](./docs/SECURITY.md) (reviewer checklist), [docs/BACKEND.md](./docs/BACKEND.md), and [docs/REVIEW.md](./docs/REVIEW.md).
 
 ## DB Health Check
 

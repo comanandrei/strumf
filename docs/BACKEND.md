@@ -38,4 +38,4 @@ Each router maps to vocabulary in `CONTEXT.md`: `household`, `baby`, `feeding`, 
 3. Keep side effects (email, OpenAI, external HTTP) in `src/server/lib/*`.
 4. Export the router from `root.ts`.
 
-See [SECURITY.md](./SECURITY.md) for production requirements and reviewer checklist.
+See [SECURITY.md](./SECURITY.md) for the reviewer checklist and production env rules.

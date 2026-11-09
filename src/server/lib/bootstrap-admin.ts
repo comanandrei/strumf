@@ -1,5 +1,6 @@
 import { env } from "~/env";
 import { normalizeEmail } from "~/server/lib/household-access";
+import { secureCompare } from "~/server/lib/secure-compare";
 
 /**
  * Optional first-run admin used in self-hosted / dev environments.
@@ -23,7 +24,8 @@ export function isBootstrapAdminLogin(email: string, password: string): boolean 
   const configuredPassword = getBootstrapAdminPassword();
   if (!configuredEmail || !configuredPassword) return false;
   return (
-    normalizeEmail(email) === configuredEmail && password === configuredPassword
+    normalizeEmail(email) === configuredEmail &&
+    secureCompare(password, configuredPassword)
   );
 }
 
